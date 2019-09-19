@@ -42,7 +42,7 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
   Vcl.ComCtrls, Vcl.ExtCtrls, Vcl.ActnList, Vcl.ToolWin, Vcl.ActnMan,
   Vcl.ImgList, Vcl.ActnCtrls, Vcl.PlatformDefaultStyleActnCtrls, Vcl.Mask,
-  Vcl.Menus, Vcl.WinXCtrls,
+  Vcl.Menus,
 
   VirtualTrees,
 
@@ -162,10 +162,10 @@ type
     SaveDialog3: TSaveDialog;
     actSaveToGraphML: TAction;
     SaveDialog4: TSaveDialog;
-    edtSearch: TSearchBox;
-    edtListSearch: TSearchBox;
-    edtSearchUsedByList: TSearchBox;
-    edtSearchUsesList: TSearchBox;
+    edtSearch: TEdit;
+    edtListSearch: TEdit;
+    edtSearchUsedByList: TEdit;
+    edtSearchUsesList: TEdit;
     vtUnitsList: TVirtualStringTree;
     vtUnits: TVirtualStringTree;
     vtUsedUnits: TVirtualStringTree;

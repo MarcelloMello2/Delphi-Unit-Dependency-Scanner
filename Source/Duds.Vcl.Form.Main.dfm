@@ -141,7 +141,7 @@ object frmMain: TfrmMain
               BevelOuter = bvNone
               TabOrder = 0
               ExplicitHeight = 415
-              object edtSearch: TSearchBox
+              object edtSearch: TEdit
                 AlignWithMargins = True
                 Left = 3
                 Top = 3
@@ -976,7 +976,7 @@ object frmMain: TfrmMain
               BevelOuter = bvNone
               TabOrder = 0
               ExplicitHeight = 415
-              object edtListSearch: TSearchBox
+              object edtListSearch: TEdit
                 AlignWithMargins = True
                 Left = 3
                 Top = 3
@@ -1088,7 +1088,7 @@ object frmMain: TfrmMain
                 object tabUsedBy: TTabSheet
                   Caption = 'Used By Units'
                   ExplicitHeight = 385
-                  object edtSearchUsedByList: TSearchBox
+                  object edtSearchUsedByList: TEdit
                     AlignWithMargins = True
                     Left = 0
                     Top = 0
@@ -1180,7 +1180,7 @@ object frmMain: TfrmMain
                   Caption = 'Uses Units'
                   ImageIndex = 2
                   ExplicitHeight = 385
-                  object edtSearchUsesList: TSearchBox
+                  object edtSearchUsesList: TEdit
                     AlignWithMargins = True
                     Left = 0
                     Top = 0
