@@ -271,6 +271,8 @@ type
     FDelphiFileList: TObjectList<TDelphiFile>;
     FStats: TStringList;
     FScannedFiles: Integer;
+    FSemiCircularFiles: Integer;
+    FCircularFiles: Integer;
     FScanDepth: Integer;
     FCancelled: Boolean;
     FStartTime: TDateTime;
@@ -374,6 +376,8 @@ resourcestring
   StrUpdatedDelphiUnitNameIn = 'Updated unit name in "%s" from "%s" to "%s"';
   StrUpdatedUsesClause = 'Replaced "%s" with "%s" the uses clause of "%s"';
   StrScannedFiles = 'Processed Files';
+  StrSemiCircularFiles = 'Semi Circular references';
+  StrFCircularFiles = 'Circular references';
   StrParsedFiles = 'Unique Parsed Files';
   StrFilesFound = 'Total Used Units';
   StrTotalLines = 'Total Lines of Code';
@@ -2693,6 +2697,11 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
     FNodeObjects[GetID(Result)].DelphiFile := DelphiFile;
     FNodeObjects[GetID(Result)].CircularReference := GetParentCircularRelationship(Result, UnitInfo.DelphiUnitName);
 
+    case FNodeObjects[GetID(Result)].CircularReference of
+      crSemiCircular: Inc(FSemiCircularFiles);
+      crCircular: Inc(FCircularFiles);
+    end;
+
     SetNodeVisibility(vtUnits, Result, DelphiFile);
 
     if ListNode <> nil then
@@ -2843,6 +2852,8 @@ end;
 procedure TfrmMain.ClearStats;
 begin
   FScannedFiles := 0;
+  FSemiCircularFiles := 0;
+  FCircularFiles := 0;
   FParsedFileCount := 0;
   FLineCount := 0;
   FDeppestScanDepth := 0;
@@ -2879,6 +2890,8 @@ begin
 
     AddStat(StrTime, SecondsToTimeString(SecondsBetween(now, FStartTime)));
     AddStat(StrScannedFiles, FormatCardinal(FScannedFiles));
+    AddStat(StrSemiCircularFiles, FormatCardinal(FSemiCircularFiles));
+    AddStat(StrFCircularFiles, FormatCardinal(FCircularFiles));
     AddStat(StrFilesFound, FormatCardinal(FDelphiFiles.Count));
     AddStat(StrParsedFiles, FormatCardinal(FParsedFileCount));
     AddStat(StrVCLFormCount, FormatCardinal(FVCLFormCount));
