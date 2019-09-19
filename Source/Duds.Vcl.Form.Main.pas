@@ -175,6 +175,8 @@ type
     vtLog: TVirtualStringTree;
     SearchandReplace2: TMenuItem;
     N13: TMenuItem;
+    ActionSaveCirRefs: TAction;
+    Savecircularreference1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure vtUnitsGetNodeDataSize(Sender: TBaseVirtualTree;
@@ -260,6 +262,7 @@ type
     procedure vtCommonGetImageIndex(Sender: TBaseVirtualTree;
       Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
       var Ghosted: Boolean; var ImageIndex: TImageIndex);
+    procedure ActionSaveCirRefsExecute(Sender: TObject);
   private
     FLogEntries: TLogEntries;
     FFiles: TDictionary<String, String>;
@@ -1453,6 +1456,43 @@ begin
   Handled := TRUE;
 end;
 
+procedure TfrmMain.ActionSaveCirRefsExecute(Sender: TObject);
+var
+  Node: PVirtualNode;
+  LStrs: TStringList;
+begin
+  vtUnits.BeginUpdate;
+  LStrs := TStringList.Create;
+  try
+    LStrs.Add('Kind;Unit;Ref');
+    Node := vtUnits.GetFirst;
+
+    while Node <> nil do
+    begin
+      if FNodeObjects[GetID(Node)].DelphiFile.InSearchPath then
+      begin
+        if FNodeObjects[GetID(Node)].CircularReference in [crSemiCircular, crCircular] then
+        begin
+          LStrs.Add(
+            CircularRelationshipTypeDescriptions[FNodeObjects[GetID(Node)].CircularReference] + ';' +
+            FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.DelphiUnitName  + ';' +
+            FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName);
+        end;
+      end;
+
+      Node := vtUnits.GetNext(Node);
+    end;
+
+    if vtUnits.FocusedNode <> nil then
+      vtUnits.ScrollIntoView(vtUnits.FocusedNode, TRUE);
+  finally
+    if SaveDialog3.Execute then
+      LStrs.SaveToFile(SaveDialog3.FileName);
+    LStrs.Free;
+    vtUnits.EndUpdate;
+  end;
+end;
+
 procedure TfrmMain.UpdateControls;
 var
   DelphiFile: TDelphiFile;
@@ -1485,6 +1525,7 @@ begin
   actSaveToXML.Enabled := not FBusy;
   actSaveToGephiCSV.Enabled := not FBusy;
   actSaveToGraphML.Enabled := not FBusy;
+  ActionSaveCirRefs.Enabled := not FBusy;
 end;
 
 procedure TfrmMain.actLoadProjectExecute(Sender: TObject);

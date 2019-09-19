@@ -1561,6 +1561,13 @@ object frmMain: TfrmMain
           item
             Action = actSaveToGraphML
             Caption = 'Save to &GraphML'
+          end
+          item
+            Caption = '-'
+          end
+          item
+            Action = ActionSaveCirRefs
+            Caption = 'Save c&ircular reference'
           end>
         ActionBar = ActionToolBar1
       end>
@@ -1662,6 +1669,10 @@ object frmMain: TfrmMain
       Caption = 'Save to GraphML'
       OnExecute = actSaveToGraphMLExecute
     end
+    object ActionSaveCirRefs: TAction
+      Caption = 'Save circular reference'
+      OnExecute = ActionSaveCirRefsExecute
+    end
   end
   object popTree: TPopupMenu
     Left = 208
@@ -1713,6 +1724,9 @@ object frmMain: TfrmMain
     end
     object SavetoGephiCSV1: TMenuItem
       Action = actSaveToGephiCSV
+    end
+    object Savecircularreference1: TMenuItem
+      Action = ActionSaveCirRefs
     end
   end
   object MainMenu1: TMainMenu
