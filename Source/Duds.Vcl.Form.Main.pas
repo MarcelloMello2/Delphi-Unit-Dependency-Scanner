@@ -62,7 +62,6 @@ uses
 
 type
   TfrmMain = class(TForm)
-    StatusBar1: TStatusBar;
     SynPasSyn1: TSynPasSyn;
     ActionManager1: TActionManager;
     actStartScan: TAction;
@@ -177,6 +176,9 @@ type
     N13: TMenuItem;
     ActionSaveCirRefs: TAction;
     Savecircularreference1: TMenuItem;
+    RichEditUnitPath: TRichEdit;
+    PanelFooter: TPanel;
+    Splitter4: TSplitter;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure vtUnitsGetNodeDataSize(Sender: TBaseVirtualTree;
@@ -301,6 +303,7 @@ type
     procedure SearchTree(const SearchText: String; FromFirstNode: Boolean);
     function IsSearchHitNode(Node: PVirtualNode): Boolean;
     function GetNodePath(Node: PVirtualNode): String;
+    procedure SetNodePathRichEdit(Node: PVirtualNode; ARichEdit: TRichEdit);
     function GetUnitFilename(const DelphiUnitName: String): String;
     procedure ShowUnitsNotInPath;
     procedure SetNodeVisibility(VT: TVirtualStringTree; Node: PVirtualNode; DelphiFile: TDelphiFile);
@@ -658,6 +661,7 @@ begin
     Top := FEnvironmentSettings.WindowTop;
     Width := FEnvironmentSettings.WindowWidth;
     Height := FEnvironmentSettings.WindowHeight;
+    PanelFooter.Height := FEnvironmentSettings.UnitPatchHeight;
 
     WindowState := TWindowState(FEnvironmentSettings.WindowState);
   end;
@@ -796,6 +800,7 @@ begin
   FEnvironmentSettings.WindowTop := Top;
   FEnvironmentSettings.WindowWidth := Width;
   FEnvironmentSettings.WindowHeight := Height;
+  FEnvironmentSettings.UnitPatchHeight := PanelFooter.Height;
 
   FEnvironmentSettings.WindowState := Integer(WindowState);
 
@@ -1018,7 +1023,7 @@ end;
 
 procedure TfrmMain.UpdateTreeControls(Node: PVirtualNode);
 begin
-  StatusBar1.Panels[0].Text := GetNodePath(Node);
+  SetNodePathRichEdit(Node, RichEditUnitPath);
 
   tabParentFile.TabVisible := (Node <> nil) and (Node.Parent <> vtUnits.RootNode);
   tabSelectedFile.TabVisible := (Node <> nil) and (FNodeObjects[GetID(Node)].DelphiFile.InSearchPath);
@@ -1062,6 +1067,37 @@ begin
       Result := ' -> ' + Result;
 
     Result := FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName + Result;
+
+    Node := Node.Parent;
+  end;
+end;
+
+procedure TfrmMain.SetNodePathRichEdit(Node: PVirtualNode; ARichEdit: TRichEdit);
+var
+  LStartNodeFile: string;
+  LParentNodeFile: string;
+  LArrow: string;
+begin
+  ARichEdit.Clear;
+
+  if Node <> nil then
+    LStartNodeFile := FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName;
+
+  LArrow := '';
+
+  while (Node <> nil) and (Node <> vtUnits.RootNode) do
+  begin
+    LParentNodeFile := FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName;
+
+    RichEditUnitPath.SelStart := 0;
+
+    if AnsiSameText(LStartNodeFile, LParentNodeFile) then
+      RichEditUnitPath.SelAttributes.Style := [fsBold]
+    else
+      RichEditUnitPath.SelAttributes.Style := [];
+
+    RichEditUnitPath.SelText := LParentNodeFile + LArrow;
+    LArrow := ' -> ';
 
     Node := Node.Parent;
   end;
@@ -2196,13 +2232,12 @@ begin
     FBusy := TRUE;
     try
       UpdateControls;
-
       ShowHideControls;
-
       pnlMain.Visible := TRUE;
 
+      RichEditUnitPath.Clear;
+      RichEditUnitPath.SelText := 'Loading...';
       UpdateStats(TRUE);
-
       Refresh;
 
       LoadFilesInSearchPaths;
@@ -2625,7 +2660,7 @@ begin
   ScaleVT(vtUsedUnits);
   ScaleVT(vtUsesUnits);
 
-  StatusBar1.Height := ScaleDimension(StatusBar1.Height, PixelsPerInch);
+  RichEditUnitPath.Height := ScaleDimension(RichEditUnitPath.Height, PixelsPerInch);
 end;
 
 procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
@@ -2944,8 +2979,6 @@ begin
     if FBusy then
     begin
       AddStat(StrScanDepth, FScanDepth);
-
-      StatusBar1.Panels[0].Text := GetNodePath(FLastScanNode);
     end;
 
     while Index < FStats.Count do

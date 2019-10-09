@@ -139,6 +139,7 @@ type
     FPromptBeforeUpdate: Boolean;
     FDummyRun: Boolean;
     FRenameHistoryFiles: Boolean;
+    FUnitPatchHeight: integer;
   protected
     procedure DoSaveToIniFile(const IniFile: TIniFile); override;
     procedure DoLoadFromIniFile(const IniFile: TIniFile); override;
@@ -161,6 +162,7 @@ type
     property PromptBeforeUpdate: Boolean read FPromptBeforeUpdate write FPromptBeforeUpdate;
     property DummyRun: Boolean read FDummyRun write FDummyRun;
     property RenameHistoryFiles: Boolean read FRenameHistoryFiles write FRenameHistoryFiles;
+    property UnitPatchHeight: Integer read FUnitPatchHeight write FUnitPatchHeight;
   end;
 
 implementation
@@ -290,6 +292,7 @@ begin
   FWindowTop := IniFile.ReadInteger(WindowSection, 'WindowTop', FWindowTop);
   FWindowWidth := IniFile.ReadInteger(WindowSection, 'WindowWidth', FWindowWidth);
   FWindowHeight := IniFile.ReadInteger(WindowSection, 'WindowHeight', FWindowHeight);
+  FUnitPatchHeight := IniFile.ReadInteger(WindowSection, 'UnitPatchHeight', 19);
 
   FPromptBeforeUpdate := IniFile.ReadBool(DialogsSection, 'PromptBeforeUpdate', FPromptBeforeUpdate);
   FDummyRun := IniFile.ReadBool(DialogsSection, 'DummyRun', FDummyRun);
@@ -312,6 +315,7 @@ begin
   IniFile.WriteInteger(WindowSection, 'WindowTop', FWindowTop);
   IniFile.WriteInteger(WindowSection, 'WindowWidth', FWindowWidth);
   IniFile.WriteInteger(WindowSection, 'WindowHeight', FWindowHeight);
+  IniFile.WriteInteger(WindowSection, 'UnitPatchHeight', FUnitPatchHeight);
 
   IniFile.WriteBool(DialogsSection, 'PromptBeforeUpdate', FPromptBeforeUpdate);
   IniFile.WriteBool(DialogsSection, 'DummyRun', FDummyRun);

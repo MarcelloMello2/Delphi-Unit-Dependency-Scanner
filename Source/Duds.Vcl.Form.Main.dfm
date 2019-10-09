@@ -3,7 +3,7 @@ object frmMain: TfrmMain
   Top = 0
   Caption = 'Delphi Unit Dependency Scanner'
   ClientHeight = 643
-  ClientWidth = 1051
+  ClientWidth = 1119
   Color = clBtnFace
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
@@ -18,23 +18,10 @@ object frmMain: TfrmMain
   OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
-  object StatusBar1: TStatusBar
-    AlignWithMargins = True
-    Left = 3
-    Top = 624
-    Width = 1045
-    Height = 19
-    Margins.Top = 0
-    Margins.Bottom = 0
-    Panels = <
-      item
-        Width = 400
-      end>
-  end
   object ActionToolBar1: TActionToolBar
     Left = 0
     Top = 0
-    Width = 1051
+    Width = 1119
     Height = 26
     ActionManager = ActionManager1
     Caption = 'ActionToolBar1'
@@ -51,25 +38,30 @@ object frmMain: TfrmMain
     ParentBackground = True
     ParentFont = False
     Spacing = 0
-    ExplicitHeight = 23
   end
   object pnlBackground: TPanel
     Left = 0
     Top = 26
-    Width = 1051
-    Height = 598
+    Width = 1119
+    Height = 617
     Align = alClient
     BevelOuter = bvNone
     Caption = 'Click Scan to begin the Unit Dependecy Seach'
-    TabOrder = 2
-    ExplicitTop = 23
-    ExplicitHeight = 601
+    TabOrder = 1
+    object Splitter4: TSplitter
+      Left = 0
+      Top = 595
+      Width = 1119
+      Height = 3
+      Cursor = crVSplit
+      Align = alBottom
+    end
     object pnlMain: TPanel
       AlignWithMargins = True
       Left = 3
       Top = 3
-      Width = 1048
-      Height = 595
+      Width = 1116
+      Height = 592
       Margins.Right = 0
       Margins.Bottom = 0
       Align = alClient
@@ -83,33 +75,28 @@ object frmMain: TfrmMain
       ParentFont = False
       TabOrder = 0
       Visible = False
-      ExplicitHeight = 598
       object Splitter1: TSplitter
         Left = 0
-        Top = 442
-        Width = 1048
+        Top = 439
+        Width = 1116
         Height = 3
         Cursor = crVSplit
         Align = alBottom
         ResizeStyle = rsUpdate
-        ExplicitLeft = -15
-        ExplicitTop = 440
-        ExplicitWidth = 1118
       end
       object Panel3: TPanel
         Left = 0
         Top = 0
-        Width = 1048
-        Height = 442
+        Width = 1116
+        Height = 439
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitHeight = 445
         object pcView: TPageControl
           Left = 0
           Top = 0
-          Width = 1048
-          Height = 442
+          Width = 1116
+          Height = 439
           ActivePage = tabList
           Align = alClient
           Font.Charset = ANSI_CHARSET
@@ -119,28 +106,22 @@ object frmMain: TfrmMain
           Font.Style = []
           ParentFont = False
           TabOrder = 0
-          ExplicitHeight = 445
           object tabTree: TTabSheet
             Caption = 'Tree'
-            ExplicitHeight = 415
             object Splitter2: TSplitter
               Left = 497
               Top = 0
-              Height = 412
+              Height = 409
               ResizeStyle = rsUpdate
-              ExplicitLeft = 296
-              ExplicitTop = -18
-              ExplicitHeight = 376
             end
             object pnlTree: TPanel
               Left = 0
               Top = 0
               Width = 497
-              Height = 412
+              Height = 409
               Align = alLeft
               BevelOuter = bvNone
               TabOrder = 0
-              ExplicitHeight = 415
               object edtSearch: TEdit
                 AlignWithMargins = True
                 Left = 3
@@ -174,7 +155,7 @@ object frmMain: TfrmMain
                 Left = 3
                 Top = 29
                 Width = 494
-                Height = 380
+                Height = 377
                 Margins.Right = 0
                 Align = alClient
                 Colors.UnfocusedColor = clMedGray
@@ -201,7 +182,6 @@ object frmMain: TfrmMain
                 OnGetImageIndex = vtUnitsGetImageIndex
                 OnGetNodeDataSize = vtUnitsGetNodeDataSize
                 OnHeaderClick = vtCommonHeaderClick
-                ExplicitHeight = 383
                 Columns = <
                   item
                     Position = 0
@@ -257,27 +237,24 @@ object frmMain: TfrmMain
             object Panel5: TPanel
               Left = 500
               Top = 0
-              Width = 540
-              Height = 412
+              Width = 608
+              Height = 409
               Align = alClient
               Caption = 'Select a file to display its contents here.'
               TabOrder = 1
-              ExplicitHeight = 415
               object pcSource: TPageControl
                 AlignWithMargins = True
                 Left = 1
                 Top = 4
-                Width = 535
-                Height = 404
+                Width = 603
+                Height = 401
                 Margins.Left = 0
                 ActivePage = tabParentFile
                 Align = alClient
                 TabOrder = 0
                 Visible = False
-                ExplicitHeight = 407
                 object tabParentFile: TTabSheet
                   Caption = 'Parent File'
-                  ExplicitHeight = 377
                   object Image1: TImage
                     Left = 296
                     Top = 200
@@ -895,8 +872,8 @@ object frmMain: TfrmMain
                     AlignWithMargins = True
                     Left = 0
                     Top = 3
-                    Width = 524
-                    Height = 368
+                    Width = 592
+                    Height = 365
                     Margins.Left = 0
                     Align = alClient
                     Font.Charset = DEFAULT_CHARSET
@@ -916,19 +893,17 @@ object frmMain: TfrmMain
                     ReadOnly = True
                     OnChange = memParentFileChange
                     FontSmoothing = fsmNone
-                    ExplicitHeight = 371
                   end
                 end
                 object tabSelectedFile: TTabSheet
                   Caption = 'Selected File'
                   ImageIndex = 1
-                  ExplicitHeight = 377
                   object memSelectedFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
                     Top = 3
-                    Width = 524
-                    Height = 368
+                    Width = 592
+                    Height = 365
                     Margins.Left = 0
                     Align = alClient
                     Font.Charset = DEFAULT_CHARSET
@@ -948,7 +923,6 @@ object frmMain: TfrmMain
                     ReadOnly = True
                     OnChange = memSelectedFileChange
                     FontSmoothing = fsmNone
-                    ExplicitHeight = 371
                   end
                 end
               end
@@ -957,25 +931,20 @@ object frmMain: TfrmMain
           object tabList: TTabSheet
             Caption = 'List'
             ImageIndex = 1
-            ExplicitHeight = 415
             object Splitter3: TSplitter
               Left = 497
               Top = 0
-              Height = 412
+              Height = 409
               ResizeStyle = rsUpdate
-              ExplicitLeft = 296
-              ExplicitTop = -18
-              ExplicitHeight = 376
             end
             object pnlList: TPanel
               Left = 0
               Top = 0
               Width = 497
-              Height = 412
+              Height = 409
               Align = alLeft
               BevelOuter = bvNone
               TabOrder = 0
-              ExplicitHeight = 415
               object edtListSearch: TEdit
                 AlignWithMargins = True
                 Left = 3
@@ -1007,7 +976,7 @@ object frmMain: TfrmMain
                 Left = 3
                 Top = 29
                 Width = 494
-                Height = 380
+                Height = 377
                 Margins.Right = 0
                 Align = alClient
                 Colors.UnfocusedColor = clMedGray
@@ -1032,7 +1001,6 @@ object frmMain: TfrmMain
                 OnPaintText = vtUnitsListPaintText
                 OnGetImageIndex = vtCommonGetImageIndex
                 OnHeaderClick = vtCommonHeaderClick
-                ExplicitHeight = 383
                 Columns = <
                   item
                     Position = 0
@@ -1069,30 +1037,27 @@ object frmMain: TfrmMain
             object Panel10: TPanel
               Left = 500
               Top = 0
-              Width = 540
-              Height = 412
+              Width = 608
+              Height = 409
               Align = alClient
               BevelOuter = bvNone
               Caption = 'Select a file to display it'#39's contents here.'
               TabOrder = 1
-              ExplicitHeight = 415
               object pcList: TPageControl
                 Left = 0
                 Top = 0
-                Width = 540
-                Height = 412
+                Width = 608
+                Height = 409
                 ActivePage = tabUsedBy
                 Align = alClient
                 TabOrder = 0
-                ExplicitHeight = 415
                 object tabUsedBy: TTabSheet
                   Caption = 'Used By Units'
-                  ExplicitHeight = 385
                   object edtSearchUsedByList: TEdit
                     AlignWithMargins = True
                     Left = 0
                     Top = 0
-                    Width = 532
+                    Width = 600
                     Height = 23
                     Margins.Left = 0
                     Margins.Top = 0
@@ -1118,8 +1083,8 @@ object frmMain: TfrmMain
                   object vtUsedUnits: TVirtualStringTree
                     Left = 0
                     Top = 26
-                    Width = 532
-                    Height = 356
+                    Width = 600
+                    Height = 353
                     Margins.Right = 0
                     Align = alClient
                     Colors.UnfocusedColor = clMedGray
@@ -1142,7 +1107,6 @@ object frmMain: TfrmMain
                     OnPaintText = vtUnitsListPaintText
                     OnGetImageIndex = vtCommonGetImageIndex
                     OnHeaderClick = vtCommonHeaderClick
-                    ExplicitHeight = 359
                     Columns = <
                       item
                         Position = 0
@@ -1179,12 +1143,11 @@ object frmMain: TfrmMain
                 object tabUsesList: TTabSheet
                   Caption = 'Uses Units'
                   ImageIndex = 2
-                  ExplicitHeight = 385
                   object edtSearchUsesList: TEdit
                     AlignWithMargins = True
                     Left = 0
                     Top = 0
-                    Width = 532
+                    Width = 600
                     Height = 23
                     Margins.Left = 0
                     Margins.Top = 0
@@ -1210,8 +1173,8 @@ object frmMain: TfrmMain
                   object vtUsesUnits: TVirtualStringTree
                     Left = 0
                     Top = 26
-                    Width = 532
-                    Height = 356
+                    Width = 600
+                    Height = 353
                     Margins.Right = 0
                     Align = alClient
                     Colors.UnfocusedColor = clMedGray
@@ -1234,7 +1197,6 @@ object frmMain: TfrmMain
                     OnPaintText = vtUnitsListPaintText
                     OnGetImageIndex = vtCommonGetImageIndex
                     OnHeaderClick = vtCommonHeaderClick
-                    ExplicitHeight = 359
                     Columns = <
                       item
                         Position = 0
@@ -1271,13 +1233,12 @@ object frmMain: TfrmMain
                 object tabSource: TTabSheet
                   Caption = 'Source'
                   ImageIndex = 1
-                  ExplicitHeight = 385
                   object memListFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
                     Top = 3
-                    Width = 529
-                    Height = 376
+                    Width = 597
+                    Height = 373
                     Margins.Left = 0
                     Align = alClient
                     Font.Charset = DEFAULT_CHARSET
@@ -1297,7 +1258,6 @@ object frmMain: TfrmMain
                     ReadOnly = True
                     OnChange = memListFileChange
                     FontSmoothing = fsmNone
-                    ExplicitHeight = 379
                   end
                 end
               end
@@ -1307,15 +1267,14 @@ object frmMain: TfrmMain
       end
       object pnlLog: TPanel
         Left = 0
-        Top = 445
-        Width = 1048
+        Top = 442
+        Width = 1116
         Height = 150
         Align = alBottom
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitTop = 448
         object Panel9: TPanel
-          Left = 784
+          Left = 852
           Top = 0
           Width = 264
           Height = 150
@@ -1339,7 +1298,6 @@ object frmMain: TfrmMain
             Header.Font.Style = []
             Header.Options = [hoAutoResize, hoColumnResize, hoDblClickResize, hoDrag]
             TabOrder = 0
-            TreeOptions.AutoOptions = [toAutoDropExpand, toAutoScrollOnExpand, toAutoSort, toAutoTristateTracking, toAutoDeleteMovedNodes, toAutoChangeScale]
             TreeOptions.PaintOptions = [toShowButtons, toShowDropmark, toThemeAware, toUseBlendedImages]
             TreeOptions.SelectionOptions = [toFullRowSelect]
             OnGetText = vtStatsGetText
@@ -1359,7 +1317,7 @@ object frmMain: TfrmMain
           AlignWithMargins = True
           Left = 0
           Top = 3
-          Width = 784
+          Width = 852
           Height = 144
           Margins.Left = 0
           Margins.Right = 0
@@ -1375,13 +1333,34 @@ object frmMain: TfrmMain
           Images = ImageList1
           NodeDataSize = 24
           TabOrder = 0
-          TreeOptions.AutoOptions = [toAutoDropExpand, toAutoScrollOnExpand, toAutoSort, toAutoTristateTracking, toAutoDeleteMovedNodes, toAutoChangeScale]
           TreeOptions.PaintOptions = [toHideFocusRect, toShowDropmark, toShowHorzGridLines, toThemeAware, toUseBlendedImages, toUseBlendedSelection]
           TreeOptions.SelectionOptions = [toFullRowSelect, toRightClickSelect]
           OnGetText = vtLogGetText
           OnGetImageIndex = vtLogGetImageIndex
           Columns = <>
         end
+      end
+    end
+    object PanelFooter: TPanel
+      Left = 0
+      Top = 598
+      Width = 1119
+      Height = 19
+      Align = alBottom
+      BevelOuter = bvNone
+      Caption = 'Panel'
+      TabOrder = 1
+      object RichEditUnitPath: TRichEdit
+        Left = 0
+        Top = 0
+        Width = 1119
+        Height = 19
+        Align = alClient
+        Lines.Strings = (
+          'RichEditUnitPath')
+        ReadOnly = True
+        TabOrder = 0
+        Zoom = 100
       end
     end
   end
@@ -1403,7 +1382,7 @@ object frmMain: TfrmMain
           item
             Action = actStartScan
             Caption = 'Sca&n'
-            ImageIndex = 0
+            ImageIndex = 6
             ShortCut = 120
           end
           item
@@ -1453,7 +1432,7 @@ object frmMain: TfrmMain
           item
             Action = actStartScan
             Caption = '&Scan'
-            ImageIndex = 0
+            ImageIndex = 6
             ShortCut = 120
           end
           item
@@ -1880,7 +1859,7 @@ object frmMain: TfrmMain
     Left = 48
     Top = 408
     Bitmap = {
-      494C01010B0018002C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010B0018003C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
