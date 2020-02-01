@@ -3,7 +3,7 @@ object frmRenameUnit: TfrmRenameUnit
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Rename Unit'
-  ClientHeight = 139
+  ClientHeight = 184
   ClientWidth = 450
   Color = clBtnFace
   Font.Charset = ANSI_CHARSET
@@ -27,21 +27,9 @@ object frmRenameUnit: TfrmRenameUnit
     Top = 21
     Width = 434
     Height = 21
-    TabOrder = 1
+    TabOrder = 0
     OnChange = edtNewNameChange
     OnKeyPress = edtNewNameKeyPress
-  end
-  object chkUpdateUsesClauses: TCheckBox
-    Left = 8
-    Top = 140
-    Width = 249
-    Height = 17
-    Caption = 'Update uses clauses with new name'
-    Checked = True
-    State = cbChecked
-    TabOrder = 0
-    Visible = False
-    OnClick = chkUpdateUsesClausesClick
   end
   object chkPromptBeforeUpdate: TCheckBox
     Left = 8
@@ -51,28 +39,28 @@ object frmRenameUnit: TfrmRenameUnit
     Caption = 'Prompt before updating uses clauses'
     Checked = True
     State = cbChecked
-    TabOrder = 4
+    TabOrder = 3
   end
   object btnOK: TButton
     Left = 150
-    Top = 109
+    Top = 152
     Width = 75
     Height = 25
     Caption = '&OK'
     Default = True
     Enabled = False
     ModalResult = 1
-    TabOrder = 5
+    TabOrder = 4
   end
   object btnCancel: TButton
     Left = 230
-    Top = 109
+    Top = 152
     Width = 75
     Height = 25
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
-    TabOrder = 6
+    TabOrder = 5
   end
   object chkDummyRun: TCheckBox
     Left = 8
@@ -80,7 +68,7 @@ object frmRenameUnit: TfrmRenameUnit
     Width = 248
     Height = 17
     Caption = 'Dummy Run - No files will be updated'
-    TabOrder = 2
+    TabOrder = 1
   end
   object chkRenameHistoryFiles: TCheckBox
     Left = 8
@@ -90,6 +78,26 @@ object frmRenameUnit: TfrmRenameUnit
     Caption = 'Rename files in the "__history" folder'
     Checked = True
     State = cbChecked
-    TabOrder = 3
+    TabOrder = 2
+  end
+  object chkInsertOldNameComment: TCheckBox
+    Left = 8
+    Top = 106
+    Width = 425
+    Height = 17
+    Caption = 'Insert "{renamed from xyz.pas} comment"'
+    Checked = True
+    State = cbChecked
+    TabOrder = 6
+  end
+  object chkRenameLowerCaseExtension: TCheckBox
+    Left = 8
+    Top = 129
+    Width = 425
+    Height = 17
+    Caption = 'Lowercase extension e.g. ".Pas" => ".pas"'
+    Checked = True
+    State = cbChecked
+    TabOrder = 7
   end
 end

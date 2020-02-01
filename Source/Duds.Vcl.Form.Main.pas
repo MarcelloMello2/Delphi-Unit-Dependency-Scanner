@@ -308,7 +308,10 @@ type
     procedure SetNodeVisibility(VT: TVirtualStringTree; Node: PVirtualNode; DelphiFile: TDelphiFile);
     function GetLinkedNode(Node: PVirtualNode): PVirtualNode;
     procedure UpdateTreeControls(Node: PVirtualNode);
-    procedure RenameDelphiFile(const SearchString, ReplaceString: String; UpdateUsesClasues, PromptBeforeUpdate, DummyRun, RenameHistoryFiles, ExactMatch: Boolean);
+    procedure RenameDelphiFile(
+       const SearchString, ReplaceString: String;
+       PromptBeforeUpdate: Boolean;
+       const DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment, LowerCaseExtension: Boolean);
     function FindParsedDelphiUnit(const DelphiUnitName: string): TDelphiFile;
     function CreateDelphiFile(const DelphiUnitName: String): TDelphiFile;
     procedure UpdateStats(ForceUpdate: Boolean);
@@ -1703,25 +1706,31 @@ begin
             edtNewName.Text := DelphiFile.UnitInfo.DelphiUnitName;
             Caption := format(StrRenameS, [edtNewName.Text]);
 
-            chkPromptBeforeUpdate.Checked := FEnvironmentSettings.PromptBeforeUpdate;
-            chkDummyRun.Checked := FEnvironmentSettings.DummyRun;
-            chkRenameHistoryFiles.Checked := FEnvironmentSettings.RenameHistoryFiles;
+            chkPromptBeforeUpdate.Checked       := FEnvironmentSettings.PromptBeforeUpdate;
+            chkDummyRun.Checked                 := FEnvironmentSettings.DummyRun;
+            chkRenameHistoryFiles.Checked       := FEnvironmentSettings.RenameHistoryFiles;
+            chkInsertOldNameComment.Checked     := FEnvironmentSettings.RenameInsertOldNameComment;
+            chkInsertOldNameComment.Caption     := 'Insert "{renamed from ' + DelphiFile.UnitInfo.DelphiUnitName + '.pas} comment"';
+            chkRenameLowerCaseExtension.Checked := FEnvironmentSettings.RenameLowerCaseExtension;
 
             Result := ShowModal = mrOK;
 
             if Result then
             begin
-              FEnvironmentSettings.PromptBeforeUpdate := chkPromptBeforeUpdate.Checked;
-              FEnvironmentSettings.DummyRun := chkDummyRun.Checked;
-              FEnvironmentSettings.RenameHistoryFiles := chkRenameHistoryFiles.Checked;
+              FEnvironmentSettings.PromptBeforeUpdate         := chkPromptBeforeUpdate.Checked;
+              FEnvironmentSettings.DummyRun                   := chkDummyRun.Checked;
+              FEnvironmentSettings.RenameHistoryFiles         := chkRenameHistoryFiles.Checked;
+              FEnvironmentSettings.RenameInsertOldNameComment := chkInsertOldNameComment.Checked;
+              FEnvironmentSettings.RenameLowerCaseExtension   := chkRenameLowerCaseExtension.Checked;
 
               RenameDelphiFile(DelphiFile.UnitInfo.DelphiUnitName,
                                edtNewName.Text,
-                               chkUpdateUsesClauses.Checked,
                                chkPromptBeforeUpdate.Checked,
                                chkDummyRun.Checked,
                                chkRenameHistoryFiles.Checked,
-                               TRUE);
+                               TRUE,
+                               chkInsertOldNameComment.Checked,
+                               chkRenameLowerCaseExtension.Checked);
             end;
           finally
             Release;
@@ -1735,13 +1744,13 @@ begin
         try
           if DelphiFile <> nil then
           begin
-            edtSearch.Text := DelphiFile.UnitInfo.DelphiUnitName;
+            edtSearch.Text  := DelphiFile.UnitInfo.DelphiUnitName;
             edtReplace.Text := DelphiFile.UnitInfo.DelphiUnitName;
-            edtTest.Text := DelphiFile.UnitInfo.DelphiUnitName;
+            edtTest.Text    := DelphiFile.UnitInfo.DelphiUnitName;
           end;
 
           chkPromptBeforeUpdate.Checked := FEnvironmentSettings.PromptBeforeUpdate;
-          chkDummyRun.Checked := FEnvironmentSettings.DummyRun;
+          chkDummyRun.Checked           := FEnvironmentSettings.DummyRun;
           chkRenameHistoryFiles.Checked := FEnvironmentSettings.RenameHistoryFiles;
 
           Result := ShowModal = mrOK;
@@ -1749,15 +1758,16 @@ begin
           if Result then
           begin
             FEnvironmentSettings.PromptBeforeUpdate := chkPromptBeforeUpdate.Checked;
-            FEnvironmentSettings.DummyRun := chkDummyRun.Checked;
+            FEnvironmentSettings.DummyRun           := chkDummyRun.Checked;
             FEnvironmentSettings.RenameHistoryFiles := chkRenameHistoryFiles.Checked;
 
             RenameDelphiFile(edtSearch.Text,
                              edtReplace.Text,
-                             TRUE,
                              chkPromptBeforeUpdate.Checked,
                              chkDummyRun.Checked,
                              chkRenameHistoryFiles.Checked,
+                             FALSE,
+                             FALSE,
                              FALSE);
           end;
         finally
@@ -1770,7 +1780,10 @@ begin
     vtUnits.Header.Columns[1].Options := vtUnits.Header.Columns[1].Options + [coVisible];
 end;
 
-procedure TfrmMain.RenameDelphiFile(const SearchString, ReplaceString: String; UpdateUsesClasues, PromptBeforeUpdate, DummyRun, RenameHistoryFiles, ExactMatch: Boolean);
+procedure TfrmMain.RenameDelphiFile(
+       const SearchString, ReplaceString: String;
+       PromptBeforeUpdate: Boolean;
+       const DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment, LowerCaseExtension: Boolean);
 
 var
   PositionOffset: Integer;
@@ -1970,21 +1983,30 @@ var
 
   function RenameDelphiFile(DelphiFile: TDelphiFile): Boolean;
   var
-    NewUnitName, NewUnitFilename, OldUnitName, OldFilename: String;
+    NewUnitName, NewUnitFilename, NewUnitFilenameExt, OldUnitNameComment, OldUnitName, OldFilename: String;
     i: Integer;
   begin
     Result := FALSE;
 
     // Store the name of the old unit
-    OldFilename := DelphiFile.UnitInfo.Filename;
-    OldUnitName := DelphiFile.UnitInfo.DelphiUnitName;
+    OldFilename        := DelphiFile.UnitInfo.Filename;
+    OldUnitName        := DelphiFile.UnitInfo.DelphiUnitName;
+    if InsertOldNameComment then
+       OldUnitNameComment := ' {renamed from ' + OldUnitName + '.pas}'
+    else
+       OldUnitNameComment := '';
 
     // Generate the new unit name and filename
     NewUnitName := SearchAndReplaceUnitName(DelphiFile.UnitInfo.DelphiUnitName);
-    NewUnitFilename := IncludeTrailingPathDelimiter(ExtractFileDir(DelphiFile.UnitInfo.Filename)) + NewUnitName + ExtractFileExt(DelphiFile.UnitInfo.Filename);
+    NewUnitFilenameExt := ExtractFileExt(DelphiFile.UnitInfo.Filename);
+    if LowerCaseExtension then
+       NewUnitFilenameExt := LowerCase(NewUnitFilenameExt);
+    NewUnitFilename := IncludeTrailingPathDelimiter(ExtractFileDir(DelphiFile.UnitInfo.Filename))
+                       + NewUnitName
+                       + NewUnitFilenameExt;
 
     // Calculate the offset for the units in the uses clauses
-    PositionOffset := length(NewUnitName) - length(DelphiFile.UnitInfo.DelphiUnitName);
+    PositionOffset := length(NewUnitName + OldUnitNameComment) - length(DelphiFile.UnitInfo.DelphiUnitName);
 
     // Update the unit name in the file to be renamed
     if DelphiFile.UnitInfo.DelphiUnitNamePosition = 0 then
@@ -2007,7 +2029,7 @@ var
       if (DummyRun) or
          (UpdateUsesClause(DelphiFile.UnitInfo.Filename,
                            DelphiFile.UnitInfo.DelphiUnitName,
-                           NewUnitName,
+                           NewUnitName + OldUnitNameComment,
                            DelphiFile.UnitInfo.DelphiUnitNamePosition,
                            0)) then
       begin

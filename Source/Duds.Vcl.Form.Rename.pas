@@ -37,14 +37,14 @@ type
   TfrmRenameUnit = class(TForm)
     edtNewName: TEdit;
     Label1: TLabel;
-    chkUpdateUsesClauses: TCheckBox;
     chkPromptBeforeUpdate: TCheckBox;
     btnOK: TButton;
     btnCancel: TButton;
     chkDummyRun: TCheckBox;
     chkRenameHistoryFiles: TCheckBox;
+    chkInsertOldNameComment: TCheckBox;
+    chkRenameLowerCaseExtension: TCheckBox;
     procedure edtNewNameChange(Sender: TObject);
-    procedure chkUpdateUsesClausesClick(Sender: TObject);
     procedure edtNewNameKeyPress(Sender: TObject; var Key: Char);
   private
     { Private declarations }
@@ -58,11 +58,6 @@ var
 implementation
 
 {$R *.dfm}
-
-procedure TfrmRenameUnit.chkUpdateUsesClausesClick(Sender: TObject);
-begin
-  chkPromptBeforeUpdate.Enabled := chkUpdateUsesClauses.Checked;
-end;
 
 procedure TfrmRenameUnit.edtNewNameChange(Sender: TObject);
 begin

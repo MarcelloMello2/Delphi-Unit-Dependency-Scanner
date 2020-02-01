@@ -139,6 +139,8 @@ type
     FPromptBeforeUpdate: Boolean;
     FDummyRun: Boolean;
     FRenameHistoryFiles: Boolean;
+    FRenameInsertOldNameComment: Boolean;
+    FRenameLowerCaseExtension: Boolean;
     FUnitPatchHeight: integer;
   protected
     procedure DoSaveToIniFile(const IniFile: TIniFile); override;
@@ -162,6 +164,8 @@ type
     property PromptBeforeUpdate: Boolean read FPromptBeforeUpdate write FPromptBeforeUpdate;
     property DummyRun: Boolean read FDummyRun write FDummyRun;
     property RenameHistoryFiles: Boolean read FRenameHistoryFiles write FRenameHistoryFiles;
+    property RenameInsertOldNameComment: Boolean read FRenameInsertOldNameComment write FRenameInsertOldNameComment;
+    property RenameLowerCaseExtension: Boolean read FRenameLowerCaseExtension write FRenameLowerCaseExtension;
     property UnitPatchHeight: Integer read FUnitPatchHeight write FUnitPatchHeight;
   end;
 
@@ -294,9 +298,11 @@ begin
   FWindowHeight := IniFile.ReadInteger(WindowSection, 'WindowHeight', FWindowHeight);
   FUnitPatchHeight := IniFile.ReadInteger(WindowSection, 'UnitPatchHeight', 19);
 
-  FPromptBeforeUpdate := IniFile.ReadBool(DialogsSection, 'PromptBeforeUpdate', FPromptBeforeUpdate);
-  FDummyRun := IniFile.ReadBool(DialogsSection, 'DummyRun', FDummyRun);
-  FRenameHistoryFiles := IniFile.ReadBool(DialogsSection, 'RenameHistoryFiles', FRenameHistoryFiles);
+  FPromptBeforeUpdate         := IniFile.ReadBool(DialogsSection, 'PromptBeforeUpdate', FPromptBeforeUpdate);
+  FDummyRun                   := IniFile.ReadBool(DialogsSection, 'DummyRun', FDummyRun);
+  FRenameHistoryFiles         := IniFile.ReadBool(DialogsSection, 'RenameHistoryFiles', FRenameHistoryFiles);
+  FRenameInsertOldNameComment := IniFile.ReadBool(DialogsSection, 'RenameInsertOldNameComment', FRenameInsertOldNameComment);
+  FRenameLowerCaseExtension   := IniFile.ReadBool(DialogsSection, 'RenameLowerCaseExtension', FRenameLowerCaseExtension);
 end;
 
 procedure TEnvironmentSettings.DoSaveToIniFile(const IniFile: TIniFile);
@@ -320,6 +326,8 @@ begin
   IniFile.WriteBool(DialogsSection, 'PromptBeforeUpdate', FPromptBeforeUpdate);
   IniFile.WriteBool(DialogsSection, 'DummyRun', FDummyRun);
   IniFile.WriteBool(DialogsSection, 'RenameHistoryFiles', FRenameHistoryFiles);
+  IniFile.WriteBool(DialogsSection, 'RenameInsertOldNameComment', FRenameInsertOldNameComment);
+  IniFile.WriteBool(DialogsSection, 'RenameLowerCaseExtension', FRenameLowerCaseExtension);
 end;
 
 end.
