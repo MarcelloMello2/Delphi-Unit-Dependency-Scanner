@@ -53,7 +53,7 @@ type
 
     property DelphiUnitName: String read GetDelphiUnitName write SetDelphiUnitName;
     property Position: Integer read GetPosition write SetPosition;
-    property InFilePosition: Integer read GetInFilePosition write SetInFilePosition;
+    property InFilePosition: Integer read GetInFilePosition write SetInFilePosition;   // offset of the  <in '..\..\abc.pas'>   part
     property UsesType: TUsedUnitType read GetUsesType write SetUsesType;
     property Order: Integer read GetOrder write SetOrder;
     property Filename: String read GetFilename write SetFilename;

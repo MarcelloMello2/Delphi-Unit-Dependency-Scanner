@@ -137,7 +137,6 @@ type
     tabUsedBy: TTabSheet;
     tabSource: TTabSheet;
     memListFile: TSynEdit;
-    Image1: TImage;
     tmrClose: TTimer;
     tabUsesList: TTabSheet;
     actNewProject: TAction;
@@ -380,7 +379,7 @@ resourcestring
   StrFinishedUpdated = 'Finished - Updated %d uses clauses';
   StrUnableToRenameS = 'Unable to rename "%s" as the unit name was not found';
   StrUpdatedDelphiUnitNameIn = 'Updated unit name in "%s" from "%s" to "%s"';
-  StrUpdatedUsesClause = 'Replaced "%s" with "%s" the uses clause of "%s"';
+  StrUpdatedUsesClause = 'Replaced "%s" with "%s" in the uses clause of "%s"';
   StrScannedFiles = 'Processed Files';
   StrSemiCircularFiles = 'Semi Circular references';
   StrFCircularFiles = 'Circular references';
@@ -1909,28 +1908,36 @@ var
   var
     StepNode: PVirtualNode;
     PosOffset: Integer;
-    UsedUnitInfo: IUsedUnitInfo;
+    FileUsingTheUnit: IUnitInfo;
+    UsedUnitIndex: integer;
+    UsedUnitInfo, NextUsedUnitInfo: IUsedUnitInfo;
     OldUnitName, NewUnitName: String;
   begin
     OldUnitName := GetDelphiUnitName(UpdateNode);
     NewUnitName := SearchAndReplaceUnitName(OldUnitName);
 
-    Result := UpdateUsesClause(FNodeObjects[GetID(UpdateNode.Parent)].DelphiFile.UnitInfo.Filename,
+    FileUsingTheUnit := FNodeObjects[GetID(UpdateNode.Parent)].DelphiFile.UnitInfo; // file to update (using the unit to rename)
+
+    UsedUnitIndex  := GetNodeIndex(UpdateNode);                  // Index of the unit in the uses list of the file to update
+    UsedUnitInfo   := FileUsingTheUnit.UsedUnits[UsedUnitIndex]; // detail info about the used unit we are renaming
+
+    // step 1: apply the rename in the file
+    Result := UpdateUsesClause(FileUsingTheUnit.Filename,
                                OldUnitName,
                                NewUnitName,
-                               FNodeObjects[GetID(UpdateNode.Parent)].DelphiFile.UnitInfo.UsedUnits[GetID(UpdateNode)].Position,
-                               FNodeObjects[GetID(UpdateNode.Parent)].DelphiFile.UnitInfo.UsedUnits[GetID(UpdateNode)].InFilePosition);
+                               UsedUnitInfo.Position,
+                               UsedUnitInfo.InFilePosition);
 
     if Result then
     begin
-      Log(StrUpdatedUsesClause, [OldUnitName, NewUnitName, FNodeObjects[GetID(UpdateNode.Parent)].DelphiFile.UnitInfo.Filename]);
+      Log(StrUpdatedUsesClause, [OldUnitName, NewUnitName, FileUsingTheUnit.Filename]);
 
       if not DummyRun then
       begin
         PosOffset := PositionOffset;
 
-        UsedUnitInfo := FNodeObjects[GetID(UpdateNode.Parent)].DelphiFile.UnitInfo.UsedUnits[GetID(UpdateNode)];
-
+        // step 2: update the recently changed uses in the meta data
+        UsedUnitInfo.DelphiUnitName := NewUnitName;
         if UsedUnitInfo.InFilePosition > 0 then
         begin
           if UsedUnitInfo.Position > 0 then
@@ -1939,23 +1946,22 @@ var
           PosOffset := PosOffset * 2;
         end;
 
+        // step 3: update position of all following uses in the meta data
         StepNode := UpdateNode.NextSibling;
 
         while StepNode <> nil do
         begin
-          UsedUnitInfo := FNodeObjects[GetID(UpdateNode.Parent)].DelphiFile.UnitInfo.UsedUnits[GetID(StepNode)];
+          NextUsedUnitInfo := FileUsingTheUnit.UsedUnits[GetNodeIndex(StepNode)];
 
-          if UsedUnitInfo.Position > 0 then
-            UsedUnitInfo.Position := UsedUnitInfo.Position + PosOffset;
+          if NextUsedUnitInfo.Position > 0 then
+            NextUsedUnitInfo.Position := NextUsedUnitInfo.Position + PosOffset;
 
-          if UsedUnitInfo.InFilePosition > 0 then
-            UsedUnitInfo.InFilePosition := UsedUnitInfo.InFilePosition + PosOffset;
+          if NextUsedUnitInfo.InFilePosition > 0 then
+            NextUsedUnitInfo.InFilePosition := NextUsedUnitInfo.InFilePosition + PosOffset;
 
           StepNode := StepNode.NextSibling;
         end;
 
-        // Update the DelphiUnitName and positions
-        FNodeObjects[GetID(UpdateNode.Parent)].DelphiFile.UnitInfo.UsedUnits[GetNodeIndex(UpdateNode)].DelphiUnitName := NewUnitName;
       end;
 
       Inc(UpdatedCount);
