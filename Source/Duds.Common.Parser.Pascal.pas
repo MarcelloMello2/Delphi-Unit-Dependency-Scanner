@@ -177,7 +177,7 @@ function TPascalUnitExtractor.GetUsedUnits(const UnitFileName: String; var UnitI
   var
     Delimiter, UnitText: String;
     UsedUnitInfo: IUsedUnitInfo;
-    InFilePos: Integer;
+    PosOfUnitNameInPath, InFilePos: Integer;
   begin
     while not FTokeniser.Eof do
     begin
@@ -209,22 +209,27 @@ function TPascalUnitExtractor.GetUsedUnits(const UnitFileName: String; var UnitI
             // Move to the next token. It should be the filename
             FTokeniser2.Next;
 
-            InFilePos := pos(LowerCase(UnitText), LowerCase(FTokeniser2.Token.Text));
+            PosOfUnitNameInPath := pos(LowerCase(UnitText), LowerCase(FTokeniser2.Token.Text));
 
-            if InFilePos > 0 then
+            if PosOfUnitNameInPath > 0 then
             begin
               UsedUnitInfo.Filename := ExpandFileNameRelBaseDir(StripQuotes(FTokeniser2.Token.Text), ExtractFilePath(UnitFilename));
 
-              InFilePos := FTokeniser.Token.Position + FTokeniser2.Token.Position - 1;
+              InFilePos := FTokeniser.Token.Position + FTokeniser2.Token.Position + PosOfUnitNameInPath - 2 - 1;
+            end else
+            begin
+              // error -> unit name not found in >in '...'< part
+              UsedUnitInfo.Filename := ExpandFileNameRelBaseDir(UnitText + '.failedToParseInPart', ExtractFilePath(UnitFilename));
+              InFilePos             := 0;
             end;
           end;
         end;
 
         UsedUnitInfo.DelphiUnitName := Trim(UnitText);
-        UsedUnitInfo.Position := FTokeniser.Token.Position - 1;
+        UsedUnitInfo.Position       := FTokeniser.Token.Position - 1;
         UsedUnitInfo.InFilePosition := InFilePos;
-        UsedUnitInfo.UsesType := UsesType;
-        UsedUnitInfo.Order := UnitInfo.UsedUnits.Count - 1;
+        UsedUnitInfo.UsesType       := UsesType;
+        UsedUnitInfo.Order          := UnitInfo.UsedUnits.Count - 1;
       end;
 
       if Delimiter = ';' then

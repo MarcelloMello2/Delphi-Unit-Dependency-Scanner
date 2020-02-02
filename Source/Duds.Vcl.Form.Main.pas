@@ -1024,6 +1024,9 @@ begin
 end;
 
 procedure TfrmMain.UpdateTreeControls(Node: PVirtualNode);
+var
+  ParentFileInfo: IUnitInfo;
+  UsedUnitInfo: IUsedUnitInfo;
 begin
   SetNodePathRichEdit(Node, RichEditUnitPath);
 
@@ -1043,12 +1046,15 @@ begin
 
     if (Node.Parent <> vtUnits.RootNode) and (FileExists(FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.Filename)) then
     begin
-      tabParentFile.Caption := ExtractFileName(FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.Filename);
+      ParentFileInfo := FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo;
+      UsedUnitInfo   := ParentFileInfo.UsedUnits[GetNodeIndex(Node)];
 
-      memParentFile.Lines.LoadFromFile(FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.Filename);
+      tabParentFile.Caption := ExtractFileName(ParentFileInfo.Filename);
 
-      memParentFile.SelStart := FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.UsedUnits[GetNodeIndex(Node)].Position;  // Todo: FIX
-      memParentFile.SelLength := length(FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.UsedUnits[GetNodeIndex(Node)].DelphiUnitName);
+      memParentFile.Lines.LoadFromFile(ParentFileInfo.Filename);
+
+      memParentFile.SelStart  := UsedUnitInfo.Position;  // Todo: FIX // UsedUnitInfo.InFilePosition;  //
+      memParentFile.SelLength := length(UsedUnitInfo.DelphiUnitName);
 
       memParentFile.Modified := FALSE;
 
@@ -1786,7 +1792,6 @@ procedure TfrmMain.RenameDelphiFile(
        const DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment, LowerCaseExtension: Boolean);
 
 var
-  PositionOffset: Integer;
   UpdatedCount: Integer;
 
 
@@ -1925,9 +1930,11 @@ var
     UsedUnitIndex: integer;
     UsedUnitInfo, NextUsedUnitInfo: IUsedUnitInfo;
     OldUnitName, NewUnitName: String;
+
   begin
     OldUnitName := GetDelphiUnitName(UpdateNode);
     NewUnitName := SearchAndReplaceUnitName(OldUnitName);
+
 
     FileUsingTheUnit := FNodeObjects[GetID(UpdateNode.Parent)].DelphiFile.UnitInfo; // file to update (using the unit to rename)
 
@@ -1947,7 +1954,7 @@ var
 
       if not DummyRun then
       begin
-        PosOffset := PositionOffset;
+        PosOffset   := length(NewUnitName) - length(OldUnitName);
 
         // step 2: update the recently changed uses in the meta data
         UsedUnitInfo.DelphiUnitName := NewUnitName;
@@ -1985,6 +1992,7 @@ var
   var
     NewUnitName, NewUnitFilename, NewUnitFilenameExt, OldUnitNameComment, OldUnitName, OldFilename: String;
     i: Integer;
+    PosOffset: Integer;
   begin
     Result := FALSE;
 
@@ -2004,9 +2012,6 @@ var
     NewUnitFilename := IncludeTrailingPathDelimiter(ExtractFileDir(DelphiFile.UnitInfo.Filename))
                        + NewUnitName
                        + NewUnitFilenameExt;
-
-    // Calculate the offset for the units in the uses clauses
-    PositionOffset := length(NewUnitName + OldUnitNameComment) - length(DelphiFile.UnitInfo.DelphiUnitName);
 
     // Update the unit name in the file to be renamed
     if DelphiFile.UnitInfo.DelphiUnitNamePosition = 0 then
@@ -2039,16 +2044,19 @@ var
         begin
           DelphiFile.UnitInfo.DelphiUnitName := NewUnitName;
 
+          // Calculate the offset for the units in the uses clauses
+          PosOffset := length(NewUnitName + OldUnitNameComment) - length(OldUnitName);
+
           // Update the position of all the used units
           for i := 0 to pred(DelphiFile.UnitInfo.UsedUnits.Count) do
           begin
             if DelphiFile.UnitInfo.UsedUnits[i].Position > 0 then
               DelphiFile.UnitInfo.UsedUnits[i].Position :=
-                DelphiFile.UnitInfo.UsedUnits[i].Position + PositionOffset;
+                DelphiFile.UnitInfo.UsedUnits[i].Position + PosOffset;
 
             if DelphiFile.UnitInfo.UsedUnits[i].InFilePosition > 0 then
               DelphiFile.UnitInfo.UsedUnits[i].InFilePosition :=
-                DelphiFile.UnitInfo.UsedUnits[i].InFilePosition + PositionOffset;
+                DelphiFile.UnitInfo.UsedUnits[i].InFilePosition + PosOffset;
           end;
         end;
       end;
