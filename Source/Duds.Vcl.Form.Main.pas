@@ -622,7 +622,7 @@ procedure TfrmMain.LoadFilesInSearchPaths;
         if CurrentDir.EndsWith(ExpandSearchPathSign) then // has "expand" sign?
         begin
            CurrentDir := Copy(CurrentDir, 1, Length(CurrentDir) - Length(ExpandSearchPathSign));
-
+           aExpandedPaths.Add(CurrentDir);
            ScannedFiles := ScanFiles(CurrentDir, '*.*', TRUE, TRUE, TRUE);
            try
              for j := 0 to pred(ScannedFiles.Count) do
