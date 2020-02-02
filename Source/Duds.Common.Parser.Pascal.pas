@@ -112,7 +112,7 @@ type
   TPascalUnitExtractor = class(TComponent)
   private
     FTokeniser: TPascalTokeniser;
-    FTokeniser2: TPascalTokeniser;
+    FTokeniserInFile: TPascalTokeniser;
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -145,13 +145,13 @@ begin
   inherited;
 
   FTokeniser := TPascalTokeniser.Create;
-  FTokeniser2 := TPascalTokeniser.Create;
+  FTokeniserInFile := TPascalTokeniser.Create;
 end;
 
 destructor TPascalUnitExtractor.Destroy;
 begin
   FreeAndNil(FTokeniser);
-  FreeAndNil(FTokeniser2);
+  FreeAndNil(FTokeniserInFile);
 
   inherited;
 end;
@@ -175,7 +175,7 @@ function TPascalUnitExtractor.GetUsedUnits(const UnitFileName: String; var UnitI
 
   procedure ExtractUnits(UsesType: TUsedUnitType);
   var
-    Delimiter, UnitText: String;
+    Delimiter, UnitName: String;
     UsedUnitInfo: IUsedUnitInfo;
     PosOfUnitNameInPath, InFilePos: Integer;
   begin
@@ -188,44 +188,45 @@ function TPascalUnitExtractor.GetUsedUnits(const UnitFileName: String; var UnitI
         UsedUnitInfo := TUsedUnitInfo.Create;
         UnitInfo.UsedUnits.Add(UsedUnitInfo);
 
-        FTokeniser2.Code := FTokeniser.Token.Text;
+        FTokeniserInFile.Code := FTokeniser.Token.Text;
 
         InFilePos := 0;
 
-        if FTokeniser2.Eof then
+        // when there are no further tokens, it must be a uses without a file declaration "in 'abc.pas'"
+        if FTokeniserInFile.Eof then
         begin
-          UnitText := FTokeniser.Token.Text;
+          UnitName := FTokeniser.Token.Text;
         end
         else
         begin
           // Get the real unit text
-          UnitText := FTokeniser2.Token.Text;
+          UnitName := FTokeniserInFile.Token.Text;
 
-          FTokeniser2.Next;
+          FTokeniserInFile.Next;
 
           // Is the token 'in' a file?
-          if SameText(FTokeniser2.Token.Text, 'in') then
+          if SameText(FTokeniserInFile.Token.Text, 'in') then
           begin
             // Move to the next token. It should be the filename
-            FTokeniser2.Next;
+            FTokeniserInFile.Next;
 
-            PosOfUnitNameInPath := pos(LowerCase(UnitText), LowerCase(FTokeniser2.Token.Text));
+            PosOfUnitNameInPath := pos(LowerCase(UnitName), LowerCase(FTokeniserInFile.Token.Text));
 
             if PosOfUnitNameInPath > 0 then
             begin
-              UsedUnitInfo.Filename := ExpandFileNameRelBaseDir(StripQuotes(FTokeniser2.Token.Text), ExtractFilePath(UnitFilename));
+              UsedUnitInfo.Filename := ExpandFileNameRelBaseDir(StripQuotes(FTokeniserInFile.Token.Text), ExtractFilePath(UnitFilename));
 
-              InFilePos := FTokeniser.Token.Position + FTokeniser2.Token.Position + PosOfUnitNameInPath - 2 - 1;
+              InFilePos := FTokeniser.Token.Position + FTokeniserInFile.Token.Position + PosOfUnitNameInPath - 2 - 1;
             end else
             begin
               // error -> unit name not found in >in '...'< part
-              UsedUnitInfo.Filename := ExpandFileNameRelBaseDir(UnitText + '.failedToParseInPart', ExtractFilePath(UnitFilename));
+              UsedUnitInfo.Filename := ExpandFileNameRelBaseDir(UnitName + '.failedToParseInPart', ExtractFilePath(UnitFilename));
               InFilePos             := 0;
             end;
           end;
         end;
 
-        UsedUnitInfo.DelphiUnitName := Trim(UnitText);
+        UsedUnitInfo.DelphiUnitName := Trim(UnitName);
         UsedUnitInfo.Position       := FTokeniser.Token.Position - 1;
         UsedUnitInfo.InFilePosition := InFilePos;
         UsedUnitInfo.UsesType       := UsesType;
