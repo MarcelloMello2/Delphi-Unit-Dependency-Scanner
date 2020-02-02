@@ -1053,7 +1053,11 @@ begin
 
       memParentFile.Lines.LoadFromFile(ParentFileInfo.Filename);
 
-      memParentFile.SelStart  := UsedUnitInfo.Position;  // Todo: FIX // UsedUnitInfo.InFilePosition;  //
+      memParentFile.SelStart  := UsedUnitInfo.Position;
+      if UsedUnitInfo.InFilePosition > 0 then
+      begin
+         // memParentFile.SelStart  := UsedUnitInfo.InFilePosition; // uncomment this line to visualize unitname recognition in the "in file" part
+      end;
       memParentFile.SelLength := length(UsedUnitInfo.DelphiUnitName);
 
       memParentFile.Modified := FALSE;

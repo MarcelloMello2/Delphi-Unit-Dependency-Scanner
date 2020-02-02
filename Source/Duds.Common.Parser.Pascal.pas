@@ -207,10 +207,12 @@ function TPascalUnitExtractor.GetUsedUnits(const UnitFileName: String; var UnitI
           // Is the token 'in' a file?
           if SameText(FTokeniserInFile.Token.Text, 'in') then
           begin
-            // Move to the next token. It should be the filename
-            FTokeniserInFile.Next;
+            // Find the text between '...' -> it should be the filename / absolute filepath / relative filepath
+            //   originally, this used 'FTokeniserInFile.Next()' but that crashes with spaces in paths
+            FTokeniserInFile.Next(['''']);
+            FTokeniserInFile.Next(['''']);
 
-            PosOfUnitNameInPath := pos(LowerCase(UnitName), LowerCase(FTokeniserInFile.Token.Text));
+            PosOfUnitNameInPath := pos(LowerCase(UnitName + '.pas'), LowerCase(FTokeniserInFile.Token.Text));
 
             if PosOfUnitNameInPath > 0 then
             begin
@@ -219,8 +221,8 @@ function TPascalUnitExtractor.GetUsedUnits(const UnitFileName: String; var UnitI
               InFilePos := FTokeniser.Token.Position + FTokeniserInFile.Token.Position + PosOfUnitNameInPath - 2 - 1;
             end else
             begin
-              // error -> unit name not found in >in '...'< part
-              UsedUnitInfo.Filename := ExpandFileNameRelBaseDir(UnitName + '.failedToParseInPart', ExtractFilePath(UnitFilename));
+              // error -> create a "fake unit name" that will cause an error in the oupt because it cannot be found on the disk
+              UsedUnitInfo.Filename := ExpandFileNameRelBaseDir(UnitName + '.failed to parse "in file" path - please check source', ExtractFilePath(UnitFilename));
               InFilePos             := 0;
             end;
           end;
