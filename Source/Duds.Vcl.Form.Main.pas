@@ -68,6 +68,7 @@ type
     actShowUnitsNotInPath: TAction;
     actSaveChanges: TAction;
     actRename: TAction;
+    actApplyRenameList: TAction;
     popTree: TPopupMenu;
     Rename1: TMenuItem;
     ShowUnitsnotinPath1: TMenuItem;
@@ -112,6 +113,7 @@ type
     N8: TMenuItem;
     OpenDialog1: TOpenDialog;
     SaveDialog1: TSaveDialog;
+    OpenDialogMultipleRenames: TOpenDialog;
     ActionToolBar1: TActionToolBar;
     pnlBackground: TPanel;
     pnlMain: TPanel;
@@ -178,6 +180,7 @@ type
     RichEditUnitPath: TRichEdit;
     PanelFooter: TPanel;
     Splitter4: TSplitter;
+
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure vtUnitsGetNodeDataSize(Sender: TBaseVirtualTree;
@@ -264,6 +267,7 @@ type
       Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
       var Ghosted: Boolean; var ImageIndex: TImageIndex);
     procedure ActionSaveCirRefsExecute(Sender: TObject);
+    procedure actApplyRenameListExecute(Sender: TObject);
   private
     FLogEntries: TLogEntries;
     FFiles: TDictionary<String, String>;
@@ -309,6 +313,7 @@ type
     function GetLinkedNode(Node: PVirtualNode): PVirtualNode;
     procedure UpdateTreeControls(Node: PVirtualNode);
     procedure RenameDelphiFile(
+       const aClearLog: Boolean;
        const SearchString, ReplaceString: String;
        PromptBeforeUpdate: Boolean;
        const DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment, LowerCaseExtension: Boolean);
@@ -333,6 +338,12 @@ type
     function TryGetSearchUnit(const DelphiUnitName: String; var UnitFilename: String; UseScopes: Boolean): Boolean;
     function RenameDelphiFileWithDialog(RenameType: TRenameType): Boolean; overload;
     function RenameDelphiFileWithDialog(const DelphiFile: TDelphiFile; RenameType: TRenameType): Boolean; overload;
+    procedure ApplyMultipleRenames(
+      aCsvFilename: String;
+      DummyRun,
+      RenameHistoryFiles,
+      InsertOldNameComment,
+      RenameLowerCaseExtension: Boolean);
     procedure SearchList(VT: TVirtualStringTree; const SearchText: String);
     procedure SearchUnitsListChildList(VT: TVirtualStringTree; const SearchText: String; UsedBy: Boolean);
     procedure CloseControls;
@@ -405,6 +416,9 @@ resourcestring
   StrUnableToParseS = 'Unable to parse "%s": %s';
   StrVCLFormCount = 'VCL Form Count';
   StrFMXFormCount = 'FMX Form Count';
+  StrStartBatchRename = 'Batch-Rename from CSV: Renaming unit "%s" to "%s"';
+  StrBatchRenameResult = 'Batch-Rename finished. Renamed %d units.';
+  StrUnableToRenameToNewName = 'Unable to rename "%s" because "%s" already exists.';
 
 {$R *.dfm}
 
@@ -1454,6 +1468,8 @@ begin
   Result := (Node <> nil) and (pos(FSearchText, LowerCase(FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName)) > 0);
 end;
 
+
+
 procedure TfrmMain.actCloseProjectExecute(Sender: TObject);
 begin
   if (CheckNotRunning) and (CheckSaveProject) then
@@ -1676,6 +1692,54 @@ begin
   RenameDelphiFileWithDialog(rtRename);
 end;
 
+procedure TfrmMain.actApplyRenameListExecute(Sender: TObject);
+var
+  aFileName: String;
+  ShowDlgResult: Boolean;
+begin
+  if (OpenDialogMultipleRenames.Execute) then
+  begin
+    aFileName := OpenDialogMultipleRenames.FileName;
+
+    with TfrmRenameUnit.Create(Self) do
+    try
+      Width := Width + 300;
+      Label1.Caption := 'Selected file';
+      edtNewName.Text := aFileName;
+      edtNewName.Enabled := false;
+      Caption := 'Rename multiple files';
+
+      chkPromptBeforeUpdate.Checked       := false;
+      chkPromptBeforeUpdate.Enabled       := false;
+      chkDummyRun.Checked                 := FEnvironmentSettings.DummyRun;
+      chkRenameHistoryFiles.Checked       := FEnvironmentSettings.RenameHistoryFiles;
+      chkInsertOldNameComment.Checked     := FEnvironmentSettings.RenameInsertOldNameComment;
+      chkInsertOldNameComment.Caption     := 'Insert "{renamed from ' + 'oldname' + '.pas} comment"';
+      chkRenameLowerCaseExtension.Checked := FEnvironmentSettings.RenameLowerCaseExtension;
+
+      ShowDlgResult := ShowModal = mrOK;
+
+      if ShowDlgResult then
+      begin
+
+        FEnvironmentSettings.DummyRun                   := chkDummyRun.Checked;
+        FEnvironmentSettings.RenameHistoryFiles         := chkRenameHistoryFiles.Checked;
+        FEnvironmentSettings.RenameInsertOldNameComment := chkInsertOldNameComment.Checked;
+        FEnvironmentSettings.RenameLowerCaseExtension   := chkRenameLowerCaseExtension.Checked;
+
+        ApplyMultipleRenames(
+           aFileName,
+           chkDummyRun.Checked,
+           chkRenameHistoryFiles.Checked,
+           chkInsertOldNameComment.Checked,
+           chkRenameLowerCaseExtension.Checked);
+      end;
+    finally
+      Release;
+    end;
+  end;
+end;
+
 function TfrmMain.GetFocusedDelphiFile: TDelphiFile;
 begin
   if (vtUnits.Focused) and
@@ -1733,7 +1797,8 @@ begin
               FEnvironmentSettings.RenameInsertOldNameComment := chkInsertOldNameComment.Checked;
               FEnvironmentSettings.RenameLowerCaseExtension   := chkRenameLowerCaseExtension.Checked;
 
-              RenameDelphiFile(DelphiFile.UnitInfo.DelphiUnitName,
+              RenameDelphiFile(true,
+                               DelphiFile.UnitInfo.DelphiUnitName,
                                edtNewName.Text,
                                chkPromptBeforeUpdate.Checked,
                                chkDummyRun.Checked,
@@ -1771,7 +1836,8 @@ begin
             FEnvironmentSettings.DummyRun           := chkDummyRun.Checked;
             FEnvironmentSettings.RenameHistoryFiles := chkRenameHistoryFiles.Checked;
 
-            RenameDelphiFile(edtSearch.Text,
+            RenameDelphiFile(true,
+                             edtSearch.Text,
                              edtReplace.Text,
                              chkPromptBeforeUpdate.Checked,
                              chkDummyRun.Checked,
@@ -1790,7 +1856,98 @@ begin
     vtUnits.Header.Columns[1].Options := vtUnits.Header.Columns[1].Options + [coVisible];
 end;
 
+procedure TfrmMain.ApplyMultipleRenames(
+  aCsvFilename: String;
+  DummyRun,
+  RenameHistoryFiles,
+  InsertOldNameComment,
+  RenameLowerCaseExtension: Boolean);
+var
+  aRenameFileStrings: TStringList;
+  i: Integer;
+  semicolonPos: Integer;
+  aLine: String;
+  OldUnitName, NewUnitName: String;
+  renameCount: Integer;
+  OldFile, NewFile: TDelphiFile;
+  PreCheckOk: Boolean;
+  aRenameUnitsList: TDictionary<String, String>;
+begin
+
+  aRenameUnitsList := TDictionary<String, String>.Create;
+  try
+    if FileExists(aCsvFilename) then
+    begin
+      ClearLog;
+
+      PreCheckOk := true;
+
+      aRenameFileStrings := TStringList.Create;
+      try
+        aRenameFileStrings.LoadFromFile(aCsvFilename);
+        for i := 0 to pred(aRenameFileStrings.Count) do
+        begin
+           aLine        := aRenameFileStrings[i];
+           semicolonPos := Pos(';', aLine);
+           OldUnitName  := Copy(aLine, 1, semicolonPos - 1 );
+           NewUnitName  := Copy(aLine, semicolonPos + 1, length(aLine));
+
+           // "old name" Unit exists?
+           OldFile := FindParsedDelphiUnit(OldUnitName);
+           if not Assigned(OldFile) then
+           begin
+              Log(StrUnableToRenameS, [OldUnitName], LogError);
+              PreCheckOk := false;
+           end;
+
+           // "new name" unit does NOT exist already?
+           NewFile := FindParsedDelphiUnit(NewUnitName);
+           if Assigned(NewFile) then
+           begin
+              Log(StrUnableToRenameToNewName, [OldUnitName, NewUnitName], LogError);
+              PreCheckOk := false;
+           end;
+
+           aRenameUnitsList.Add(OldUnitName, NewUnitName);
+        end;
+      finally
+        FreeAndNil(aRenameFileStrings);
+      end;
+
+      renameCount := 0;
+      if PreCheckOk then
+      begin
+        for OldUnitName in aRenameUnitsList.Keys do
+        begin
+           NewUnitName  := aRenameUnitsList[OldUnitName];
+
+           Log(StrStartBatchRename, [OldUnitName, NewUnitName], LogInfo);
+           Application.ProcessMessages;
+
+           RenameDelphiFile(FALSE,
+                            OldUnitName,
+                            NewUnitName,
+                            FALSE,
+                            DummyRun,
+                            RenameHistoryFiles,
+                            TRUE,
+                            InsertOldNameComment,
+                            RenameLowerCaseExtension);
+           Inc(renameCount);
+        end;
+      end;
+
+      Log(StrBatchRenameResult, [renameCount], LogInfo);
+    end
+    else
+      Log(StrUnableToFindFile, [aCsvFilename], LogWarning);
+  finally
+     FreeAndNil(aRenameUnitsList);
+  end;
+end;
+
 procedure TfrmMain.RenameDelphiFile(
+       const aClearLog: Boolean;
        const SearchString, ReplaceString: String;
        PromptBeforeUpdate: Boolean;
        const DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment, LowerCaseExtension: Boolean);
@@ -2074,7 +2231,8 @@ var
   PreviousUnitName: String;
   FocusedNode: PVirtualNode;
 begin
-  ClearLog;
+  if aClearLog then
+    ClearLog();
 
   // Clear PreviousUnitNames
   StepNode := vtUnits.GetFirst;

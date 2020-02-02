@@ -871,6 +871,10 @@ object frmMain: TfrmMain
             ImageIndex = 10
           end
           item
+            Action = actApplyRenameList
+            ImageIndex = 10
+          end
+          item
             Caption = '-'
           end
           item
@@ -957,6 +961,11 @@ object frmMain: TfrmMain
       Caption = 'Rename'
       ImageIndex = 10
       OnExecute = actRenameExecute
+    end
+    object actApplyRenameList: TAction
+      Caption = 'Apply multiple renames (defined in .csv)'
+      ImageIndex = 10
+      OnExecute = actApplyRenameListExecute
     end
     object actExpandAll: TAction
       Caption = 'Expand All'
@@ -1636,5 +1645,12 @@ object frmMain: TfrmMain
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000}
+  end
+  object OpenDialogMultipleRenames: TOpenDialog
+    DefaultExt = '.dspr'
+    Filter = 'Rename definition (*.csv)|*.csv'
+    Title = 'Apply multiple renames'
+    Left = 344
+    Top = 264
   end
 end

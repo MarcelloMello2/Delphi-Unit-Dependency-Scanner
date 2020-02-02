@@ -4,7 +4,7 @@ object frmRenameUnit: TfrmRenameUnit
   BorderStyle = bsDialog
   Caption = 'Rename Unit'
   ClientHeight = 184
-  ClientWidth = 450
+  ClientWidth = 446
   Color = clBtnFace
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
@@ -13,6 +13,9 @@ object frmRenameUnit: TfrmRenameUnit
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
+  DesignSize = (
+    446
+    184)
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
@@ -25,11 +28,13 @@ object frmRenameUnit: TfrmRenameUnit
   object edtNewName: TEdit
     Left = 8
     Top = 21
-    Width = 434
+    Width = 432
     Height = 21
+    Anchors = [akLeft, akTop, akRight]
     TabOrder = 0
     OnChange = edtNewNameChange
     OnKeyPress = edtNewNameKeyPress
+    ExplicitWidth = 434
   end
   object chkPromptBeforeUpdate: TCheckBox
     Left = 8
