@@ -381,7 +381,8 @@ resourcestring
   StrYes = 'Yes';
   StrNo = 'No';
   StrSHasBeenModifi = '"%s" has been modified. Would you like to save the changes?';
-  StrScanningDSearchD = 'Scanning %d search directories';
+  StrScanningDSearchRootFiles = 'Scanning %d root files';
+  StrScanningDSearchSearchPaths = 'Scanning %d search paths (expanded from %d defined paths)';
   StrDFilesFound = '%d matching file(s) found in the search paths';
   StrParsingFiles = 'Parsing files';
   StrDFilesWithATo = '%d used unit(s) found and a total of %d lines parsed';
@@ -605,12 +606,54 @@ procedure TfrmMain.LoadFilesInSearchPaths;
     end;
   end;
 
-begin
-  if not NoLog then
-    Log(StrScanningDSearchD, [FProjectSettings.RootFiles.Count + FProjectSettings.SearchPaths.Count]);
+  procedure ExpandAndScanSearchPaths;
+  var
+    aExpandedPaths: TStringList;
+    i, j: Integer;
+    CurrentDir: String;
+    Dir: String;
+    ScannedFiles: TObjectList<TFileInfo>;
+  begin
+    aExpandedPaths := TStringList.Create;
+    try
+      for i := 0 to pred(FProjectSettings.SearchPaths.Count) do
+      begin
+        CurrentDir := FProjectSettings.SearchPaths[i];
+        if CurrentDir.EndsWith(ExpandSearchPathSign) then // has "expand" sign?
+        begin
+           CurrentDir := Copy(CurrentDir, 1, Length(CurrentDir) - Length(ExpandSearchPathSign));
 
+           ScannedFiles := ScanFiles(CurrentDir, '*.*', TRUE, TRUE, TRUE);
+           try
+             for j := 0 to pred(ScannedFiles.Count) do
+              if ScannedFiles[j].IsDir then
+                aExpandedPaths.Add(ScannedFiles[j].Filename);
+           finally
+             FreeAndNil(ScannedFiles);
+           end;
+
+
+        end else
+           aExpandedPaths.Add(CurrentDir)
+      end;
+
+      if not NoLog then
+        Log(StrScanningDSearchSearchPaths, [aExpandedPaths.Count, FProjectSettings.SearchPaths.Count]);
+
+      ScanPasFiles(aExpandedPaths);
+    finally
+       FreeAndNil(aExpandedPaths);
+    end;
+  end;
+
+begin
+  // step 1: scan root files
+  if not NoLog then
+    Log(StrScanningDSearchRootFiles, [FProjectSettings.RootFiles.Count]);
   ScanPasFiles(FProjectSettings.RootFiles);
-  ScanPasFiles(FProjectSettings.SearchPaths);
+
+  // step 2: scan search paths
+  ExpandAndScanSearchPaths;
 
   if not NoLog then
     Log(StrDFilesFound, [FFiles.Count]);

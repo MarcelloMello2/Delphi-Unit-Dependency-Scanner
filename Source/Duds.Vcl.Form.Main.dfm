@@ -22,7 +22,7 @@ object frmMain: TfrmMain
     Left = 0
     Top = 0
     Width = 1119
-    Height = 26
+    Height = 54
     ActionManager = ActionManager1
     Caption = 'ActionToolBar1'
     Color = clMenuBar
@@ -41,27 +41,28 @@ object frmMain: TfrmMain
   end
   object pnlBackground: TPanel
     Left = 0
-    Top = 26
+    Top = 54
     Width = 1119
-    Height = 617
+    Height = 589
     Align = alClient
     BevelOuter = bvNone
     Caption = 'Click Scan to begin the Unit Dependecy Seach'
     TabOrder = 1
     object Splitter4: TSplitter
       Left = 0
-      Top = 595
+      Top = 567
       Width = 1119
       Height = 3
       Cursor = crVSplit
       Align = alBottom
+      ExplicitTop = 595
     end
     object pnlMain: TPanel
       AlignWithMargins = True
       Left = 3
       Top = 3
       Width = 1116
-      Height = 592
+      Height = 564
       Margins.Right = 0
       Margins.Bottom = 0
       Align = alClient
@@ -77,18 +78,19 @@ object frmMain: TfrmMain
       Visible = False
       object Splitter1: TSplitter
         Left = 0
-        Top = 439
+        Top = 411
         Width = 1116
         Height = 3
         Cursor = crVSplit
         Align = alBottom
         ResizeStyle = rsUpdate
+        ExplicitTop = 439
       end
       object Panel3: TPanel
         Left = 0
         Top = 0
         Width = 1116
-        Height = 439
+        Height = 411
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 0
@@ -96,7 +98,7 @@ object frmMain: TfrmMain
           Left = 0
           Top = 0
           Width = 1116
-          Height = 439
+          Height = 411
           ActivePage = tabTree
           Align = alClient
           Font.Charset = ANSI_CHARSET
@@ -111,14 +113,15 @@ object frmMain: TfrmMain
             object Splitter2: TSplitter
               Left = 497
               Top = 0
-              Height = 409
+              Height = 381
               ResizeStyle = rsUpdate
+              ExplicitHeight = 409
             end
             object pnlTree: TPanel
               Left = 0
               Top = 0
               Width = 497
-              Height = 409
+              Height = 381
               Align = alLeft
               BevelOuter = bvNone
               TabOrder = 0
@@ -155,7 +158,7 @@ object frmMain: TfrmMain
                 Left = 3
                 Top = 29
                 Width = 494
-                Height = 377
+                Height = 349
                 Margins.Right = 0
                 Align = alClient
                 Colors.UnfocusedColor = clMedGray
@@ -233,7 +236,7 @@ object frmMain: TfrmMain
               Left = 500
               Top = 0
               Width = 608
-              Height = 409
+              Height = 381
               Align = alClient
               Caption = 'Select a file to display its contents here.'
               TabOrder = 1
@@ -242,7 +245,7 @@ object frmMain: TfrmMain
                 Left = 1
                 Top = 4
                 Width = 603
-                Height = 401
+                Height = 373
                 Margins.Left = 0
                 ActivePage = tabParentFile
                 Align = alClient
@@ -255,7 +258,7 @@ object frmMain: TfrmMain
                     Left = 0
                     Top = 3
                     Width = 592
-                    Height = 365
+                    Height = 337
                     Margins.Left = 0
                     Align = alClient
                     Font.Charset = DEFAULT_CHARSET
@@ -286,6 +289,10 @@ object frmMain: TfrmMain
                 object tabSelectedFile: TTabSheet
                   Caption = 'Selected File'
                   ImageIndex = 1
+                  ExplicitLeft = 0
+                  ExplicitTop = 0
+                  ExplicitWidth = 0
+                  ExplicitHeight = 0
                   object memSelectedFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
@@ -325,20 +332,26 @@ object frmMain: TfrmMain
           object tabList: TTabSheet
             Caption = 'List'
             ImageIndex = 1
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
             object Splitter3: TSplitter
               Left = 497
               Top = 0
-              Height = 409
+              Height = 381
               ResizeStyle = rsUpdate
+              ExplicitHeight = 409
             end
             object pnlList: TPanel
               Left = 0
               Top = 0
               Width = 497
-              Height = 409
+              Height = 381
               Align = alLeft
               BevelOuter = bvNone
               TabOrder = 0
+              ExplicitHeight = 409
               object edtListSearch: TEdit
                 AlignWithMargins = True
                 Left = 3
@@ -427,21 +440,27 @@ object frmMain: TfrmMain
               Left = 500
               Top = 0
               Width = 608
-              Height = 409
+              Height = 381
               Align = alClient
               BevelOuter = bvNone
               Caption = 'Select a file to display it'#39's contents here.'
               TabOrder = 1
+              ExplicitHeight = 409
               object pcList: TPageControl
                 Left = 0
                 Top = 0
                 Width = 608
-                Height = 409
+                Height = 381
                 ActivePage = tabUsedBy
                 Align = alClient
                 TabOrder = 0
+                ExplicitHeight = 409
                 object tabUsedBy: TTabSheet
                   Caption = 'Used By Units'
+                  ExplicitLeft = 0
+                  ExplicitTop = 0
+                  ExplicitWidth = 0
+                  ExplicitHeight = 0
                   object edtSearchUsedByList: TEdit
                     AlignWithMargins = True
                     Left = 0
@@ -527,6 +546,10 @@ object frmMain: TfrmMain
                 object tabUsesList: TTabSheet
                   Caption = 'Uses Units'
                   ImageIndex = 2
+                  ExplicitLeft = 0
+                  ExplicitTop = 0
+                  ExplicitWidth = 0
+                  ExplicitHeight = 0
                   object edtSearchUsesList: TEdit
                     AlignWithMargins = True
                     Left = 0
@@ -612,6 +635,10 @@ object frmMain: TfrmMain
                 object tabSource: TTabSheet
                   Caption = 'Source'
                   ImageIndex = 1
+                  ExplicitLeft = 0
+                  ExplicitTop = 0
+                  ExplicitWidth = 0
+                  ExplicitHeight = 0
                   object memListFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
@@ -652,7 +679,7 @@ object frmMain: TfrmMain
       end
       object pnlLog: TPanel
         Left = 0
-        Top = 442
+        Top = 414
         Width = 1116
         Height = 150
         Align = alBottom
@@ -718,7 +745,7 @@ object frmMain: TfrmMain
     end
     object PanelFooter: TPanel
       Left = 0
-      Top = 598
+      Top = 570
       Width = 1119
       Height = 19
       Align = alBottom
@@ -872,6 +899,7 @@ object frmMain: TfrmMain
           end
           item
             Action = actApplyRenameList
+            Caption = 'A&pply multiple renames (defined in .csv)'
             ImageIndex = 10
           end
           item

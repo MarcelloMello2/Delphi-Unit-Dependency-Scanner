@@ -88,6 +88,9 @@ type
     DelphiXE61: TMenuItem;
     DelphiXE71: TMenuItem;
     lnkFTSInfo: TLabel;
+    Panel3: TPanel;
+    Panel5: TPanel;
+    Label1: TLabel;
     procedure btnAddFileClick(Sender: TObject);
     procedure btnAddPathClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);

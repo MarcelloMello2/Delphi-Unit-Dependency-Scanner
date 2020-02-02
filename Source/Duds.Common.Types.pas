@@ -67,6 +67,8 @@ const
     'Circular'
   );
 
+  ExpandSearchPathSign = '<+>';
+
 implementation
 
 end.

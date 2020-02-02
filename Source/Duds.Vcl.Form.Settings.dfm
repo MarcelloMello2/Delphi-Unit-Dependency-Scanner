@@ -4,7 +4,7 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
   BorderIcons = [biSystemMenu]
   Caption = 'Settings'
   ClientHeight = 449
-  ClientWidth = 603
+  ClientWidth = 774
   Color = clBtnFace
   Constraints.MinHeight = 300
   Constraints.MinWidth = 400
@@ -22,22 +22,24 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
     AlignWithMargins = True
     Left = 3
     Top = 3
-    Width = 597
+    Width = 768
     Height = 415
-    ActivePage = tabRootFiles
+    ActivePage = tabSearchPaths
     Align = alClient
     TabOrder = 0
+    ExplicitWidth = 730
     object tabRootFiles: TTabSheet
       Caption = 'Root Files'
+      ExplicitWidth = 722
       object Panel4: TPanel
-        Left = 476
+        Left = 647
         Top = 0
         Width = 113
         Height = 334
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitHeight = 299
+        ExplicitLeft = 609
         object btnAddFile: TButton
           AlignWithMargins = True
           Left = 3
@@ -78,19 +80,19 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
         AlignWithMargins = True
         Left = 3
         Top = 337
-        Width = 583
+        Width = 754
         Height = 47
         Align = alBottom
         BevelOuter = bvNone
         Color = clGray
         ParentBackground = False
         TabOrder = 2
-        Visible = False
+        ExplicitWidth = 716
         object Panel14: TPanel
           AlignWithMargins = True
           Left = 1
           Top = 1
-          Width = 581
+          Width = 752
           Height = 45
           Margins.Left = 1
           Margins.Top = 1
@@ -101,14 +103,13 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
           Color = 12910591
           ParentBackground = False
           TabOrder = 0
-          ExplicitTop = -2
-          ExplicitHeight = 18
+          ExplicitWidth = 714
           object lnkFTSInfo: TLabel
             AlignWithMargins = True
             Left = 1
             Top = 1
-            Width = 557
-            Height = 39
+            Width = 750
+            Height = 43
             Margins.Left = 1
             Margins.Top = 1
             Margins.Right = 1
@@ -130,6 +131,8 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
             ParentFont = False
             Transparent = True
             WordWrap = True
+            ExplicitWidth = 700
+            ExplicitHeight = 39
           end
         end
       end
@@ -137,7 +140,7 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
         AlignWithMargins = True
         Left = 3
         Top = 3
-        Width = 470
+        Width = 641
         Height = 328
         Align = alClient
         Font.Charset = ANSI_CHARSET
@@ -152,16 +155,18 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
         WordWrap = False
         Zoom = 100
         OnChange = OnSettingChange
+        ExplicitWidth = 603
       end
     end
     object tabSearchPaths: TTabSheet
       Caption = 'Search Paths'
       ImageIndex = 1
+      ExplicitWidth = 722
       object Panel2: TPanel
-        Left = 476
+        Left = 600
         Top = 0
-        Width = 113
-        Height = 387
+        Width = 160
+        Height = 334
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 0
@@ -169,21 +174,28 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
           AlignWithMargins = True
           Left = 3
           Top = 3
-          Width = 107
+          Width = 154
           Height = 25
           Align = alTop
           Caption = 'Add Search Paths'
           TabOrder = 0
           OnClick = btnAddPathClick
+          ExplicitWidth = 107
         end
         object chkRecursive: TCheckBox
           AlignWithMargins = True
           Left = 3
           Top = 34
-          Width = 107
-          Height = 31
+          Width = 154
+          Height = 15
+          Hint = 
+            'This will add also subfolders when you pick a path with "Add Sea' +
+            'rch Paths".'#13#10#13#10'If you want to perform recursion at scan-time, ad' +
+            'd <+> behind the path.'
           Align = alTop
-          Caption = 'Recursive'
+          Caption = 'Add recursive to settings'
+          ParentShowHint = False
+          ShowHint = True
           TabOrder = 1
           WordWrap = True
         end
@@ -192,8 +204,8 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
         AlignWithMargins = True
         Left = 3
         Top = 3
-        Width = 470
-        Height = 381
+        Width = 594
+        Height = 328
         Align = alClient
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
@@ -207,20 +219,79 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
         WordWrap = False
         Zoom = 100
         OnChange = OnSettingChange
+        ExplicitWidth = 603
+        ExplicitHeight = 381
+      end
+      object Panel3: TPanel
+        AlignWithMargins = True
+        Left = 3
+        Top = 337
+        Width = 754
+        Height = 47
+        Align = alBottom
+        BevelOuter = bvNone
+        Color = clGray
+        ParentBackground = False
+        TabOrder = 2
+        ExplicitLeft = 6
+        ExplicitTop = 340
+        ExplicitWidth = 716
+        object Panel5: TPanel
+          AlignWithMargins = True
+          Left = 1
+          Top = 1
+          Width = 752
+          Height = 45
+          Margins.Left = 1
+          Margins.Top = 1
+          Margins.Right = 1
+          Margins.Bottom = 1
+          Align = alClient
+          BevelOuter = bvNone
+          Color = 12910591
+          ParentBackground = False
+          TabOrder = 0
+          ExplicitWidth = 714
+          object Label1: TLabel
+            AlignWithMargins = True
+            Left = 1
+            Top = 1
+            Width = 750
+            Height = 43
+            Margins.Left = 1
+            Margins.Top = 1
+            Margins.Right = 1
+            Margins.Bottom = 1
+            Align = alClient
+            Caption = 
+              'Each of the directories will be searched for matching files (*.p' +
+              'as, *.dpr, *.dpk). '#13#10'Add <+> behind a search path to perform a r' +
+              'ecusive search in subdirectories. '#13#10'E.g. C:\MyProject\source<+>'
+            Color = 14548991
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentColor = False
+            ParentFont = False
+            Transparent = True
+            WordWrap = True
+            ExplicitWidth = 402
+            ExplicitHeight = 39
+          end
+        end
       end
     end
     object tabUnitScopes: TTabSheet
       Caption = 'Unit Scope Names'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 722
       object memUnitScopeNames: TRichEdit
         AlignWithMargins = True
         Left = 3
         Top = 3
-        Width = 583
+        Width = 754
         Height = 381
         Align = alClient
         Font.Charset = ANSI_CHARSET
@@ -255,15 +326,13 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
         WordWrap = False
         Zoom = 100
         OnChange = OnSettingChange
+        ExplicitWidth = 716
       end
     end
     object tabScan: TTabSheet
       Caption = 'Scan'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 722
       object chkLinkUnits: TCheckBox
         Left = 16
         Top = 16
@@ -289,10 +358,7 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
     object tabEnvironment: TTabSheet
       Caption = 'Environment'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 722
       object chkLoadLastProject: TCheckBox
         Left = 16
         Top = 16
@@ -308,16 +374,17 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
   object Panel1: TPanel
     Left = 0
     Top = 421
-    Width = 603
+    Width = 774
     Height = 28
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitWidth = 736
     object lblStatus: TLabel
       AlignWithMargins = True
       Left = 3
       Top = 5
-      Width = 438
+      Width = 609
       Height = 20
       Margins.Top = 5
       Align = alClient
@@ -330,7 +397,7 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
     end
     object btnOK: TButton
       AlignWithMargins = True
-      Left = 447
+      Left = 618
       Top = 0
       Width = 75
       Height = 25
@@ -343,10 +410,11 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
       ParentDoubleBuffered = False
       TabOrder = 0
       OnClick = btnOKClick
+      ExplicitLeft = 580
     end
     object btnCancel: TButton
       AlignWithMargins = True
-      Left = 525
+      Left = 696
       Top = 0
       Width = 75
       Height = 25
@@ -356,6 +424,7 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
       Caption = '&Cancel'
       TabOrder = 1
       OnClick = btnCancelClick
+      ExplicitLeft = 658
     end
   end
   object OpenDialog1: TOpenDialog
