@@ -2029,12 +2029,13 @@ var
       Result := UnitName;
   end;
 
-  function RenameMatchingFiles(const OldFilename, NewUnitName: String; const IsHistory: Boolean = FALSE): Boolean;
+  function RenameMatchingFiles(const OldFilename, NewUnitName: String; const IsHistory: Boolean; LowerCaseExtension: Boolean): Boolean;
   var
     ScanFilenames: TObjectList<TFileInfo>;
     i: Integer;
     Filter: String;
     NewFilename, LogMsg: String;
+    NewFileExtension: String;
   begin
     Result := FALSE;
 
@@ -2050,7 +2051,10 @@ var
         if (not ScanFilenames[i].IsDir) and
            (SameText(ExtractFilenameNoExt(OldFilename), ExtractFilenameNoExt(ScanFilenames[i].Filename))) then
         begin
-          NewFileName := IncludeTrailingPathDelimiter(ExtractFileDir(ScanFilenames[i].Filename)) + NewUnitName + ExtractFileExt(ScanFilenames[i].Filename);
+          NewFileExtension := ExtractFileExt(ScanFilenames[i].Filename);
+          if LowerCaseExtension then
+            NewFileExtension := LowerCase(NewFileExtension);
+          NewFileName := IncludeTrailingPathDelimiter(ExtractFileDir(ScanFilenames[i].Filename)) + NewUnitName + NewFileExtension;
 
           if DummyRun then
             Result := TRUE
@@ -2066,7 +2070,7 @@ var
 
           if (not IsHistory) and (RenameHistoryFiles) then
             RenameMatchingFiles(IncludeTrailingPathDelimiter(ExtractFileDir(OldFilename)) + '__history\' +
-                                ExtractFilename(ScanFilenames[i].Filename), NewUnitName + ExtractFileExt(ScanFilenames[i].Filename), TRUE);
+                                ExtractFilename(ScanFilenames[i].Filename), NewUnitName + ExtractFileExt(ScanFilenames[i].Filename), TRUE, LowerCaseExtension);
         end;
       end;
     finally
@@ -2227,7 +2231,7 @@ var
     end else
 
     // Try to rename the file
-    if RenameMatchingFiles(DelphiFile.UnitInfo.Filename, NewUnitName) then
+    if RenameMatchingFiles(DelphiFile.UnitInfo.Filename, NewUnitName, FALSE, LowerCaseExtension) then
     begin
       Result := TRUE;
 
