@@ -31,19 +31,24 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls;
 
 type
   TfrmRenameUnit = class(TForm)
-    edtNewName: TEdit;
-    Label1: TLabel;
-    chkPromptBeforeUpdate: TCheckBox;
+    infoRenameCSV: TPanel;
+    Panel5: TPanel;
+    Label2: TLabel;
+    pnlButtons: TPanel;
     btnOK: TButton;
     btnCancel: TButton;
-    chkDummyRun: TCheckBox;
-    chkRenameHistoryFiles: TCheckBox;
-    chkInsertOldNameComment: TCheckBox;
+    pnlMain: TPanel;
     chkRenameLowerCaseExtension: TCheckBox;
+    chkInsertOldNameComment: TCheckBox;
+    chkPromptBeforeUpdate: TCheckBox;
+    chkRenameHistoryFiles: TCheckBox;
+    chkDummyRun: TCheckBox;
+    edtNewName: TEdit;
+    Label1: TLabel;
     procedure edtNewNameChange(Sender: TObject);
     procedure edtNewNameKeyPress(Sender: TObject; var Key: Char);
   private

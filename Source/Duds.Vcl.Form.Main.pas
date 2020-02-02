@@ -1751,6 +1751,7 @@ begin
       edtNewName.Text := aFileName;
       edtNewName.Enabled := false;
       Caption := 'Rename multiple files';
+      infoRenameCSV.Visible := true;
 
       chkPromptBeforeUpdate.Checked       := false;
       chkPromptBeforeUpdate.Enabled       := false;
