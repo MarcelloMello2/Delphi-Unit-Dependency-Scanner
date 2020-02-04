@@ -1,6 +1,18 @@
 Easy-IP Delphi Unit Dependency Scanner
 --------------------------------------
 
+v2.1 (cfmaer)
+Fixed: Unit renaming was broken
+Fixed: offset calculation for following units after rename 
+Fixed: Same app icon for release config
+Fixed: parsing of "in '..\path\to\file.pas'" was broken when containing spaces
+Added: "expand path on scan" (for details see search paths dialog)
+Added: "applyMultipleRenames from csv"
+Added: new options for unit renaming "insert old name comment" & "lower case extension"
+Added: Stats 'Semi Circular references' and 'Circular references' (philipp-H) 
+Added: csv export for Semi and Circular references (philipp-H)
+Deleted: 64bit target
+
 v2.0
 Licence: Released as open source software - https://github.com/norgepaul/DelphiUnitDependencyScanner
 

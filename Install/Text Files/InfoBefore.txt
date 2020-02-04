@@ -1,1 +1,0 @@
-Delphi Unit Dependency Scanner - Copyright (c) 2017 Easy-IP AS
