@@ -157,6 +157,8 @@
         <DCCReference Include="Duds.Common.Refactoring.pas"/>
         <DCCReference Include="Duds.Common.Log.pas"/>
         <DCCReference Include="Duds.Model.pas"/>
+        <DCCReference Include="Duds.Export.Gephi.pas"/>
+        <DCCReference Include="Duds.Export.GraphML.pas"/>
         <DCCReference Include="Duds.Vcl.HourGlass.pas"/>
         <DCCReference Include="Duds.Common.Parser.Pascal.pas"/>
         <DCCReference Include="Duds.Common.Parser.Pascal.Tokeniser.pas"/>

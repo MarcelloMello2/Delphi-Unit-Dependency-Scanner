@@ -19,6 +19,8 @@ uses
   Duds.Common.Refactoring in 'Duds.Common.Refactoring.pas',
   Duds.Common.Log in 'Duds.Common.Log.pas',
   Duds.Model in 'Duds.Model.pas',
+  Duds.Export.Gephi in 'Duds.Export.Gephi.pas',
+  Duds.Export.GraphML in 'Duds.Export.GraphML.pas',
   Duds.Vcl.HourGlass in 'Duds.Vcl.HourGlass.pas',
   Duds.Common.Parser.Pascal in 'Duds.Common.Parser.Pascal.pas',
   Duds.Common.Parser.Pascal.Tokeniser in 'Duds.Common.Parser.Pascal.Tokeniser.pas',

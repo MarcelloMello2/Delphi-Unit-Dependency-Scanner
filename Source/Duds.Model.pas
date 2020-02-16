@@ -27,7 +27,7 @@ implementation
 constructor TDudsModel.Create;
 begin
   inherited Create;
-  FFiles := TDictionary<String, String>.Create;
+  FFiles       := TDictionary<String, String>.Create;
   FDelphiFiles := TObjectDictionary<String, TDelphiFile>.Create([doOwnsValues]);
 end;
 

@@ -1246,7 +1246,7 @@ object frmMain: TfrmMain
     Left = 48
     Top = 197
   end
-  object SaveDialog3: TSaveDialog
+  object SaveDialogGephiCSV: TSaveDialog
     DefaultExt = '.csv'
     Filter = 'CSV Files (*.csv)|*.csv|All Files (*.*)|*.*'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
