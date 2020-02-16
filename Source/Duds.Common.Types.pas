@@ -56,10 +56,6 @@ type
   );
 
 const
-  LogInfo = 1;
-  LogWarning = 2;
-  LogError = 3;
-  LogDebug = 4;
 
   CircularRelationshipTypeDescriptions: Array[TCircularRelationshipType] of String = (
     'None',

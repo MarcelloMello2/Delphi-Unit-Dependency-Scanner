@@ -1,6 +1,12 @@
 Easy-IP Delphi Unit Dependency Scanner
 --------------------------------------
 
+v2.2 (cfmaer)
+Fixed: Clear settings before loading a project
+Added: Ignore empty lines in project settings "root files"
+Added: new feature "add unit B to uses clauses of all units that already use unit A" 
+Update: code refactorings
+
 v2.1 (cfmaer)
 Fixed: Unit renaming was broken
 Fixed: offset calculation for following units after rename 

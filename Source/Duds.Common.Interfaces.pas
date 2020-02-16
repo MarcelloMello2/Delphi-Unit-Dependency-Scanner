@@ -51,6 +51,8 @@ type
     procedure SetOrder(const Value: Integer);
     procedure SetFilename(const Value: String);
 
+    procedure UpdatePosition(Offset: Integer);
+
     property DelphiUnitName: String read GetDelphiUnitName write SetDelphiUnitName;
     property Position: Integer read GetPosition write SetPosition;
     property InFilePosition: Integer read GetInFilePosition write SetInFilePosition;   // offset of the  <in '..\..\abc.pas'>   part

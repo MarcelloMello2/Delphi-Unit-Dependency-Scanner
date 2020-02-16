@@ -99,6 +99,8 @@ type
     procedure SetFilename(const Value: String);
     function GetFilename: String;
   public
+    procedure UpdatePosition(Offset: Integer);
+
     property DelphiUnitName: String read GetDelphiUnitName write SetDelphiUnitName;
     property Position: Integer read GetPosition write SetPosition;
     property InFilePosition: Integer read GetInFilePosition write SetInFilePosition;
@@ -396,6 +398,15 @@ end;
 procedure TUsedUnitInfo.SetOrder(const Value: Integer);
 begin
   FOrder := Value;
+end;
+
+procedure TUsedUnitInfo.UpdatePosition(Offset: Integer);
+begin
+  if Position > 0 then
+    Position := Position + Offset;
+
+  if InFilePosition > 0 then
+    InFilePosition := InFilePosition + Offset;
 end;
 
 { TUnitInfo }

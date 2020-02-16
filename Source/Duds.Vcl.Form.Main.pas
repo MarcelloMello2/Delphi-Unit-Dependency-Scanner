@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 //
 // The contents of this file are subject to the Mozilla Public License
 // Version 2.0 (the "License"); you may not use this file except in compliance
@@ -23,7 +23,7 @@
 //
 // (C) 2017 Easy-IP AS. All Rights Reserved.
 //
-//------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 unit Duds.Vcl.Form.Main;
 
@@ -36,7 +36,7 @@ uses
 
   Xml.XMLDoc, Xml.XMLIntf,
 
-  Winapi.Windows, Winapi.Messages, WinAPI.ShellAPI,
+  Winapi.Windows, Winapi.Messages, Winapi.ShellAPI,
   System.Win.Registry,
 
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
@@ -55,6 +55,9 @@ uses
   Duds.Common.Utils,
   Duds.Common.Interfaces,
   Duds.Common.Parser.Pascal,
+  Duds.Common.Refactoring,
+  Duds.Common.Language,
+  Duds.Common.Log,
 
   Duds.Vcl.HourGlass,
   Duds.Vcl.Utils,
@@ -168,7 +171,7 @@ type
     edtSearchUsesList: TEdit;
     vtUnitsList: TVirtualStringTree;
     vtUnits: TVirtualStringTree;
-    vtUsedUnits: TVirtualStringTree;
+    vtUsedByUnits: TVirtualStringTree;
     vtUsesUnits: TVirtualStringTree;
     vtStats: TVirtualStringTree;
     ImageList1: TImageList;
@@ -180,30 +183,30 @@ type
     RichEditUnitPath: TRichEdit;
     PanelFooter: TPanel;
     Splitter4: TSplitter;
-
+    actAddUnitToUses: TAction;
+    Applymultiplerenamesdefinedincsv1: TMenuItem;
+    Addunittouseslistinallfilesthatcurrentlyusethisunit1: TMenuItem;
+    N14: TMenuItem;
+    Addunittouseslistinallfilesthatcurrentlyusethisunit2: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure vtUnitsGetNodeDataSize(Sender: TBaseVirtualTree;
-      var NodeDataSize: Integer);
-    procedure vtUnitsGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
-      Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
+    procedure vtUnitsGetNodeDataSize(Sender: TBaseVirtualTree; var NodeDataSize: Integer);
+    procedure vtUnitsGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
+      var CellText: string);
     procedure edtSearchEditChange(Sender: TObject);
-    procedure vtUnitsPaintText(Sender: TBaseVirtualTree;
-      const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-      TextType: TVSTTextType);
-    procedure vtUnitsBeforeItemErase(Sender: TBaseVirtualTree;
-      TargetCanvas: TCanvas; Node: PVirtualNode; ItemRect: TRect;
-      var ItemColor: TColor; var EraseAction: TItemEraseAction);
-    procedure vtUnitsFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode;
-      Column: TColumnIndex);
-    procedure vtUnitsGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode;
-      Kind: TVTImageKind; Column: TColumnIndex; var Ghosted: Boolean;
-      var ImageIndex: TImageIndex);
+    procedure vtUnitsPaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;
+      Column: TColumnIndex; TextType: TVSTTextType);
+    procedure vtUnitsBeforeItemErase(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
+      ItemRect: TRect; var ItemColor: TColor; var EraseAction: TItemEraseAction);
+    procedure vtUnitsFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
+    procedure vtUnitsGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
+      Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
     procedure vtUnitsDblClick(Sender: TObject);
     procedure actStartScanExecute(Sender: TObject);
     procedure actShowUnitsNotInPathExecute(Sender: TObject);
     procedure ActionManager1Update(Action: TBasicAction; var Handled: Boolean);
-    procedure vtUnitsFocusChanging(Sender: TBaseVirtualTree; OldNode, NewNode: PVirtualNode; OldColumn, NewColumn: TColumnIndex; var Allowed: Boolean);
+    procedure vtUnitsFocusChanging(Sender: TBaseVirtualTree; OldNode, NewNode: PVirtualNode;
+      OldColumn, NewColumn: TColumnIndex; var Allowed: Boolean);
     procedure memParentFileChange(Sender: TObject);
     procedure memSelectedFileChange(Sender: TObject);
     procedure actSaveChangesExecute(Sender: TObject);
@@ -214,32 +217,28 @@ type
     procedure actExpandExecute(Sender: TObject);
     procedure actCollapseAllExecute(Sender: TObject);
     procedure actCollapseExecute(Sender: TObject);
-    procedure vtUnitsListGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
-      Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
-    procedure vtStatsGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
-      Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
-    procedure vtStatsPaintText(Sender: TBaseVirtualTree;
-      const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-      TextType: TVSTTextType);
-    procedure vtUnitsListFocusChanging(Sender: TBaseVirtualTree; OldNode,
-      NewNode: PVirtualNode; OldColumn, NewColumn: TColumnIndex;
-      var Allowed: Boolean);
-    procedure vtUnitsListFocusChanged(Sender: TBaseVirtualTree;
-      Node: PVirtualNode; Column: TColumnIndex);
-    procedure vtUnitsListSearchComparison(Sender: TObject; Node: PVirtualNode;
-      const SearchTerms: TStrings; var IsMatch: Boolean);
+    procedure vtUnitsListGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
+      TextType: TVSTTextType; var CellText: string);
+    procedure vtStatsGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
+      var CellText: string);
+    procedure vtStatsPaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;
+      Column: TColumnIndex; TextType: TVSTTextType);
+    procedure vtUnitsListFocusChanging(Sender: TBaseVirtualTree; OldNode, NewNode: PVirtualNode;
+      OldColumn, NewColumn: TColumnIndex; var Allowed: Boolean);
+    procedure vtUnitsListFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
+    procedure vtUnitsListSearchComparison(Sender: TObject; Node: PVirtualNode; const SearchTerms: TStrings;
+      var IsMatch: Boolean);
     procedure edtListSearchEditChange(Sender: TObject);
     procedure vtUnitsListDblClick(Sender: TObject);
-    procedure vtUnitsListPaintText(Sender: TBaseVirtualTree;
-      const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-      TextType: TVSTTextType);
+    procedure vtUnitsListPaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;
+      Column: TColumnIndex; TextType: TVSTTextType);
     procedure actStopScanExecute(Sender: TObject);
     procedure memListFileChange(Sender: TObject);
-    procedure vtUnitsListCompareNodes(Sender: TBaseVirtualTree; Node1,
-      Node2: PVirtualNode; Column: TColumnIndex; var Result: Integer);
+    procedure vtUnitsListCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
+      var Result: Integer);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    procedure vtUnitsCompareNodes(Sender: TBaseVirtualTree; Node1,
-      Node2: PVirtualNode; Column: TColumnIndex; var Result: Integer);
+    procedure vtUnitsCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
+      var Result: Integer);
     procedure actExitExecute(Sender: TObject);
     procedure actSettingsExecute(Sender: TObject);
     procedure actLoadProjectExecute(Sender: TObject);
@@ -257,19 +256,17 @@ type
     procedure actSaveToXMLExecute(Sender: TObject);
     procedure actSaveToGephiCSVExecute(Sender: TObject);
     procedure actSaveToGraphMLExecute(Sender: TObject);
-    procedure vtLogGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
-      Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
+    procedure vtLogGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
+      var CellText: string);
     procedure vtCommonHeaderClick(Sender: TVTHeader; HitInfo: TVTHeaderHitInfo);
-    procedure vtLogGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode;
-      Kind: TVTImageKind; Column: TColumnIndex; var Ghosted: Boolean;
-      var ImageIndex: TImageIndex);
-    procedure vtCommonGetImageIndex(Sender: TBaseVirtualTree;
-      Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
+    procedure vtLogGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
       var Ghosted: Boolean; var ImageIndex: TImageIndex);
+    procedure vtCommonGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
+      Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
     procedure ActionSaveCirRefsExecute(Sender: TObject);
     procedure actApplyRenameListExecute(Sender: TObject);
+    procedure actAddUnitToUsesExecute(Sender: TObject);    
   private
-    FLogEntries: TLogEntries;
     FFiles: TDictionary<String, String>;
     FDelphiFiles: TObjectDictionary<String, TDelphiFile>;
     FNodeObjects: TObjectList<TNodeObject>;
@@ -312,11 +309,9 @@ type
     procedure SetNodeVisibility(VT: TVirtualStringTree; Node: PVirtualNode; DelphiFile: TDelphiFile);
     function GetLinkedNode(Node: PVirtualNode): PVirtualNode;
     procedure UpdateTreeControls(Node: PVirtualNode);
-    procedure RenameDelphiFile(
-       const aClearLog: Boolean;
-       const SearchString, ReplaceString: String;
-       PromptBeforeUpdate: Boolean;
-       const DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment, LowerCaseExtension: Boolean);
+    procedure RenameDelphiFile(const aClearLog: Boolean; const SearchString, ReplaceString: String;
+      PromptBeforeUpdate: Boolean; const DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment,
+      LowerCaseExtension: Boolean);
     function FindParsedDelphiUnit(const DelphiUnitName: string): TDelphiFile;
     function CreateDelphiFile(const DelphiUnitName: String): TDelphiFile;
     procedure UpdateStats(ForceUpdate: Boolean);
@@ -338,11 +333,7 @@ type
     function TryGetSearchUnit(const DelphiUnitName: String; var UnitFilename: String; UseScopes: Boolean): Boolean;
     function RenameDelphiFileWithDialog(RenameType: TRenameType): Boolean; overload;
     function RenameDelphiFileWithDialog(const DelphiFile: TDelphiFile; RenameType: TRenameType): Boolean; overload;
-    procedure ApplyMultipleRenames(
-      aCsvFilename: String;
-      DummyRun,
-      RenameHistoryFiles,
-      InsertOldNameComment,
+    procedure ApplyMultipleRenames(aCsvFilename: String; DummyRun, RenameHistoryFiles, InsertOldNameComment,
       RenameLowerCaseExtension: Boolean);
     procedure SearchList(VT: TVirtualStringTree; const SearchText: String);
     procedure SearchUnitsListChildList(VT: TVirtualStringTree; const SearchText: String; UsedBy: Boolean);
@@ -356,6 +347,7 @@ type
     procedure ExportToGraphML(const Filename: String);
     procedure Log(const Msg: String; const Severity: Integer = LogInfo); overload;
     procedure Log(const Msg: String; const Args: array of const; const Severity: Integer = LogInfo); overload;
+
     function GetID(const Node: PVirtualNode): Integer;
     procedure SetID(const Node: PVirtualNode; const ID: Integer);
     function GetFocusedID(const VT: TVirtualStringTree): Integer;
@@ -363,6 +355,7 @@ type
     procedure UpdateLogEntries;
     procedure ClearLog;
     procedure FixDPI;
+    procedure AddUnitToUses(DummyRun: Boolean; DelphiFile: TDelphiFile; NewUnitName: String);
 
     property Modified: Boolean read FModified write SetModified;
   end;
@@ -375,51 +368,8 @@ implementation
 uses
   Duds.Vcl.Form.Rename,
   Duds.Vcl.Form.Settings,
-  Duds.Vcl.Form.FindReplace;
-
-resourcestring
-  StrYes = 'Yes';
-  StrNo = 'No';
-  StrSHasBeenModifi = '"%s" has been modified. Would you like to save the changes?';
-  StrScanningDSearchRootFiles = 'Scanning %d root files';
-  StrScanningDSearchSearchPaths = 'Scanning %d search paths (expanded from %d defined paths)';
-  StrDFilesFound = '%d matching file(s) found in the search paths';
-  StrParsingFiles = 'Parsing files';
-  StrDFilesWithATo = '%d used unit(s) found and a total of %d lines parsed';
-  StrUpdateTheUsesClauseIn = 'Update the uses clause in "%s"?';
-  StrUnableToFindFile = 'Unable to find file "%s"';
-  StrUsesClauseIn = '"%s" not updated as the text has been changed from "%s" to "%s"';
-  StrTHISISADUMMYRUN = 'THIS IS A DUMMY RUN. NO FILES WILL BE UPDATED!';
-  StrTHISWASADUMMYRUN = 'THIS WAS A DUMMY RUN. NO FILES WERE UPDATED!';
-  StrFinishedUpdated = 'Finished - Updated %d uses clauses';
-  StrUnableToRenameS = 'Unable to rename "%s" as the unit name was not found';
-  StrUpdatedDelphiUnitNameIn = 'Updated unit name in "%s" from "%s" to "%s"';
-  StrUpdatedUsesClause = 'Replaced "%s" with "%s" in the uses clause of "%s"';
-  StrScannedFiles = 'Processed Files';
-  StrSemiCircularFiles = 'Semi Circular references';
-  StrFCircularFiles = 'Circular references';
-  StrParsedFiles = 'Unique Parsed Files';
-  StrFilesFound = 'Total Used Units';
-  StrTotalLines = 'Total Lines of Code';
-  StrSearchPathFiles = 'Search Path Files';
-  StrScanDepth = 'Current Scan Depth';
-  StrSFoundInMultip = '"%s" found in multiple search paths. "%s" will be used and "%s" ignored';
-  StrTime = 'Elapsed Time';
-  StrUnitDependencyScan = 'Delphi Unit Dependency Scanner';
-  StrHistory = 'History ';
-  StrTheProjectHasBeen = 'The project has been modified. Would you like to save it now?';
-  StrYouNeedToAddAtLeastOne = 'You need to add at least one root file before you can scan the dependencies. Would you like to add a root file now?';
-  StrDeepestScanDepth = 'Deepest Scan Depth';
-  StrRenameS = 'Rename "%s"';
-  StrPleaseStopTheCurr = 'Please stop the current scan first.';
-  StrFileSRenamedTo = 'File "%s" renamed to "%s"';
-  StrRootFileNotFound = 'Root file not found: "%s"';
-  StrUnableToParseS = 'Unable to parse "%s": %s';
-  StrVCLFormCount = 'VCL Form Count';
-  StrFMXFormCount = 'FMX Form Count';
-  StrStartBatchRename = 'Batch-Rename from CSV: Renaming unit "%s" to "%s"';
-  StrBatchRenameResult = 'Batch-Rename finished. Renamed %d units.';
-  StrUnableToRenameToNewName = 'Unable to rename "%s" because "%s" already exists.';
+  Duds.Vcl.Form.FindReplace,
+  Duds.Vcl.Form.AddNewUnitWhereThisUnitIsUsed;
 
 {$R *.dfm}
 
@@ -428,7 +378,8 @@ begin
   if FClosing then
   begin
     CloseControls;
-  end else
+  end
+  else
   begin
     CanClose := FALSE;
 
@@ -448,9 +399,12 @@ begin
   if not Result then
   begin
     case MessageDlg(StrTheProjectHasBeen, mtConfirmation, [mbYes, mbNo, mbCancel], 0) of
-      mrYes: Result := SaveProject;
-      mrNo: Result := TRUE;
-      mrCancel: Abort;
+      mrYes:
+        Result := SaveProject;
+      mrNo:
+        Result := TRUE;
+      mrCancel:
+        Abort;
     end;
   end;
 end;
@@ -492,15 +446,14 @@ begin
 
   vtUnitsList.NodeDataSize := SizeOf(TNodeData);
   vtUnits.NodeDataSize := SizeOf(TNodeData);
-  vtUsedUnits.NodeDataSize := SizeOf(TNodeData);
+  vtUsedByUnits.NodeDataSize := SizeOf(TNodeData);
   vtUsesUnits.NodeDataSize := SizeOf(TNodeData);
   vtStats.NodeDataSize := SizeOf(TNodeData);
 
-  FLogEntries := TLogEntries.Create;
   FFiles := TDictionary<String, String>.Create;
   FDelphiFiles := TObjectDictionary<String, TDelphiFile>.Create([doOwnsValues]);
   FDelphiFileList := TObjectList<TDelphiFile>.Create(FALSE);
-  FNodeObjects := TObjectList<TNodeObject>.Create(True);
+  FNodeObjects := TObjectList<TNodeObject>.Create(TRUE);
   FStats := TStringList.Create;
 
   FEnvironmentSettings := TEnvironmentSettings.Create;
@@ -530,22 +483,16 @@ begin
   FreeAndNil(FStats);
   FreeAndNil(FEnvironmentSettings);
   FreeAndNil(FProjectSettings);
-  FreeAndNil(FLogEntries);
   FreeAndNil(FNodeObjects);
 end;
 
 procedure TfrmMain.Log(const Msg: String; const Severity: Integer);
-var
-  LogEntry: TLogEntry;
 begin
-  LogEntry.Text := Msg;
-  LogEntry.Severity := Severity;
-  FLogEntries.Add(LogEntry);
-
+  TDudsLogger.GetInstance.Log(Msg, Severity);
   UpdateLogEntries;
 end;
 
-procedure TfrmMain.Log(const Msg: String; const Args: Array of const; const Severity: Integer);
+procedure TfrmMain.Log(const Msg: String; const Args: array of const; const Severity: Integer);
 begin
   Log(Format(Msg, Args), Severity);
 end;
@@ -580,20 +527,15 @@ procedure TfrmMain.LoadFilesInSearchPaths;
 
             Extension := LowerCase(ExtractFileExt(ScannedFiles[i].Filename));
 
-            if ((Extension = '.pas') or
-                (Extension = '.dpk') or
-                (Extension = '.dpr')) then
+            if ((Extension = '.pas') or (Extension = '.dpk') or (Extension = '.dpr')) then
             begin
               DelphiUnitName := UpperCase(ExtractFilenameNoExt(ScannedFiles[i].Filename));
 
               if TryGetSearchUnit(DelphiUnitName, ExistingFilename, TRUE) then
               begin
                 if not SameText(ExistingFilename, ScannedFiles[i].Filename) then
-                  Log(StrSFoundInMultip,
-                               [ExtractFilenameNoExt(ScannedFiles[i].Filename),
-                                ExistingFilename,
-                                ScannedFiles[i].Filename],
-                              LogWarning);
+                  Log(StrSFoundInMultip, [ExtractFilenameNoExt(ScannedFiles[i].Filename), ExistingFilename,
+                    ScannedFiles[i].Filename], LogWarning);
               end
               else
                 FFiles.Add(DelphiUnitName, ScannedFiles[i].Filename);
@@ -621,20 +563,20 @@ procedure TfrmMain.LoadFilesInSearchPaths;
         CurrentDir := FProjectSettings.SearchPaths[i];
         if CurrentDir.EndsWith(ExpandSearchPathSign) then // has "expand" sign?
         begin
-           CurrentDir := Copy(CurrentDir, 1, Length(CurrentDir) - Length(ExpandSearchPathSign));
-           aExpandedPaths.Add(CurrentDir);
-           ScannedFiles := ScanFiles(CurrentDir, '*.*', TRUE, TRUE, TRUE);
-           try
-             for j := 0 to pred(ScannedFiles.Count) do
+          CurrentDir := Copy(CurrentDir, 1, Length(CurrentDir) - Length(ExpandSearchPathSign));
+          aExpandedPaths.Add(CurrentDir);
+          ScannedFiles := ScanFiles(CurrentDir, '*.*', TRUE, TRUE, TRUE);
+          try
+            for j := 0 to pred(ScannedFiles.Count) do
               if ScannedFiles[j].IsDir then
                 aExpandedPaths.Add(ScannedFiles[j].Filename);
-           finally
-             FreeAndNil(ScannedFiles);
-           end;
+          finally
+            FreeAndNil(ScannedFiles);
+          end;
 
-
-        end else
-           aExpandedPaths.Add(CurrentDir)
+        end
+        else
+          aExpandedPaths.Add(CurrentDir)
       end;
 
       if not NoLog then
@@ -642,7 +584,7 @@ procedure TfrmMain.LoadFilesInSearchPaths;
 
       ScanPasFiles(aExpandedPaths);
     finally
-       FreeAndNil(aExpandedPaths);
+      FreeAndNil(aExpandedPaths);
     end;
   end;
 
@@ -673,7 +615,8 @@ begin
   begin
     for i := 0 to pred(FProjectSettings.UnitScopeNames.Count) do
     begin
-      Result := FFiles.TryGetValue(UpperCase(FProjectSettings.UnitScopeNames[i]) + '.' + UpperDelphiUnitName, UnitFilename);
+      Result := FFiles.TryGetValue(UpperCase(FProjectSettings.UnitScopeNames[i]) + '.' + UpperDelphiUnitName,
+        UnitFilename);
 
       if Result then
         Break;
@@ -687,10 +630,8 @@ begin
 
   if FProjectSettings.LoadFromFile(Filename) then
   begin
-    if (FProjectFilename <> '') and
-       (RunScanAfterLoad) and
-       (FRunScanOnLoad) and
-       (FProjectSettings.RootFiles.Count > 0) then
+    if (FProjectFilename <> '') and (RunScanAfterLoad) and (FRunScanOnLoad) and (FProjectSettings.RootFiles.Count > 0)
+    then
       actStartScan.Execute;
 
     SetFormCaption;
@@ -751,8 +692,7 @@ begin
   SearchTree(edtSearch.Text, TRUE);
 end;
 
-procedure TfrmMain.edtSearchEditKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
+procedure TfrmMain.edtSearchEditKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if Key = 13 then
   begin
@@ -765,7 +705,7 @@ end;
 
 procedure TfrmMain.ClearLog;
 begin
-  FLogEntries.Clear;
+  TDudsLogger.GetInstance.Clear;
   UpdateLogEntries;
 end;
 
@@ -782,7 +722,7 @@ end;
 
 procedure TfrmMain.edtSearchUsedByListEditChange(Sender: TObject);
 begin
-  SearchUnitsListChildList(vtUsedUnits, edtSearchUsedByList.Text, TRUE);
+  SearchUnitsListChildList(vtUsedByUnits, edtSearchUsedByList.Text, TRUE);
 end;
 
 procedure TfrmMain.edtSearchUsesListEditChange(Sender: TObject);
@@ -803,7 +743,7 @@ var
 begin
   VT.BeginUpdate;
   try
-    LowerSearchText := lowercase(SearchText);
+    LowerSearchText := LowerCase(SearchText);
 
     Node := VT.GetFirst;
 
@@ -820,11 +760,10 @@ begin
         DelphiFile := FDelphiFileList[GetFocusedID(vtUnitsList)]
       end;
 
-      VT.IsVisible[Node] := ((SearchText = '') or
-                             ((pos(SearchText, LowerCase(FDelphiFileList[GetID(Node)].UnitInfo.DelphiUnitName)) <> 0))) and
-                             ((FDelphiFileList[GetID(Node)].InSearchPath) or
-                             ((not FDelphiFileList[GetID(Node)].InSearchPath) and (actShowUnitsNotInPath.Checked))) and
-                            (IsUnitUsed(DelphiUnitName, DelphiFile));
+      VT.IsVisible[Node] :=
+        ((SearchText = '') or ((pos(SearchText, LowerCase(FDelphiFileList[GetID(Node)].UnitInfo.DelphiUnitName)) <> 0)))
+        and ((FDelphiFileList[GetID(Node)].InSearchPath) or ((not FDelphiFileList[GetID(Node)].InSearchPath) and
+        (actShowUnitsNotInPath.Checked))) and (IsUnitUsed(DelphiUnitName, DelphiFile));
 
       Node := Node.NextSibling;
     end;
@@ -875,7 +814,7 @@ var
 begin
   VT.BeginUpdate;
   try
-    LowerSearchText := lowercase(SearchText);
+    LowerSearchText := LowerCase(SearchText);
 
     Node := VT.GetFirst;
 
@@ -883,10 +822,9 @@ begin
     begin
       DelphiFile := FDelphiFileList[GetID(Node)];
 
-      VT.IsVisible[Node] := ((SearchText = '') or
-                            (((pos(LowerSearchText, LowerCase(DelphiFile.UnitInfo.DelphiUnitName)) <> 0)))) and
-                            ((DelphiFile.InSearchPath) or
-                             ((not DelphiFile.InSearchPath) and (actShowUnitsNotInPath.Checked)));
+      VT.IsVisible[Node] :=
+        ((SearchText = '') or (((pos(LowerSearchText, LowerCase(DelphiFile.UnitInfo.DelphiUnitName)) <> 0)))) and
+        ((DelphiFile.InSearchPath) or ((not DelphiFile.InSearchPath) and (actShowUnitsNotInPath.Checked)));
 
       Node := Node.NextSibling;
     end;
@@ -903,7 +841,7 @@ var
 begin
   vtUnits.BeginUpdate;
   try
-    FSearchText := lowercase(SearchText);
+    FSearchText := LowerCase(SearchText);
 
     if (vtUnits.FocusedNode = nil) or (FromFirstNode) then
     begin
@@ -963,68 +901,68 @@ begin
   end;
 end;
 
-procedure TfrmMain.vtLogGetImageIndex(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
-  var Ghosted: Boolean; var ImageIndex: TImageIndex);
+procedure TfrmMain.vtLogGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
+  Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
 begin
   if (Kind in [ikNormal, ikSelected]) and (Column <= 0) then
   begin
-    case FLogEntries[Node.Index].Severity of
-      LogWarning: ImageIndex := 4;
-      LogError: ImageIndex := 5;
+    case TDudsLogger.GetInstance.LogEntries[Node.Index].Severity of
+      LogWarning:
+        ImageIndex := 4;
+      LogError:
+        ImageIndex := 5;
     else
       ImageIndex := 3;
     end;
   end;
 end;
 
-procedure TfrmMain.vtLogGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
-  Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
+procedure TfrmMain.vtLogGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
+  TextType: TVSTTextType; var CellText: string);
 begin
-  CellText := FLogEntries[Node.Index].Text;
+  CellText := TDudsLogger.GetInstance.LogEntries[Node.Index].Text;
 end;
 
-procedure TfrmMain.vtStatsGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
-  Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
+procedure TfrmMain.vtStatsGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
+  TextType: TVSTTextType; var CellText: string);
 var
   Stat: String;
 begin
   Stat := FStats[Node.Index];
 
   case Column of
-    0: CellText := copy(Stat, 1, pos('=', Stat) - 1);
-    1: CellText := copy(Stat, pos('=', Stat) + 1, MaxInt);
+    0:
+      CellText := Copy(Stat, 1, pos('=', Stat) - 1);
+    1:
+      CellText := Copy(Stat, pos('=', Stat) + 1, MaxInt);
   end;
 end;
 
-procedure TfrmMain.vtStatsPaintText(Sender: TBaseVirtualTree;
-  const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-  TextType: TVSTTextType);
+procedure TfrmMain.vtStatsPaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;
+  Column: TColumnIndex; TextType: TVSTTextType);
 begin
   if Column = 0 then
     TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
 end;
 
-procedure TfrmMain.vtUnitsBeforeItemErase(Sender: TBaseVirtualTree;
-  TargetCanvas: TCanvas; Node: PVirtualNode; ItemRect: TRect;
-  var ItemColor: TColor; var EraseAction: TItemEraseAction);
+procedure TfrmMain.vtUnitsBeforeItemErase(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
+  ItemRect: TRect; var ItemColor: TColor; var EraseAction: TItemEraseAction);
 begin
   if IsSearchHitNode(Node) then
   begin
     EraseAction := eaColor;
     ItemColor := $008CFFFF;
-  end else
-  if (FNodeObjects[GetID(Node)].SearchTermInChildren) or
-     ((Node.Parent <> Sender.RootNode) and
-      (FNodeObjects[GetID(Node.Parent)].SearchTermInChildren)) then
+  end
+  else if (FNodeObjects[GetID(Node)].SearchTermInChildren) or
+    ((Node.Parent <> Sender.RootNode) and (FNodeObjects[GetID(Node.Parent)].SearchTermInChildren)) then
   begin
     EraseAction := eaColor;
     ItemColor := $00CCFFCC;
   end;
 end;
 
-procedure TfrmMain.vtUnitsCompareNodes(Sender: TBaseVirtualTree; Node1,
-  Node2: PVirtualNode; Column: TColumnIndex; var Result: Integer);
+procedure TfrmMain.vtUnitsCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
+  var Result: Integer);
 var
   NodeObject1, NodeObject2: TNodeObject;
 begin
@@ -1032,16 +970,31 @@ begin
   NodeObject2 := FNodeObjects[GetID(Node2)];
 
   case Column of
-    0: Result := CompareStr(NodeObject1.DelphiFile.UnitInfo.DelphiUnitName, NodeObject2.DelphiFile.UnitInfo.DelphiUnitName);
-    1: Result := CompareStr(NodeObject1.DelphiFile.UnitInfo.PreviousUnitName, NodeObject2.DelphiFile.UnitInfo.PreviousUnitName);
-    2: Result := CompareStr(DelphiFileTypeStrings[NodeObject1.DelphiFile.UnitInfo.DelphiFileType], DelphiFileTypeStrings[NodeObject2.DelphiFile.UnitInfo.DelphiFileType]);
-    3: Result := CompareInteger(NodeObject1.DelphiFile.UnitInfo.LineCount, NodeObject2.DelphiFile.UnitInfo.LineCount);
-    4: Result := CompareInteger(NodeObject1.DelphiFile.UsedCount, NodeObject2.DelphiFile.UsedCount);
-    5: Result := CompareInteger(NodeObject1.DelphiFile.UnitInfo.UsedUnits.Count, NodeObject2.DelphiFile.UnitInfo.UsedUnits.Count);
-    6: Result := 0;
-    7: Result := CompareInteger(Integer(FNodeObjects[GetID(Node1)].CircularReference), Integer(FNodeObjects[GetID(Node2)].CircularReference));
-    8: Result := CompareBoolean(FNodeObjects[GetID(Node1)].Link <> nil, FNodeObjects[GetID(Node2)].Link <> nil);
-    9: Result := CompareStr(NodeObject1.DelphiFile.UnitInfo.Filename, NodeObject2.DelphiFile.UnitInfo.Filename);
+    0:
+      Result := CompareStr(NodeObject1.DelphiFile.UnitInfo.DelphiUnitName,
+        NodeObject2.DelphiFile.UnitInfo.DelphiUnitName);
+    1:
+      Result := CompareStr(NodeObject1.DelphiFile.UnitInfo.PreviousUnitName,
+        NodeObject2.DelphiFile.UnitInfo.PreviousUnitName);
+    2:
+      Result := CompareStr(DelphiFileTypeStrings[NodeObject1.DelphiFile.UnitInfo.DelphiFileType],
+        DelphiFileTypeStrings[NodeObject2.DelphiFile.UnitInfo.DelphiFileType]);
+    3:
+      Result := CompareInteger(NodeObject1.DelphiFile.UnitInfo.LineCount, NodeObject2.DelphiFile.UnitInfo.LineCount);
+    4:
+      Result := CompareInteger(NodeObject1.DelphiFile.UsedCount, NodeObject2.DelphiFile.UsedCount);
+    5:
+      Result := CompareInteger(NodeObject1.DelphiFile.UnitInfo.UsedUnits.Count,
+        NodeObject2.DelphiFile.UnitInfo.UsedUnits.Count);
+    6:
+      Result := 0;
+    7:
+      Result := CompareInteger(Integer(FNodeObjects[GetID(Node1)].CircularReference),
+        Integer(FNodeObjects[GetID(Node2)].CircularReference));
+    8:
+      Result := CompareBoolean(FNodeObjects[GetID(Node1)].Link <> nil, FNodeObjects[GetID(Node2)].Link <> nil);
+    9:
+      Result := CompareStr(NodeObject1.DelphiFile.UnitInfo.Filename, NodeObject2.DelphiFile.UnitInfo.Filename);
   end;
 
 end;
@@ -1052,19 +1005,18 @@ begin
     vtUnits.SelectNodeEx(GetLinkedNode(vtUnits.FocusedNode));
 end;
 
-procedure TfrmMain.vtUnitsFocusChanged(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex);
+procedure TfrmMain.vtUnitsFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
 begin
   UpdateTreeControls(Node);
 end;
 
-procedure TfrmMain.vtUnitsFocusChanging(Sender: TBaseVirtualTree; OldNode,
-  NewNode: PVirtualNode; OldColumn, NewColumn: TColumnIndex;
-  var Allowed: Boolean);
+procedure TfrmMain.vtUnitsFocusChanging(Sender: TBaseVirtualTree; OldNode, NewNode: PVirtualNode;
+  OldColumn, NewColumn: TColumnIndex; var Allowed: Boolean);
 begin
   if memParentFile.Modified then
-    case MessageDlg(format(StrSHasBeenModifi, [tabParentFile.Caption]), mtWarning, [mbYes, mbNo, mbCancel], 0) of
-      mrYes: memParentFile.Lines.SaveToFile(FNodeObjects[GetID(OldNode.Parent)].DelphiFile.UnitInfo.Filename);
+    case MessageDlg(Format(StrSHasBeenModifi, [tabParentFile.Caption]), mtWarning, [mbYes, mbNo, mbCancel], 0) of
+      mrYes:
+        memParentFile.Lines.SaveToFile(FNodeObjects[GetID(OldNode.Parent)].DelphiFile.UnitInfo.Filename);
       mrCancel:
         begin
           Allowed := FALSE;
@@ -1074,9 +1026,11 @@ begin
     end;
 
   if memSelectedFile.Modified then
-    case MessageDlg(format(StrSHasBeenModifi, [tabSelectedFile.Caption]), mtWarning, [mbYes, mbNo, mbCancel], 0) of
-      mrYes: memSelectedFile.Lines.SaveToFile(FNodeObjects[GetID(OldNode)].DelphiFile.UnitInfo.Filename);
-      mrCancel: Allowed := FALSE;
+    case MessageDlg(Format(StrSHasBeenModifi, [tabSelectedFile.Caption]), mtWarning, [mbYes, mbNo, mbCancel], 0) of
+      mrYes:
+        memSelectedFile.Lines.SaveToFile(FNodeObjects[GetID(OldNode)].DelphiFile.UnitInfo.Filename);
+      mrCancel:
+        Allowed := FALSE;
     end;
 end;
 
@@ -1094,28 +1048,30 @@ begin
   begin
     pcSource.Visible := TRUE;
 
-    if (FNodeObjects[GetID(Node)].DelphiFile.InSearchPath) and (FileExists(FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.Filename)) then
+    if (FNodeObjects[GetID(Node)].DelphiFile.InSearchPath) and
+      (FileExists(FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.Filename)) then
     begin
       tabSelectedFile.Caption := ExtractFileName(FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.Filename);
       memSelectedFile.Lines.LoadFromFile(FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.Filename);
       memSelectedFile.Modified := FALSE;
     end;
 
-    if (Node.Parent <> vtUnits.RootNode) and (FileExists(FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.Filename)) then
+    if (Node.Parent <> vtUnits.RootNode) and (FileExists(FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.Filename))
+    then
     begin
       ParentFileInfo := FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo;
-      UsedUnitInfo   := ParentFileInfo.UsedUnits[GetNodeIndex(Node)];
+      UsedUnitInfo := ParentFileInfo.UsedUnits[GetNodeIndex(Node)];
 
       tabParentFile.Caption := ExtractFileName(ParentFileInfo.Filename);
 
       memParentFile.Lines.LoadFromFile(ParentFileInfo.Filename);
 
-      memParentFile.SelStart  := UsedUnitInfo.Position;
+      memParentFile.SelStart := UsedUnitInfo.Position;
       if UsedUnitInfo.InFilePosition > 0 then
       begin
-         // memParentFile.SelStart  := UsedUnitInfo.InFilePosition; // uncomment this line to visualize unitname recognition in the "in file" part
+        // memParentFile.SelStart  := UsedUnitInfo.InFilePosition; // uncomment this line to visualize unitname recognition in the "in file" part
       end;
-      memParentFile.SelLength := length(UsedUnitInfo.DelphiUnitName);
+      memParentFile.SelLength := Length(UsedUnitInfo.DelphiUnitName);
 
       memParentFile.Modified := FALSE;
 
@@ -1177,23 +1133,23 @@ begin
   TryGetSearchUnit(DelphiUnitName, Result, TRUE);
 end;
 
-procedure TfrmMain.vtUnitsGetImageIndex(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
-  var Ghosted: Boolean; var ImageIndex: TImageIndex);
+procedure TfrmMain.vtUnitsGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
+  Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
 begin
-  if (Kind in [ikNormal, ikSelected]) and
-     (Column = 0) then
+  if (Kind in [ikNormal, ikSelected]) and (Column = 0) then
   begin
     case FNodeObjects[GetID(Node)].CircularReference of
-      crNone: ImageIndex := 0;
-      crSemiCircular: ImageIndex := 1;
-      crCircular: ImageIndex := 2;
+      crNone:
+        ImageIndex := 0;
+      crSemiCircular:
+        ImageIndex := 1;
+      crCircular:
+        ImageIndex := 2;
     end;
   end;
 end;
 
-procedure TfrmMain.vtUnitsGetNodeDataSize(Sender: TBaseVirtualTree;
-  var NodeDataSize: Integer);
+procedure TfrmMain.vtUnitsGetNodeDataSize(Sender: TBaseVirtualTree; var NodeDataSize: Integer);
 begin
   NodeDataSize := SizeOf(TNodeData);
 end;
@@ -1227,8 +1183,8 @@ begin
   end;
 end;
 
-procedure TfrmMain.vtUnitsGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
-  Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
+procedure TfrmMain.vtUnitsGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
+  TextType: TVSTTextType; var CellText: string);
 var
   UnitInfo: IUnitInfo;
   DelphiFile: TDelphiFile;
@@ -1241,11 +1197,11 @@ begin
   begin
     CellText := '';
 
-    if (Node.Parent <> Sender.RootNode) and
-       (Column = 0) and
-       (GetNodeIndex(Node) < FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.UsedUnits.Count) then
+    if (Node.Parent <> Sender.RootNode) and (Column = 0) and
+      (GetNodeIndex(Node) < FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.UsedUnits.Count) then
     begin
-      ParentUnitFilename := FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.UsedUnits[GetNodeIndex(Node)].DelphiUnitName;
+      ParentUnitFilename := FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.UsedUnits[GetNodeIndex(Node)
+        ].DelphiUnitName;
 
       if not SameText(ParentUnitFilename, UnitInfo.DelphiUnitName) then
         CellText := '(' + ParentUnitFilename + ')';
@@ -1256,41 +1212,49 @@ begin
     CellText := '-';
 
     case Column of
-      0: CellText := UnitInfo.DelphiUnitName;
+      0:
+        CellText := UnitInfo.DelphiUnitName;
 
-      1: CellText := UnitInfo.PreviousUnitName;
+      1:
+        CellText := UnitInfo.PreviousUnitName;
 
-      2: if DelphiFile.InSearchPath then
-           CellText := DelphiFileTypeStrings[UnitInfo.DelphiFileType];
+      2:
+        if DelphiFile.InSearchPath then
+          CellText := DelphiFileTypeStrings[UnitInfo.DelphiFileType];
 
-      3:  if UnitInfo.LineCount > 0 then
-            CellText := IntToStr(UnitInfo.LineCount);
+      3:
+        if UnitInfo.LineCount > 0 then
+          CellText := IntToStr(UnitInfo.LineCount);
 
-      4: CellText := IntToStr(DelphiFile.UsedCount);
+      4:
+        CellText := IntToStr(DelphiFile.UsedCount);
 
-      5: if DelphiFile.UnitInfo.UsedUnits.Count > 0 then
-           CellText := IntToStr(DelphiFile.UnitInfo.UsedUnits.Count);
+      5:
+        if DelphiFile.UnitInfo.UsedUnits.Count > 0 then
+          CellText := IntToStr(DelphiFile.UnitInfo.UsedUnits.Count);
 
-      6: if (DelphiFile.InSearchPath) and
-            (Sender.GetNodeLevel(Node) > 0) and
-            (FNodeObjects[GetID(Node)] <> nil) and
-            (GetNodeIndex(Node) < FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.UsedUnits.Count) then
-           CellText := UsesTypeStrings[FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.UsedUnits[GetNodeIndex(Node)].UsesType];
+      6:
+        if (DelphiFile.InSearchPath) and (Sender.GetNodeLevel(Node) > 0) and (FNodeObjects[GetID(Node)] <> nil) and
+          (GetNodeIndex(Node) < FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.UsedUnits.Count) then
+          CellText := UsesTypeStrings[FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.UsedUnits[GetNodeIndex(Node)
+            ].UsesType];
 
-      7: CellText := CircularRelationshipTypeDescriptions[FNodeObjects[GetID(Node)].CircularReference];
+      7:
+        CellText := CircularRelationshipTypeDescriptions[FNodeObjects[GetID(Node)].CircularReference];
 
-      8: if FNodeObjects[GetID(Node)].Link <> nil then
-           CellText := StrYes
-         else
-           CellText := StrNo;
+      8:
+        if FNodeObjects[GetID(Node)].Link <> nil then
+          CellText := StrYes
+        else
+          CellText := StrNo;
 
-      9: CellText := UnitInfo.Filename;
+      9:
+        CellText := UnitInfo.Filename;
     end;
   end;
 end;
 
-procedure TfrmMain.vtCommonHeaderClick(Sender: TVTHeader;
-  HitInfo: TVTHeaderHitInfo);
+procedure TfrmMain.vtCommonHeaderClick(Sender: TVTHeader; HitInfo: TVTHeaderHitInfo);
 begin
   inherited;
 
@@ -1318,8 +1282,8 @@ begin
   end;
 end;
 
-procedure TfrmMain.vtUnitsListCompareNodes(Sender: TBaseVirtualTree; Node1,
-  Node2: PVirtualNode; Column: TColumnIndex; var Result: Integer);
+procedure TfrmMain.vtUnitsListCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
+  var Result: Integer);
 var
   idx1, idx2: Integer;
   DelphiFile1, DelphiFile2: TDelphiFile;
@@ -1333,12 +1297,19 @@ begin
     DelphiFile2 := FDelphiFileList[idx2];
 
     case Column of
-      0: Result := CompareStr(DelphiFile1.UnitInfo.DelphiUnitName, DelphiFile2.UnitInfo.DelphiUnitName);
-      1: Result := CompareStr(DelphiFileTypeStrings[DelphiFile1.UnitInfo.DelphiFileType], DelphiFileTypeStrings[DelphiFile2.UnitInfo.DelphiFileType]);
-      2: Result := CompareInteger(DelphiFile1.UnitInfo.LineCount, DelphiFile2.UnitInfo.LineCount);
-      3: Result := CompareInteger(DelphiFile1.UsedCount, DelphiFile2.UsedCount);
-      4: Result := CompareInteger(DelphiFile1.UnitInfo.UsedUnits.Count, DelphiFile2.UnitInfo.UsedUnits.Count);
-      5: Result := CompareStr(DelphiFile1.UnitInfo.Filename, DelphiFile2.UnitInfo.Filename);
+      0:
+        Result := CompareStr(DelphiFile1.UnitInfo.DelphiUnitName, DelphiFile2.UnitInfo.DelphiUnitName);
+      1:
+        Result := CompareStr(DelphiFileTypeStrings[DelphiFile1.UnitInfo.DelphiFileType],
+          DelphiFileTypeStrings[DelphiFile2.UnitInfo.DelphiFileType]);
+      2:
+        Result := CompareInteger(DelphiFile1.UnitInfo.LineCount, DelphiFile2.UnitInfo.LineCount);
+      3:
+        Result := CompareInteger(DelphiFile1.UsedCount, DelphiFile2.UsedCount);
+      4:
+        Result := CompareInteger(DelphiFile1.UnitInfo.UsedUnits.Count, DelphiFile2.UnitInfo.UsedUnits.Count);
+      5:
+        Result := CompareStr(DelphiFile1.UnitInfo.Filename, DelphiFile2.UnitInfo.Filename);
     end;
   end;
 end;
@@ -1354,8 +1325,7 @@ begin
   end;
 end;
 
-procedure TfrmMain.vtUnitsListFocusChanged(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex);
+procedure TfrmMain.vtUnitsListFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
 begin
   UpdateListControls(Node);
 end;
@@ -1366,7 +1336,7 @@ var
 begin
   Result := FALSE;
 
-  for i := 0 to Pred(DelphiFile.UnitInfo.UsedUnits.Count) do
+  for i := 0 to pred(DelphiFile.UnitInfo.UsedUnits.Count) do
     if SameText(DelphiFile.UnitInfo.UsedUnits[i].DelphiUnitName, DelphiUnitName) then
     begin
       Result := TRUE;
@@ -1391,25 +1361,26 @@ begin
       memListFile.Modified := FALSE;
     end;
 
-    SearchUnitsListChildList(vtUsedUnits, edtSearchUsedByList.Text, TRUE);
+    SearchUnitsListChildList(vtUsedByUnits, edtSearchUsedByList.Text, TRUE);
     SearchUnitsListChildList(vtUsesUnits, edtSearchUsesList.Text, FALSE);
   end;
 end;
 
-procedure TfrmMain.vtUnitsListFocusChanging(Sender: TBaseVirtualTree; OldNode,
-  NewNode: PVirtualNode; OldColumn, NewColumn: TColumnIndex;
-  var Allowed: Boolean);
+procedure TfrmMain.vtUnitsListFocusChanging(Sender: TBaseVirtualTree; OldNode, NewNode: PVirtualNode;
+  OldColumn, NewColumn: TColumnIndex; var Allowed: Boolean);
 begin
   if memListFile.Modified then
-    case MessageDlg(format(StrSHasBeenModifi, [FDelphiFileList[GetFocusedID(vtUnitsList)].UnitInfo.Filename]), mtWarning, [mbYes, mbNo, mbCancel], 0) of
-      mrYes: memListFile.Lines.SaveToFile(FDelphiFileList[GetFocusedID(vtUnitsList)].UnitInfo.Filename);
-      mrCancel: Allowed := FALSE;
+    case MessageDlg(Format(StrSHasBeenModifi, [FDelphiFileList[GetFocusedID(vtUnitsList)].UnitInfo.Filename]),
+      mtWarning, [mbYes, mbNo, mbCancel], 0) of
+      mrYes:
+        memListFile.Lines.SaveToFile(FDelphiFileList[GetFocusedID(vtUnitsList)].UnitInfo.Filename);
+      mrCancel:
+        Allowed := FALSE;
     end;
 end;
 
-procedure TfrmMain.vtCommonGetImageIndex(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
-  var Ghosted: Boolean; var ImageIndex: TImageIndex);
+procedure TfrmMain.vtCommonGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
+  Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
 begin
   if (Kind in [ikNormal, ikSelected]) and (Column = 0) then
   begin
@@ -1417,9 +1388,8 @@ begin
   end;
 end;
 
-procedure TfrmMain.vtUnitsListGetText(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-  var CellText: string);
+procedure TfrmMain.vtUnitsListGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
+  TextType: TVSTTextType; var CellText: string);
 var
   UnitInfo: IUnitInfo;
   DelphiFile: TDelphiFile;
@@ -1430,27 +1400,31 @@ begin
   UnitInfo := DelphiFile.UnitInfo;
 
   case Column of
-    0: CellText := UnitInfo.DelphiUnitName;
-    1: if DelphiFile.InSearchPath then
-         CellText := DelphiFileTypeStrings[UnitInfo.DelphiFileType];
-    2:  CellText := IntToStr(UnitInfo.LineCount);
-    3:  CellText := IntToStr(DelphiFile.UsedCount);
-    4: CellText := IntToStr(DelphiFile.UnitInfo.UsedUnits.Count);
-    5: CellText := UnitInfo.Filename;
+    0:
+      CellText := UnitInfo.DelphiUnitName;
+    1:
+      if DelphiFile.InSearchPath then
+        CellText := DelphiFileTypeStrings[UnitInfo.DelphiFileType];
+    2:
+      CellText := IntToStr(UnitInfo.LineCount);
+    3:
+      CellText := IntToStr(DelphiFile.UsedCount);
+    4:
+      CellText := IntToStr(DelphiFile.UnitInfo.UsedUnits.Count);
+    5:
+      CellText := UnitInfo.Filename;
   end;
 end;
 
-procedure TfrmMain.vtUnitsListPaintText(Sender: TBaseVirtualTree;
-  const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-  TextType: TVSTTextType);
+procedure TfrmMain.vtUnitsListPaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;
+  Column: TColumnIndex; TextType: TVSTTextType);
 begin
-  if (not Sender.Selected[Node]) and
-     (not FDelphiFileList[GetID(Node)].InSearchPath) then
+  if (not Sender.Selected[Node]) and (not FDelphiFileList[GetID(Node)].InSearchPath) then
     TargetCanvas.Font.Color := clGray;
 end;
 
-procedure TfrmMain.vtUnitsListSearchComparison(Sender: TObject;
-  Node: PVirtualNode; const SearchTerms: TStrings; var IsMatch: Boolean);
+procedure TfrmMain.vtUnitsListSearchComparison(Sender: TObject; Node: PVirtualNode; const SearchTerms: TStrings;
+  var IsMatch: Boolean);
 var
   i: Integer;
 begin
@@ -1458,7 +1432,7 @@ begin
 
   for i := 0 to pred(SearchTerms.Count) do
     if (pos(LowerCase(SearchTerms[i]), LowerCase(FDelphiFileList[GetID(Node)].UnitInfo.DelphiUnitName)) = 0) or
-       ((not actShowUnitsNotInPath.Checked) and (not FDelphiFileList[GetID(Node)].InSearchPath)) then
+      ((not actShowUnitsNotInPath.Checked) and (not FDelphiFileList[GetID(Node)].InSearchPath)) then
     begin
       IsMatch := FALSE;
 
@@ -1466,9 +1440,8 @@ begin
     end;
 end;
 
-procedure TfrmMain.vtUnitsPaintText(Sender: TBaseVirtualTree;
-  const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-  TextType: TVSTTextType);
+procedure TfrmMain.vtUnitsPaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;
+  Column: TColumnIndex; TextType: TVSTTextType);
 begin
   if TextType = ttStatic then
   begin
@@ -1483,8 +1456,8 @@ begin
     if not Sender.Selected[Node] then
     begin
       if not FNodeObjects[GetID(Node)].DelphiFile.InSearchPath then
-        TargetCanvas.Font.Color := clGray else
-      if FNodeObjects[GetID(GetLinkedNode(Node))].DelphiFile.UnitInfo.DelphiFileType = ftUnknown then
+        TargetCanvas.Font.Color := clGray
+      else if FNodeObjects[GetID(GetLinkedNode(Node))].DelphiFile.UnitInfo.DelphiFileType = ftUnknown then
         TargetCanvas.Font.Color := clRed;
     end;
 
@@ -1494,7 +1467,7 @@ begin
       begin
         if not Sender.Selected[Node] then
         begin
-          if FNodeObjects[GetID(Node)].DelphiFile.InSearchPath  then
+          if FNodeObjects[GetID(Node)].DelphiFile.InSearchPath then
             TargetCanvas.Font.Color := clBlue
           else
             TargetCanvas.Font.Color := $00FEC9B1;
@@ -1508,10 +1481,9 @@ end;
 
 function TfrmMain.IsSearchHitNode(Node: PVirtualNode): Boolean;
 begin
-  Result := (Node <> nil) and (pos(FSearchText, LowerCase(FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName)) > 0);
+  Result := (Node <> nil) and
+    (pos(FSearchText, LowerCase(FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName)) > 0);
 end;
-
-
 
 procedure TfrmMain.actCloseProjectExecute(Sender: TObject);
 begin
@@ -1530,7 +1502,7 @@ end;
 
 procedure TfrmMain.actCollapseExecute(Sender: TObject);
 begin
-  vtUnits.Expanded[vtUnits.FocusedNode] := False;
+  vtUnits.Expanded[vtUnits.FocusedNode] := FALSE;
 end;
 
 procedure TfrmMain.actExpandExecute(Sender: TObject);
@@ -1555,8 +1527,7 @@ begin
   vtUnits.AutoFitColumns
 end;
 
-procedure TfrmMain.ActionManager1Update(Action: TBasicAction;
-  var Handled: Boolean);
+procedure TfrmMain.ActionManager1Update(Action: TBasicAction; var Handled: Boolean);
 begin
   UpdateControls;
 
@@ -1580,10 +1551,9 @@ begin
       begin
         if FNodeObjects[GetID(Node)].CircularReference in [crSemiCircular, crCircular] then
         begin
-          LStrs.Add(
-            CircularRelationshipTypeDescriptions[FNodeObjects[GetID(Node)].CircularReference] + ';' +
-            FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.DelphiUnitName  + ';' +
-            FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName);
+          LStrs.Add(CircularRelationshipTypeDescriptions[FNodeObjects[GetID(Node)].CircularReference] + ';' +
+            FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.DelphiUnitName + ';' + FNodeObjects[GetID(Node)
+            ].DelphiFile.UnitInfo.DelphiUnitName);
         end;
       end;
 
@@ -1594,7 +1564,7 @@ begin
       vtUnits.ScrollIntoView(vtUnits.FocusedNode, TRUE);
   finally
     if SaveDialog3.Execute then
-      LStrs.SaveToFile(SaveDialog3.FileName);
+      LStrs.SaveToFile(SaveDialog3.Filename);
     LStrs.Free;
     vtUnits.EndUpdate;
   end;
@@ -1607,17 +1577,15 @@ begin
   DelphiFile := GetFocusedDelphiFile;
 
   actShowUnitsNotInPath.Enabled := (not FBusy) and (vtUnits.RootNodeCount > 0);
-  actSaveChanges.Enabled := (not FBusy) and
-                            ((memParentFile.Modified) or
-                             (memSelectedFile.Modified) or
-                             (memListFile.Modified));
+  actSaveChanges.Enabled := (not FBusy) and ((memParentFile.Modified) or (memSelectedFile.Modified) or
+    (memListFile.Modified));
 
-  actRename.Enabled := (not FBusy) and
-                       (DelphiFile <> nil) and
-                       (DelphiFile.InSearchPath);
+  actRename.Enabled := (not FBusy) and (DelphiFile <> nil) and (DelphiFile.InSearchPath);
 
-  actSearchAndReplace.Enabled := (not FBusy) and 
-                                 (vtUnits.RootNodeCount > 0);
+  actApplyRenameList.Enabled := actRename.Enabled;
+  actAddUnitToUses.Enabled := actRename.Enabled;
+
+  actSearchAndReplace.Enabled := (not FBusy) and (vtUnits.RootNodeCount > 0);
 
   actExpandAll.Enabled := (not FBusy) and (pcView.ActivePage = tabTree) and (vtUnits.RootNodeCount > 0);
   actCollapseAll.Enabled := (not FBusy) and (pcView.ActivePage = tabTree) and (vtUnits.RootNodeCount > 0);
@@ -1637,12 +1605,11 @@ end;
 
 procedure TfrmMain.actLoadProjectExecute(Sender: TObject);
 begin
-  if (OpenDialog1.Execute) and
-     (CheckSaveProject) then
+  if (OpenDialog1.Execute) and (CheckSaveProject) then
   begin
-    if LoadProjectSettings(OpenDialog1.FileName) then
+    if LoadProjectSettings(OpenDialog1.Filename) then
     begin
-      FProjectFilename := OpenDialog1.FileName;
+      FProjectFilename := OpenDialog1.Filename;
 
       SetFormCaption;
     end;
@@ -1682,20 +1649,18 @@ end;
 
 procedure TfrmMain.UpdateLogEntries;
 begin
-  vtLog.RootNodeCount := FLogEntries.Count;
+  vtLog.RootNodeCount := TDudsLogger.GetInstance.Count;
   vtLog.Invalidate;
 
   if not vtLog.Focused then
-  begin
-    vtLog.ScrollIntoView(vtLog.GetLast, False);
-  end;
+    vtLog.ScrollIntoView(vtLog.GetLast, FALSE);
 end;
 
 procedure TfrmMain.CloseControls;
 begin
   vtUnits.Clear;
   vtUnitsList.Clear;
-  vtUsedUnits.Clear;
+  vtUsedByUnits.Clear;
   vtUsesUnits.Clear;
   vtStats.Clear;
 
@@ -1704,7 +1669,7 @@ begin
   FDelphiFileList.Clear;
   FDelphiFiles.Clear;
   FStats.Clear;
-  FLogEntries.Clear;
+  TDudsLogger.GetInstance.Clear;
   UpdateLogEntries;
 
   pnlMain.Visible := FALSE;
@@ -1742,64 +1707,83 @@ var
 begin
   if (OpenDialogMultipleRenames.Execute) then
   begin
-    aFileName := OpenDialogMultipleRenames.FileName;
+    aFileName := OpenDialogMultipleRenames.Filename;
 
     with TfrmRenameUnit.Create(Self) do
-    try
-      Width := Width + 300;
-      Label1.Caption := 'Selected file';
-      edtNewName.Text := aFileName;
-      edtNewName.Enabled := false;
-      Caption := 'Rename multiple files';
-      infoRenameCSV.Visible := true;
+      try
+        Width := Width + 300;
+        Label1.Caption := 'Selected file';
+        edtNewName.Text := aFileName;
+        edtNewName.Enabled := FALSE;
+        Caption := 'Rename multiple files';
+        infoRenameCSV.Visible := TRUE;
 
-      chkPromptBeforeUpdate.Checked       := false;
-      chkPromptBeforeUpdate.Enabled       := false;
-      chkDummyRun.Checked                 := FEnvironmentSettings.DummyRun;
-      chkRenameHistoryFiles.Checked       := FEnvironmentSettings.RenameHistoryFiles;
-      chkInsertOldNameComment.Checked     := FEnvironmentSettings.RenameInsertOldNameComment;
-      chkInsertOldNameComment.Caption     := 'Insert "{renamed from ' + 'oldname' + '.pas} comment"';
-      chkRenameLowerCaseExtension.Checked := FEnvironmentSettings.RenameLowerCaseExtension;
+        chkPromptBeforeUpdate.Checked := FALSE;
+        chkPromptBeforeUpdate.Enabled := FALSE;
+        chkDummyRun.Checked := FEnvironmentSettings.DummyRun;
+        chkRenameHistoryFiles.Checked := FEnvironmentSettings.RenameHistoryFiles;
+        chkInsertOldNameComment.Checked := FEnvironmentSettings.RenameInsertOldNameComment;
+        chkInsertOldNameComment.Caption := 'Insert "{renamed from ' + 'oldname' + '.pas} comment"';
+        chkRenameLowerCaseExtension.Checked := FEnvironmentSettings.RenameLowerCaseExtension;
 
-      ShowDlgResult := ShowModal = mrOK;
+        ShowDlgResult := ShowModal = mrOK;
 
-      if ShowDlgResult then
-      begin
+        if ShowDlgResult then
+        begin
 
-        FEnvironmentSettings.DummyRun                   := chkDummyRun.Checked;
-        FEnvironmentSettings.RenameHistoryFiles         := chkRenameHistoryFiles.Checked;
-        FEnvironmentSettings.RenameInsertOldNameComment := chkInsertOldNameComment.Checked;
-        FEnvironmentSettings.RenameLowerCaseExtension   := chkRenameLowerCaseExtension.Checked;
+          FEnvironmentSettings.DummyRun := chkDummyRun.Checked;
+          FEnvironmentSettings.RenameHistoryFiles := chkRenameHistoryFiles.Checked;
+          FEnvironmentSettings.RenameInsertOldNameComment := chkInsertOldNameComment.Checked;
+          FEnvironmentSettings.RenameLowerCaseExtension := chkRenameLowerCaseExtension.Checked;
 
-        ApplyMultipleRenames(
-           aFileName,
-           chkDummyRun.Checked,
-           chkRenameHistoryFiles.Checked,
-           chkInsertOldNameComment.Checked,
-           chkRenameLowerCaseExtension.Checked);
+          ApplyMultipleRenames(aFileName, chkDummyRun.Checked, chkRenameHistoryFiles.Checked,
+            chkInsertOldNameComment.Checked, chkRenameLowerCaseExtension.Checked);
+        end;
+      finally
+        Release;
       end;
-    finally
-      Release;
-    end;
+  end;
+end;
+
+procedure TfrmMain.actAddUnitToUsesExecute(Sender: TObject);
+var
+  ShowDlgResult: Boolean;
+begin
+  if GetFocusedDelphiFile <> nil then
+  begin
+    with TfrmAddNewUnit.Create(Self) do
+      try
+        edtNewName.Text := '';
+        edtNewName.Enabled := TRUE;
+        Label1.Caption := 'Add uses to all units that currently use "' +
+          GetFocusedDelphiFile.UnitInfo.DelphiUnitName + '"';
+        Caption := Label1.Caption;
+
+        ShowDlgResult := ShowModal = mrOK;
+
+        if ShowDlgResult then
+          AddUnitToUses(chkDummyRun.Checked, GetFocusedDelphiFile, edtNewName.Text);
+      finally
+        Free;
+      end;
   end;
 end;
 
 function TfrmMain.GetFocusedDelphiFile: TDelphiFile;
 begin
-  if (vtUnits.Focused) and
-     (vtUnits.FocusedNode <> nil) then
-    Result := FNodeObjects[GetID(vtUnits.FocusedNode)].DelphiFile else
+  if (vtUnits.Focused) and (vtUnits.FocusedNode <> nil) then
+    Result := FNodeObjects[GetID(vtUnits.FocusedNode)].DelphiFile
+  else
 
-  if (vtUnitsList.Focused) and
-     (vtUnitsList.FocusedNode <> nil) then
-    Result := FDelphiFileList[GetFocusedID(vtUnitsList)] else
+    if (vtUnitsList.Focused) and (vtUnitsList.FocusedNode <> nil) then
+    Result := FDelphiFileList[GetFocusedID(vtUnitsList)]
+  else
 
-  if (vtUsedUnits.Focused) and
-     (vtUsedUnits.FocusedNode <> nil) then
-    Result := FDelphiFileList[GetFocusedID(vtUsedUnits)] else
+    if (vtUsedByUnits.Focused) and (vtUsedByUnits.FocusedNode <> nil) then
+    Result := FDelphiFileList[GetFocusedID(vtUsedByUnits)]
+  else
 
-  if (vtUsesUnits.Focused) and
-     (vtUsesUnits.FocusedNode <> nil) then
+    if (vtUsesUnits.Focused) and (vtUsesUnits.FocusedNode <> nil) then
     Result := FDelphiFileList[GetFocusedID(vtUsesUnits)]
   else
     Result := nil;
@@ -1820,79 +1804,67 @@ begin
         if DelphiFile <> nil then
         begin
           With TfrmRenameUnit.Create(Self) do
-          try
-            edtNewName.Text := DelphiFile.UnitInfo.DelphiUnitName;
-            Caption := format(StrRenameS, [edtNewName.Text]);
+            try
+              edtNewName.Text := DelphiFile.UnitInfo.DelphiUnitName;
+              Caption := Format(StrRenameS, [edtNewName.Text]);
 
-            chkPromptBeforeUpdate.Checked       := FEnvironmentSettings.PromptBeforeUpdate;
-            chkDummyRun.Checked                 := FEnvironmentSettings.DummyRun;
-            chkRenameHistoryFiles.Checked       := FEnvironmentSettings.RenameHistoryFiles;
-            chkInsertOldNameComment.Checked     := FEnvironmentSettings.RenameInsertOldNameComment;
-            chkInsertOldNameComment.Caption     := 'Insert "{renamed from ' + DelphiFile.UnitInfo.DelphiUnitName + '.pas} comment"';
-            chkRenameLowerCaseExtension.Checked := FEnvironmentSettings.RenameLowerCaseExtension;
+              chkPromptBeforeUpdate.Checked := FEnvironmentSettings.PromptBeforeUpdate;
+              chkDummyRun.Checked := FEnvironmentSettings.DummyRun;
+              chkRenameHistoryFiles.Checked := FEnvironmentSettings.RenameHistoryFiles;
+              chkInsertOldNameComment.Checked := FEnvironmentSettings.RenameInsertOldNameComment;
+              chkInsertOldNameComment.Caption := 'Insert "{renamed from ' + DelphiFile.UnitInfo.DelphiUnitName +
+                '.pas} comment"';
+              chkRenameLowerCaseExtension.Checked := FEnvironmentSettings.RenameLowerCaseExtension;
 
-            Result := ShowModal = mrOK;
+              Result := ShowModal = mrOK;
 
-            if Result then
-            begin
-              FEnvironmentSettings.PromptBeforeUpdate         := chkPromptBeforeUpdate.Checked;
-              FEnvironmentSettings.DummyRun                   := chkDummyRun.Checked;
-              FEnvironmentSettings.RenameHistoryFiles         := chkRenameHistoryFiles.Checked;
-              FEnvironmentSettings.RenameInsertOldNameComment := chkInsertOldNameComment.Checked;
-              FEnvironmentSettings.RenameLowerCaseExtension   := chkRenameLowerCaseExtension.Checked;
+              if Result then
+              begin
+                FEnvironmentSettings.PromptBeforeUpdate := chkPromptBeforeUpdate.Checked;
+                FEnvironmentSettings.DummyRun := chkDummyRun.Checked;
+                FEnvironmentSettings.RenameHistoryFiles := chkRenameHistoryFiles.Checked;
+                FEnvironmentSettings.RenameInsertOldNameComment := chkInsertOldNameComment.Checked;
+                FEnvironmentSettings.RenameLowerCaseExtension := chkRenameLowerCaseExtension.Checked;
 
-              RenameDelphiFile(true,
-                               DelphiFile.UnitInfo.DelphiUnitName,
-                               edtNewName.Text,
-                               chkPromptBeforeUpdate.Checked,
-                               chkDummyRun.Checked,
-                               chkRenameHistoryFiles.Checked,
-                               TRUE,
-                               chkInsertOldNameComment.Checked,
-                               chkRenameLowerCaseExtension.Checked);
+                RenameDelphiFile(TRUE, DelphiFile.UnitInfo.DelphiUnitName, edtNewName.Text,
+                  chkPromptBeforeUpdate.Checked, chkDummyRun.Checked, chkRenameHistoryFiles.Checked, TRUE,
+                  chkInsertOldNameComment.Checked, chkRenameLowerCaseExtension.Checked);
+              end;
+            finally
+              Release;
             end;
-          finally
-            Release;
-          end;
         end;
       end;
 
     rtSearchAndReplace:
       begin
         With TfrmSearchAndReplace.Create(Self) do
-        try
-          if DelphiFile <> nil then
-          begin
-            edtSearch.Text  := DelphiFile.UnitInfo.DelphiUnitName;
-            edtReplace.Text := DelphiFile.UnitInfo.DelphiUnitName;
-            edtTest.Text    := DelphiFile.UnitInfo.DelphiUnitName;
+          try
+            if DelphiFile <> nil then
+            begin
+              edtSearch.Text := DelphiFile.UnitInfo.DelphiUnitName;
+              edtReplace.Text := DelphiFile.UnitInfo.DelphiUnitName;
+              edtTest.Text := DelphiFile.UnitInfo.DelphiUnitName;
+            end;
+
+            chkPromptBeforeUpdate.Checked := FEnvironmentSettings.PromptBeforeUpdate;
+            chkDummyRun.Checked := FEnvironmentSettings.DummyRun;
+            chkRenameHistoryFiles.Checked := FEnvironmentSettings.RenameHistoryFiles;
+
+            Result := ShowModal = mrOK;
+
+            if Result then
+            begin
+              FEnvironmentSettings.PromptBeforeUpdate := chkPromptBeforeUpdate.Checked;
+              FEnvironmentSettings.DummyRun := chkDummyRun.Checked;
+              FEnvironmentSettings.RenameHistoryFiles := chkRenameHistoryFiles.Checked;
+
+              RenameDelphiFile(TRUE, edtSearch.Text, edtReplace.Text, chkPromptBeforeUpdate.Checked,
+                chkDummyRun.Checked, chkRenameHistoryFiles.Checked, FALSE, FALSE, FALSE);
+            end;
+          finally
+            Release;
           end;
-
-          chkPromptBeforeUpdate.Checked := FEnvironmentSettings.PromptBeforeUpdate;
-          chkDummyRun.Checked           := FEnvironmentSettings.DummyRun;
-          chkRenameHistoryFiles.Checked := FEnvironmentSettings.RenameHistoryFiles;
-
-          Result := ShowModal = mrOK;
-
-          if Result then
-          begin
-            FEnvironmentSettings.PromptBeforeUpdate := chkPromptBeforeUpdate.Checked;
-            FEnvironmentSettings.DummyRun           := chkDummyRun.Checked;
-            FEnvironmentSettings.RenameHistoryFiles := chkRenameHistoryFiles.Checked;
-
-            RenameDelphiFile(true,
-                             edtSearch.Text,
-                             edtReplace.Text,
-                             chkPromptBeforeUpdate.Checked,
-                             chkDummyRun.Checked,
-                             chkRenameHistoryFiles.Checked,
-                             FALSE,
-                             FALSE,
-                             FALSE);
-          end;
-        finally
-          Release;
-        end;
       end;
   end;
 
@@ -1900,11 +1872,7 @@ begin
     vtUnits.Header.Columns[1].Options := vtUnits.Header.Columns[1].Options + [coVisible];
 end;
 
-procedure TfrmMain.ApplyMultipleRenames(
-  aCsvFilename: String;
-  DummyRun,
-  RenameHistoryFiles,
-  InsertOldNameComment,
+procedure TfrmMain.ApplyMultipleRenames(aCsvFilename: String; DummyRun, RenameHistoryFiles, InsertOldNameComment,
   RenameLowerCaseExtension: Boolean);
 var
   aRenameFileStrings: TStringList;
@@ -1924,35 +1892,35 @@ begin
     begin
       ClearLog;
 
-      PreCheckOk := true;
+      PreCheckOk := TRUE;
 
       aRenameFileStrings := TStringList.Create;
       try
         aRenameFileStrings.LoadFromFile(aCsvFilename);
         for i := 0 to pred(aRenameFileStrings.Count) do
         begin
-           aLine        := aRenameFileStrings[i];
-           semicolonPos := Pos(';', aLine);
-           OldUnitName  := Copy(aLine, 1, semicolonPos - 1 );
-           NewUnitName  := Copy(aLine, semicolonPos + 1, length(aLine));
+          aLine := aRenameFileStrings[i];
+          semicolonPos := pos(';', aLine);
+          OldUnitName := Copy(aLine, 1, semicolonPos - 1);
+          NewUnitName := Copy(aLine, semicolonPos + 1, Length(aLine));
 
-           // "old name" Unit exists?
-           OldFile := FindParsedDelphiUnit(OldUnitName);
-           if not Assigned(OldFile) then
-           begin
-              Log(StrUnableToRenameS, [OldUnitName], LogError);
-              PreCheckOk := false;
-           end;
+          // "old name" Unit exists?
+          OldFile := FindParsedDelphiUnit(OldUnitName);
+          if not Assigned(OldFile) then
+          begin
+            Log(StrUnableToRenameS, [OldUnitName], LogError);
+            PreCheckOk := FALSE;
+          end;
 
-           // "new name" unit does NOT exist already?
-           NewFile := FindParsedDelphiUnit(NewUnitName);
-           if Assigned(NewFile) then
-           begin
-              Log(StrUnableToRenameToNewName, [OldUnitName, NewUnitName], LogError);
-              PreCheckOk := false;
-           end;
+          // "new name" unit does NOT exist already?
+          NewFile := FindParsedDelphiUnit(NewUnitName);
+          if Assigned(NewFile) then
+          begin
+            Log(StrUnableToRenameToNewName, [OldUnitName, NewUnitName], LogError);
+            PreCheckOk := FALSE;
+          end;
 
-           aRenameUnitsList.Add(OldUnitName, NewUnitName);
+          aRenameUnitsList.Add(OldUnitName, NewUnitName);
         end;
       finally
         FreeAndNil(aRenameFileStrings);
@@ -1963,21 +1931,14 @@ begin
       begin
         for OldUnitName in aRenameUnitsList.Keys do
         begin
-           NewUnitName  := aRenameUnitsList[OldUnitName];
+          NewUnitName := aRenameUnitsList[OldUnitName];
 
-           Log(StrStartBatchRename, [OldUnitName, NewUnitName], LogInfo);
-           Application.ProcessMessages;
+          Log(StrStartBatchRename, [OldUnitName, NewUnitName], LogInfo);
+          Application.ProcessMessages;
 
-           RenameDelphiFile(FALSE,
-                            OldUnitName,
-                            NewUnitName,
-                            FALSE,
-                            DummyRun,
-                            RenameHistoryFiles,
-                            TRUE,
-                            InsertOldNameComment,
-                            RenameLowerCaseExtension);
-           Inc(renameCount);
+          RenameDelphiFile(FALSE, OldUnitName, NewUnitName, FALSE, DummyRun, RenameHistoryFiles, TRUE,
+            InsertOldNameComment, RenameLowerCaseExtension);
+          Inc(renameCount);
         end;
       end;
 
@@ -1986,19 +1947,16 @@ begin
     else
       Log(StrUnableToFindFile, [aCsvFilename], LogWarning);
   finally
-     FreeAndNil(aRenameUnitsList);
+    FreeAndNil(aRenameUnitsList);
   end;
 end;
 
-procedure TfrmMain.RenameDelphiFile(
-       const aClearLog: Boolean;
-       const SearchString, ReplaceString: String;
-       PromptBeforeUpdate: Boolean;
-       const DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment, LowerCaseExtension: Boolean);
+procedure TfrmMain.RenameDelphiFile(const aClearLog: Boolean; const SearchString, ReplaceString: String;
+  PromptBeforeUpdate: Boolean; const DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment,
+  LowerCaseExtension: Boolean);
 
 var
   UpdatedCount: Integer;
-
 
   function GetDelphiUnitName(Node: PVirtualNode): String;
   begin
@@ -2029,7 +1987,8 @@ var
       Result := UnitName;
   end;
 
-  function RenameMatchingFiles(const OldFilename, NewUnitName: String; const IsHistory: Boolean; LowerCaseExtension: Boolean): Boolean;
+  function RenameMatchingFiles(const OldFilename, NewUnitName: String; const IsHistory: Boolean;
+    LowerCaseExtension: Boolean): Boolean;
   var
     ScanFilenames: TObjectList<TFileInfo>;
     i: Integer;
@@ -2040,7 +1999,7 @@ var
     Result := FALSE;
 
     if IsHistory then
-      Filter := ExtractFilename(OldFilename) + '.*'
+      Filter := ExtractFileName(OldFilename) + '.*'
     else
       Filter := ExtractFilenameNoExt(OldFilename) + '.*';
 
@@ -2049,12 +2008,13 @@ var
       for i := 0 to pred(ScanFilenames.Count) do
       begin
         if (not ScanFilenames[i].IsDir) and
-           (SameText(ExtractFilenameNoExt(OldFilename), ExtractFilenameNoExt(ScanFilenames[i].Filename))) then
+          (SameText(ExtractFilenameNoExt(OldFilename), ExtractFilenameNoExt(ScanFilenames[i].Filename))) then
         begin
           NewFileExtension := ExtractFileExt(ScanFilenames[i].Filename);
           if LowerCaseExtension then
             NewFileExtension := LowerCase(NewFileExtension);
-          NewFileName := IncludeTrailingPathDelimiter(ExtractFileDir(ScanFilenames[i].Filename)) + NewUnitName + NewFileExtension;
+          NewFilename := IncludeTrailingPathDelimiter(ExtractFileDir(ScanFilenames[i].Filename)) + NewUnitName +
+            NewFileExtension;
 
           if DummyRun then
             Result := TRUE
@@ -2070,7 +2030,8 @@ var
 
           if (not IsHistory) and (RenameHistoryFiles) then
             RenameMatchingFiles(IncludeTrailingPathDelimiter(ExtractFileDir(OldFilename)) + '__history\' +
-                                ExtractFilename(ScanFilenames[i].Filename), NewUnitName + ExtractFileExt(ScanFilenames[i].Filename), TRUE, LowerCaseExtension);
+              ExtractFileName(ScanFilenames[i].Filename), NewUnitName + ExtractFileExt(ScanFilenames[i].Filename), TRUE,
+              LowerCaseExtension);
         end;
       end;
     finally
@@ -2078,92 +2039,48 @@ var
     end;
   end;
 
-  function ReplaceUnitText(var FileText: String; const Filename, OldText, NewText: String; Position: Integer): Boolean;
-  var
-    CurrentText: String;
-  begin
-    Result := FALSE;
-
-    if Position > 0 then
-    begin
-      CurrentText := copy(FileText, Position + 1, length(OldText));
-
-      if not SameText(CurrentText, OldText) then
-        Log(StrUsesClauseIn, [Filename, OldText, CurrentText], LogWarning)
-      else
-      begin
-        Delete(FileText, Position + 1, length(OldText));
-
-        Insert(NewText, FileText, Position  + 1);
-
-        Result := TRUE;
-      end;
-    end;
-  end;
-
-  function UpdateUsesClause(Filename, OldUnitName, NewUnitName: String; Position, InFilePosition: Integer): Boolean; overload;
-  var
-    UpdateStrings: TStringList;
-    FileText: String;
-  begin
-    Result := FALSE;
-
-    UpdateStrings := TStringList.Create;
-    try
-      if FileExists(Filename) then
-      begin
-        UpdateStrings.LoadFromFile(Filename);
-
-        FileText := UpdateStrings.Text;
-
-        Result := ReplaceUnitText(FileText, Filename, OldUnitName, NewUnitName, InFilePosition);
-        Result := ReplaceUnitText(FileText, Filename, OldUnitName, NewUnitName, Position) or Result;
-
-        UpdateStrings.Text := FileText;
-
-        if not DummyRun then
-          UpdateStrings.SaveToFile(Filename);
-      end
-      else
-        Log(StrUnableToFindFile, [Filename], LogWarning);
-    finally
-      FreeAndNil(UpdateStrings);
-    end;
-  end;
-
-  function UpdateUsesClause(UpdateNode: PVirtualNode): Boolean; overload;
+  procedure UpdateUsesClause(UpdateNode: PVirtualNode);
   var
     StepNode: PVirtualNode;
     PosOffset: Integer;
     FileUsingTheUnit: IUnitInfo;
-    UsedUnitIndex: integer;
-    UsedUnitInfo, NextUsedUnitInfo: IUsedUnitInfo;
+    UsedUnitIndex: Integer;
+    UsedUnitInfo: IUsedUnitInfo;
     OldUnitName, NewUnitName: String;
-
+    SomethingChanged: Boolean;
   begin
     OldUnitName := GetDelphiUnitName(UpdateNode);
     NewUnitName := SearchAndReplaceUnitName(OldUnitName);
 
+    FileUsingTheUnit := FNodeObjects[GetID(UpdateNode.Parent)].DelphiFile.UnitInfo;
+    // file to update (using the unit to rename)
 
-    FileUsingTheUnit := FNodeObjects[GetID(UpdateNode.Parent)].DelphiFile.UnitInfo; // file to update (using the unit to rename)
-
-    UsedUnitIndex  := GetNodeIndex(UpdateNode);                  // Index of the unit in the uses list of the file to update
-    UsedUnitInfo   := FileUsingTheUnit.UsedUnits[UsedUnitIndex]; // detail info about the used unit we are renaming
+    UsedUnitIndex := GetNodeIndex(UpdateNode);
+    // Index of the unit in the uses list of the file to update
+    UsedUnitInfo := FileUsingTheUnit.UsedUnits[UsedUnitIndex];
+    // detail info about the used unit we are renaming
 
     // step 1: apply the rename in the file
-    Result := UpdateUsesClause(FileUsingTheUnit.Filename,
-                               OldUnitName,
-                               NewUnitName,
-                               UsedUnitInfo.Position,
-                               UsedUnitInfo.InFilePosition);
+    SomethingChanged := FALSE;
 
-    if Result then
+    // replace text occurence for <OldUnitName in '....\OldUnitName.pas'>
+    // ->                                               ^^^^^^^^^^^
+    if UsedUnitInfo.InFilePosition > 0 then
+      SomethingChanged := SafeReplaceTextInFile(DummyRun, FileUsingTheUnit.Filename, OldUnitName, NewUnitName,
+        UsedUnitInfo.InFilePosition);
+
+    // replace text occurence for <OldUnitName in '....\OldUnitName.pas'>
+    // ->                          ^^^^^^^^^^^
+    SomethingChanged := SafeReplaceTextInFile(DummyRun, FileUsingTheUnit.Filename, OldUnitName, NewUnitName,
+      UsedUnitInfo.Position) or SomethingChanged;
+
+    if SomethingChanged then
     begin
       Log(StrUpdatedUsesClause, [OldUnitName, NewUnitName, FileUsingTheUnit.Filename]);
 
       if not DummyRun then
       begin
-        PosOffset   := length(NewUnitName) - length(OldUnitName);
+        PosOffset := Length(NewUnitName) - Length(OldUnitName);
 
         // step 2: update the recently changed uses in the meta data
         UsedUnitInfo.DelphiUnitName := NewUnitName;
@@ -2180,13 +2097,7 @@ var
 
         while StepNode <> nil do
         begin
-          NextUsedUnitInfo := FileUsingTheUnit.UsedUnits[GetNodeIndex(StepNode)];
-
-          if NextUsedUnitInfo.Position > 0 then
-            NextUsedUnitInfo.Position := NextUsedUnitInfo.Position + PosOffset;
-
-          if NextUsedUnitInfo.InFilePosition > 0 then
-            NextUsedUnitInfo.InFilePosition := NextUsedUnitInfo.InFilePosition + PosOffset;
+          FileUsingTheUnit.UsedUnits[GetNodeIndex(StepNode)].UpdatePosition(PosOffset);
 
           StepNode := StepNode.NextSibling;
         end;
@@ -2202,80 +2113,70 @@ var
     NewUnitName, NewUnitFilename, NewUnitFilenameExt, OldUnitNameComment, OldUnitName, OldFilename: String;
     i: Integer;
     PosOffset: Integer;
+    UnitInfo: IUnitInfo;
   begin
     Result := FALSE;
 
+    UnitInfo := DelphiFile.UnitInfo;
+
     // Store the name of the old unit
-    OldFilename        := DelphiFile.UnitInfo.Filename;
-    OldUnitName        := DelphiFile.UnitInfo.DelphiUnitName;
+    OldFilename := UnitInfo.Filename;
+    OldUnitName := UnitInfo.DelphiUnitName;
     if InsertOldNameComment then
-       OldUnitNameComment := ' {renamed from ' + OldUnitName + '.pas}'
+      OldUnitNameComment := ' {renamed from ' + OldUnitName + '.pas}'
     else
-       OldUnitNameComment := '';
+      OldUnitNameComment := '';
 
     // Generate the new unit name and filename
-    NewUnitName := SearchAndReplaceUnitName(DelphiFile.UnitInfo.DelphiUnitName);
-    NewUnitFilenameExt := ExtractFileExt(DelphiFile.UnitInfo.Filename);
+    NewUnitName := SearchAndReplaceUnitName(UnitInfo.DelphiUnitName);
+    NewUnitFilenameExt := ExtractFileExt(UnitInfo.Filename);
     if LowerCaseExtension then
-       NewUnitFilenameExt := LowerCase(NewUnitFilenameExt);
-    NewUnitFilename := IncludeTrailingPathDelimiter(ExtractFileDir(DelphiFile.UnitInfo.Filename))
-                       + NewUnitName
-                       + NewUnitFilenameExt;
+      NewUnitFilenameExt := LowerCase(NewUnitFilenameExt);
+    NewUnitFilename := IncludeTrailingPathDelimiter(ExtractFileDir(UnitInfo.Filename)) + NewUnitName +
+      NewUnitFilenameExt;
 
     // Update the unit name in the file to be renamed
-    if DelphiFile.UnitInfo.DelphiUnitNamePosition = 0 then
+    if UnitInfo.DelphiUnitNamePosition = 0 then
     begin
       // We have no info about the position of the unit name in the source code.
       // Most likely due to a bug in the tokeniser.
-      Log(StrUnableToRenameS, [DelphiFile.UnitInfo.DelphiUnitName]);
-    end else
+      Log(StrUnableToRenameS, [UnitInfo.DelphiUnitName]);
+    end
+    else
 
-    // Try to rename the file
-    if RenameMatchingFiles(DelphiFile.UnitInfo.Filename, NewUnitName, FALSE, LowerCaseExtension) then
-    begin
-      Result := TRUE;
-
-      // If the file was renamed, update the local file info
-      if not DummyRun then
-        DelphiFile.UnitInfo.Filename := NewUnitFilename;
-
-      // Update the unitname clause
-      if (DummyRun) or
-         (UpdateUsesClause(DelphiFile.UnitInfo.Filename,
-                           DelphiFile.UnitInfo.DelphiUnitName,
-                           NewUnitName + OldUnitNameComment,
-                           DelphiFile.UnitInfo.DelphiUnitNamePosition,
-                           0)) then
+      // Try to rename the file
+      if RenameMatchingFiles(UnitInfo.Filename, NewUnitName, FALSE, LowerCaseExtension) then
       begin
-        Log(StrUpdatedDelphiUnitNameIn, [DelphiFile.UnitInfo.Filename, OldUnitName, NewUnitName]);
+        Result := TRUE;
 
+        // If the file was renamed, update the local file info
         if not DummyRun then
+          UnitInfo.Filename := NewUnitFilename;
+
+        // Update the unitname clause
+        if DummyRun or (SafeReplaceTextInFile(DummyRun, UnitInfo.Filename, UnitInfo.DelphiUnitName,
+          NewUnitName + OldUnitNameComment, UnitInfo.DelphiUnitNamePosition)) then
         begin
-          DelphiFile.UnitInfo.DelphiUnitName := NewUnitName;
+          Log(StrUpdatedDelphiUnitNameIn, [UnitInfo.Filename, OldUnitName, NewUnitName]);
 
-          // Calculate the offset for the units in the uses clauses
-          PosOffset := length(NewUnitName + OldUnitNameComment) - length(OldUnitName);
-
-          // Update the position of all the used units
-          for i := 0 to pred(DelphiFile.UnitInfo.UsedUnits.Count) do
+          if not DummyRun then
           begin
-            if DelphiFile.UnitInfo.UsedUnits[i].Position > 0 then
-              DelphiFile.UnitInfo.UsedUnits[i].Position :=
-                DelphiFile.UnitInfo.UsedUnits[i].Position + PosOffset;
+            UnitInfo.DelphiUnitName := NewUnitName;
 
-            if DelphiFile.UnitInfo.UsedUnits[i].InFilePosition > 0 then
-              DelphiFile.UnitInfo.UsedUnits[i].InFilePosition :=
-                DelphiFile.UnitInfo.UsedUnits[i].InFilePosition + PosOffset;
+            // Calculate the offset for the units in the uses clauses
+            PosOffset := Length(NewUnitName + OldUnitNameComment) - Length(OldUnitName);
+
+            // Update the position of all the used units
+            for i := 0 to pred(UnitInfo.UsedUnits.Count) do
+              UnitInfo.UsedUnits[i].UpdatePosition(PosOffset);
           end;
         end;
       end;
-    end;
   end;
 
 var
   StepNode: PVirtualNode;
-  NodeDelphiUnitName,
-  UpdateFilename: String;
+  NodeDelphiUnitName, UpdateFilename: String;
   PreviousUnitName: String;
   FocusedNode: PVirtualNode;
 begin
@@ -2336,15 +2237,18 @@ begin
           begin
             vtUnits.SelectNodeEx(StepNode);
 
-            case MessageDlg(format(StrUpdateTheUsesClauseIn, [UpdateFilename]), mtWarning, [mbYes, mbNo, mbCancel, mbYesToAll], 0) of
-              mrYes: UpdateUsesClause(StepNode);
+            case MessageDlg(Format(StrUpdateTheUsesClauseIn, [UpdateFilename]), mtWarning,
+              [mbYes, mbNo, mbCancel, mbYesToAll], 0) of
+              mrYes:
+                UpdateUsesClause(StepNode);
               mrYesToAll:
                 begin
                   UpdateUsesClause(StepNode);
 
                   PromptBeforeUpdate := FALSE;
                 end;
-              mrCancel: Exit;
+              mrCancel:
+                Exit;
             end;
           end
           else
@@ -2368,7 +2272,61 @@ begin
 
     SearchList(vtUnitsList, edtListSearch.Text);
 
-    vtUsedUnits.Invalidate;
+    vtUsedByUnits.Invalidate;
+  end;
+end;
+
+procedure TfrmMain.AddUnitToUses(DummyRun: Boolean; DelphiFile: TDelphiFile; NewUnitName: String);
+var
+  ReferencedUnitName: string;
+  UpdatedCount, AlreadyReferencedCount: Integer;
+  CurrentDelphiFile: TDelphiFile;
+begin
+  ClearLog();
+
+  try
+    UpdatedCount := 0;
+    AlreadyReferencedCount := 0;
+
+    if DummyRun then
+      Log(StrTHISISADUMMYRUN, LogWarning);
+
+    ReferencedUnitName := DelphiFile.UnitInfo.DelphiUnitName;
+
+    Log('Adding unit <%s> to all uses clauses that already reference unit <%s>.', [NewUnitName, ReferencedUnitName]);
+
+    // Walk through all units
+    for CurrentDelphiFile in FDelphiFileList do
+    begin
+      // Only update .pas files, not project files
+      if CurrentDelphiFile.UnitInfo.DelphiFileType = ftPAS then
+      begin
+        if IsUnitUsed(ReferencedUnitName, CurrentDelphiFile) then
+          if IsUnitUsed(NewUnitName, CurrentDelphiFile) then
+          begin
+            Log('Unit <%s> already references unit <%s>. No update needed.', [CurrentDelphiFile.UnitInfo.DelphiUnitName,
+              NewUnitName]);
+            Inc(AlreadyReferencedCount);
+          end else
+          begin
+            Log('Adding unit <%s> to uses clause of unit <%s>.',
+              [NewUnitName, CurrentDelphiFile.UnitInfo.DelphiUnitName]);
+
+            AddUnitToUsesInFile(DummyRun, CurrentDelphiFile, ReferencedUnitName, NewUnitName);
+
+            Inc(UpdatedCount);
+          end;
+      end;
+    end;
+
+    if AlreadyReferencedCount > 0 then
+       Log(StrNumberOfAlreadyReferencingUnits, [AlreadyReferencedCount]);
+    Log(StrFinishedUpdated, [UpdatedCount]);
+
+    if DummyRun then
+      Log(StrTHISWASADUMMYRUN, LogWarning);
+  finally
+
   end;
 end;
 
@@ -2421,7 +2379,8 @@ var
             if NodeObject <> nil then
             begin
               XMLNode.Attributes['IsLink'] := NodeObject.Link <> nil;
-              XMLNode.Attributes['CircularReferenceType'] := CircularRelationshipTypeDescriptions[NodeObject.CircularReference];
+              XMLNode.Attributes['CircularReferenceType'] := CircularRelationshipTypeDescriptions
+                [NodeObject.CircularReference];
             end;
 
             XMLNode.Attributes['Filename'] := DelphiFile.UnitInfo.Filename;
@@ -2573,44 +2532,41 @@ end;
 
 procedure TfrmMain.ExportToGraphML(const Filename: String);
 type
-  TUseSection = (
-    usInterface,
-    usImplementation
-  );
+  TUseSection = (usInterface, usImplementation);
 
 const
   COL: array [TUseSection] of Cardinal = ($000000, $808080);
 
 var
   n: Integer;
-  xml: IXMLDocument;
+  Xml: IXMLDocument;
   EdgeID, NodeID: Integer;
   EdgeNode1, EdgeNode2: String;
-  graphml, key, graph, node, edge, line, data: IXMLNode;
+  graphml, Key, graph, Node, edge, line, data: IXMLNode;
   UnitName, TrimmedUnitName, ColourString: String;
   NodeDictionary: TDictionary<String, String>;
 begin
-  //Internally GraphML is an XML document
-  xml := TXMLDocument.Create(nil);
-  xml.Active := True;
-  xml.Version := '1.0';
-  xml.Encoding := 'UTF-8';
-  xml.StandAlone := 'no';
-  xml.Options := [doNodeAutoIndent];
+  // Internally GraphML is an XML document
+  Xml := TXMLDocument.Create(nil);
+  Xml.Active := TRUE;
+  Xml.Version := '1.0';
+  Xml.Encoding := 'UTF-8';
+  Xml.StandAlone := 'no';
+  Xml.Options := [doNodeAutoIndent];
 
-  graphml := xml.AddChild('graphml');
+  graphml := Xml.AddChild('graphml');
   graphml.Attributes['xmlns:y'] := 'http://www.yworks.com/xml/graphml';
   graphml.Attributes['xmlns:yed'] := 'http://www.yworks.com/xml/yed/3';
 
-  key := graphml.AddChild('key');
-  key.Attributes['id'] := 'd0';
-  key.Attributes['for'] := 'node';
-  key.Attributes['yfiles.type'] := 'nodegraphics';
+  Key := graphml.AddChild('key');
+  Key.Attributes['id'] := 'd0';
+  Key.Attributes['for'] := 'node';
+  Key.Attributes['yfiles.type'] := 'nodegraphics';
 
-  key := graphml.AddChild('key');
-  key.Attributes['id'] := 'd1';
-  key.Attributes['for'] := 'edge';
-  key.Attributes['yfiles.type'] := 'edgegraphics';
+  Key := graphml.AddChild('key');
+  Key.Attributes['id'] := 'd1';
+  Key.Attributes['for'] := 'edge';
+  Key.Attributes['yfiles.type'] := 'edgegraphics';
 
   graph := graphml.AddChild('graph');
   graph.Attributes['edgedefault'] := 'directed';
@@ -2623,15 +2579,14 @@ begin
     // Build Dictionary
     for UnitName in FDelphiFiles.Keys do
     begin
-      if (FDelphiFiles[UnitName].InSearchPath) or
-         (actShowUnitsNotInPath.Checked) then
+      if (FDelphiFiles[UnitName].InSearchPath) or (actShowUnitsNotInPath.Checked) then
       begin
         TrimmedUnitName := Trim(FDelphiFiles[UnitName].UnitInfo.DelphiUnitName);
 
-        node := graph.AddChild('node');
-        node.Attributes['id'] := 'n' + IntToStr(NodeID);
+        Node := graph.AddChild('node');
+        Node.Attributes['id'] := 'n' + IntToStr(NodeID);
 
-        data := node.AddChild('data');
+        data := Node.AddChild('data');
         data.Attributes['key'] := 'd0';
         data.AddChild('y:ShapeNode').AddChild('y:NodeLabel').Text := TrimmedUnitName;
 
@@ -2644,18 +2599,18 @@ begin
     // Build XML
     for UnitName in FDelphiFiles.Keys do
     begin
-      if (FDelphiFiles[UnitName].InSearchPath) or
-         (actShowUnitsNotInPath.Checked) then
+      if (FDelphiFiles[UnitName].InSearchPath) or (actShowUnitsNotInPath.Checked) then
       begin
         TrimmedUnitName := Trim(FDelphiFiles[UnitName].UnitInfo.DelphiUnitName);
 
         for n := 0 to pred(FDelphiFiles[UnitName].UnitInfo.UsedUnits.Count) do
         begin
           if (FDelphiFiles.ContainsKey(UpperCase(FDelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName))) and
-             ((actShowUnitsNotInPath.Checked) or
-              (FDelphiFiles[UpperCase(FDelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName)].InSearchPath)) and
-             (NodeDictionary.TryGetValue(UpperCase(TrimmedUnitName), EdgeNode1)) and
-             (NodeDictionary.TryGetValue(UpperCase(Trim(FDelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName)), EdgeNode2)) then
+            ((actShowUnitsNotInPath.Checked) or
+            (FDelphiFiles[UpperCase(FDelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName)].InSearchPath)) and
+            (NodeDictionary.TryGetValue(UpperCase(TrimmedUnitName), EdgeNode1)) and
+            (NodeDictionary.TryGetValue(UpperCase(Trim(FDelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName)),
+            EdgeNode2)) then
           begin
             edge := graph.AddChild('edge');
             edge.Attributes['id'] := 'e' + IntToStr(EdgeID);
@@ -2667,7 +2622,8 @@ begin
             line := data.AddChild('y:PolyLineEdge');
 
             case FDelphiFiles[UnitName].UnitInfo.UsedUnits[n].UsesType of
-              utImplementation: ColourString := '000000'
+              utImplementation:
+                ColourString := '000000'
             else
               ColourString := '808080';
             end;
@@ -2684,8 +2640,8 @@ begin
     FreeAndNil(NodeDictionary);
   end;
 
-  xml.SaveToFile(Filename);
-  xml.Active := False;
+  Xml.SaveToFile(Filename);
+  Xml.Active := FALSE;
 end;
 
 procedure TfrmMain.ExportToGephi(const Filename: String);
@@ -2699,8 +2655,7 @@ begin
   try
     for UnitName in FDelphiFiles.Keys do
     begin
-      if (FDelphiFiles[UnitName].InSearchPath) or
-         (actShowUnitsNotInPath.Checked) then
+      if (FDelphiFiles[UnitName].InSearchPath) or (actShowUnitsNotInPath.Checked) then
       begin
         TrimmedUnitName := Trim(FDelphiFiles[UnitName].UnitInfo.DelphiUnitName);
 
@@ -2709,8 +2664,8 @@ begin
         for n := 0 to pred(FDelphiFiles[UnitName].UnitInfo.UsedUnits.Count) do
         begin
           if (FDelphiFiles.ContainsKey(UpperCase(FDelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName))) and
-             ((actShowUnitsNotInPath.Checked) or
-              (FDelphiFiles[UpperCase(FDelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName)].InSearchPath)) then
+            ((actShowUnitsNotInPath.Checked) or
+            (FDelphiFiles[UpperCase(FDelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName)].InSearchPath)) then
           begin
             AddToken(CurrentLine, Trim(FDelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName), ';');
           end;
@@ -2755,7 +2710,7 @@ begin
 
   if Result then
   begin
-    FProjectFilename := SaveDialog1.FileName;
+    FProjectFilename := SaveDialog1.Filename;
 
     SaveProjectSettings(FProjectFilename);
   end;
@@ -2769,18 +2724,18 @@ end;
 procedure TfrmMain.actSettingsExecute(Sender: TObject);
 begin
   With TfrmDependencyScannerSetting.Create(Self) do
-  try
-    SaveProjectSettings;
+    try
+      SaveProjectSettings;
 
-    if Execute(FEnvironmentSettings, FProjectSettings) then
-    begin
-      LoadProjectSettings('', FALSE);
+      if Execute(FEnvironmentSettings, FProjectSettings) then
+      begin
+        LoadProjectSettings('', FALSE);
 
-      Modified := TRUE;
+        Modified := TRUE;
+      end;
+    finally
+      Release;
     end;
-  finally
-    Release;
-  end;
 end;
 
 procedure TfrmMain.actShowFileExecute(Sender: TObject);
@@ -2790,12 +2745,8 @@ begin
   DelphiFile := GetFocusedDelphiFile;
 
   if DelphiFile <> nil then
-    ShellExecute(Handle,
-                 'OPEN',
-                 PChar('explorer.exe'),
-                 PChar('/select, "' + DelphiFile.UnitInfo.Filename + '"'),
-                 nil,
-                 SW_NORMAL) ;
+    ShellExecute(Handle, 'OPEN', PChar('explorer.exe'), PChar('/select, "' + DelphiFile.UnitInfo.Filename + '"'), nil,
+      SW_NORMAL);
 end;
 
 procedure TfrmMain.actShowUnitsNotInPathExecute(Sender: TObject);
@@ -2807,7 +2758,7 @@ procedure TfrmMain.SetNodeVisibility(VT: TVirtualStringTree; Node: PVirtualNode;
 begin
   if (Node <> nil) and (DelphiFile <> nil) then
     VT.IsVisible[Node] := (DelphiFile.InSearchPath) or
-                          ((not DelphiFile.InSearchPath) and (actShowUnitsNotInPath.Checked));
+      ((not DelphiFile.InSearchPath) and (actShowUnitsNotInPath.Checked));
 end;
 
 procedure TfrmMain.ShowUnitsNotInPath;
@@ -2903,7 +2854,7 @@ procedure TfrmMain.FixDPI;
 begin
   ScaleVT(vtUnits);
   ScaleVT(vtUnitsList);
-  ScaleVT(vtUsedUnits);
+  ScaleVT(vtUsedByUnits);
   ScaleVT(vtUsesUnits);
 
   RichEditUnitPath.Height := ScaleDimension(RichEditUnitPath.Height, PixelsPerInch);
@@ -2921,7 +2872,8 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
       Units.Add(NextBlock(UnitList, ','));
   end;
 
-  function GetParentCircularRelationship(TreeNode: PVirtualNode; const DelphiUnitName: String): TCircularRelationshipType;
+  function GetParentCircularRelationship(TreeNode: PVirtualNode; const DelphiUnitName: String)
+    : TCircularRelationshipType;
   var
     i: Integer;
     UsedUnitType: TUsedUnitType;
@@ -2932,8 +2884,7 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
     begin
       TreeNode := TreeNode.Parent;
 
-      if (TreeNode <> nil) and
-         (TreeNode <> vtUnits.RootNode) then
+      if (TreeNode <> nil) and (TreeNode <> vtUnits.RootNode) then
       begin
         UsedUnitType := utImplementation;
 
@@ -2941,7 +2892,8 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
         begin
           for i := 0 to pred(FNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.UsedUnits.Count) do
           begin
-            if SameText(FNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.UsedUnits[i].DelphiUnitName, DelphiUnitName) then
+            if SameText(FNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.UsedUnits[i].DelphiUnitName, DelphiUnitName)
+            then
             begin
               UsedUnitType := FNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.UsedUnits[i].UsesType;
 
@@ -2950,8 +2902,7 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
           end;
         end;
 
-        while (TreeNode <> nil) and
-              (TreeNode <> vtUnits.RootNode) do
+        while (TreeNode <> nil) and (TreeNode <> vtUnits.RootNode) do
         begin
           if SameText(FNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.DelphiUnitName, DelphiUnitName) then
           begin
@@ -3000,7 +2951,7 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
       ListNode := vtUnitsList.AddChild(nil);
       SetID(ListNode, pred(FDelphiFiles.Count));
 
-      NewNode := vtUsedUnits.AddChild(nil);
+      NewNode := vtUsedByUnits.AddChild(nil);
       SetID(NewNode, pred(FDelphiFiles.Count));
 
       NewNode := vtUsesUnits.AddChild(nil);
@@ -3020,8 +2971,10 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
     FNodeObjects[GetID(Result)].CircularReference := GetParentCircularRelationship(Result, UnitInfo.DelphiUnitName);
 
     case FNodeObjects[GetID(Result)].CircularReference of
-      crSemiCircular: Inc(FSemiCircularFiles);
-      crCircular: Inc(FCircularFiles);
+      crSemiCircular:
+        Inc(FSemiCircularFiles);
+      crCircular:
+        Inc(FCircularFiles);
     end;
 
     SetNodeVisibility(vtUnits, Result, DelphiFile);
@@ -3072,10 +3025,10 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
 
             Inc(FParsedFileCount);
 
-            if FileExists(ChangeFileExt(Unitinfo.Filename, '.dfm')) then
-              inc(FVCLFormCount) else
-            if FileExists(ChangeFileExt(Unitinfo.Filename, '.fmx')) then
-              inc(FFMXFormCount);
+            if FileExists(ChangeFileExt(UnitInfo.Filename, '.dfm')) then
+              Inc(FVCLFormCount)
+            else if FileExists(ChangeFileExt(UnitInfo.Filename, '.fmx')) then
+              Inc(FFMXFormCount);
           except
             on e: Exception do
             begin
@@ -3096,11 +3049,8 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
 
       FLastScanNode := Node;
 
-      if (not FCancelled) and
-         (Parsed) and
-         (InPath) and
-         (FNodeObjects[GetID(Node)].CircularReference = crNone) and
-         (FNodeObjects[GetID(Node)].Link = nil) then
+      if (not FCancelled) and (Parsed) and (InPath) and (FNodeObjects[GetID(Node)].CircularReference = crNone) and
+        (FNodeObjects[GetID(Node)].Link = nil) then
       begin
         for i := 0 to pred(UnitInfo.UsedUnits.Count) do
           BuildDependencyTreeRec(Node, UnitInfo.UsedUnits[i]);
@@ -3114,10 +3064,11 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
 var
   RootUnitInfo: IUsedUnitInfo;
   i: Integer;
+  RootFile: String;
 begin
   vtUnits.Clear;
   vtUnitsList.Clear;
-  vtUsedUnits.Clear;
+  vtUsedByUnits.Clear;
   vtUsesUnits.Clear;
   memParentFile.Clear;
   memSelectedFile.Clear;
@@ -3126,7 +3077,7 @@ begin
 
   vtUnits.BeginUpdate;
   vtUnitsList.BeginUpdate;
-  vtUsedUnits.BeginUpdate;
+  vtUsedByUnits.BeginUpdate;
   vtUsesUnits.BeginUpdate;
   try
     FDelphiFiles.Clear;
@@ -3137,21 +3088,26 @@ begin
       if FCancelled then
         Break;
 
-      if not FileExists(FProjectSettings.RootFiles[i]) then
-        Log(StrRootFileNotFound, [FProjectSettings.RootFiles[i]], LogWarning)
-      else
-      begin
-        RootUnitInfo := TUsedUnitInfo.Create;
-        RootUnitInfo.DelphiUnitName := ExtractFilenameNoExt(FProjectSettings.RootFiles[i]);
+      RootFile := FProjectSettings.RootFiles[i];
 
-        BuildDependencyTreeRec(nil, RootUnitInfo);
+      if not RootFile.IsEmpty then // allow empty definition lines (e.g. for visual structuring)
+      begin
+        if not FileExists(RootFile) then
+          Log(StrRootFileNotFound, [RootFile], LogWarning)
+        else
+        begin
+          RootUnitInfo := TUsedUnitInfo.Create;
+          RootUnitInfo.DelphiUnitName := ExtractFilenameNoExt(RootFile);
+
+          BuildDependencyTreeRec(nil, RootUnitInfo);
+        end;
       end;
     end;
 
-   if vtUnits.FocusedNode = nil then
+    if vtUnits.FocusedNode = nil then
       vtUnits.SelectNodeEx(vtUnits.GetFirst);
 
-   if vtUnitsList.FocusedNode = nil then
+    if vtUnitsList.FocusedNode = nil then
       vtUnitsList.SelectNodeEx(vtUnitsList.GetFirst);
 
     Log(StrDFilesWithATo, [FDelphiFiles.Count, FLineCount]);
@@ -3160,7 +3116,7 @@ begin
 
     vtUnits.EndUpdate;
     vtUnitsList.EndUpdate;
-    vtUsedUnits.EndUpdate;
+    vtUsedByUnits.EndUpdate;
     vtUsesUnits.EndUpdate;
 
     FLastScanNode := nil;
@@ -3201,10 +3157,7 @@ var
   end;
 
 begin
-  if (not (FClosing)) and
-     ((ForceUpdate) or
-      (FNextStatusUpdate = 0) or
-      (now > FNextStatusUpdate)) then
+  if (not(FClosing)) and ((ForceUpdate) or (FNextStatusUpdate = 0) or (now > FNextStatusUpdate)) then
   begin
     FNextStatusUpdate := now + (50 * OneMilliSecond);
 

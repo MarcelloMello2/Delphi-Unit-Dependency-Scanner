@@ -1,6 +1,7 @@
 object frmRenameUnit: TfrmRenameUnit
   Left = 0
   Top = 0
+  AutoSize = True
   BorderStyle = bsDialog
   Caption = 'Rename Unit'
   ClientHeight = 334
@@ -27,7 +28,6 @@ object frmRenameUnit: TfrmRenameUnit
     ParentBackground = False
     TabOrder = 0
     Visible = False
-    ExplicitTop = 272
     object Panel5: TPanel
       AlignWithMargins = True
       Left = 1
@@ -43,8 +43,6 @@ object frmRenameUnit: TfrmRenameUnit
       Color = 12910591
       ParentBackground = False
       TabOrder = 0
-      ExplicitWidth = 752
-      ExplicitHeight = 45
       object Label2: TLabel
         AlignWithMargins = True
         Left = 1
@@ -85,7 +83,6 @@ object frmRenameUnit: TfrmRenameUnit
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitTop = 336
     object btnOK: TButton
       Left = 142
       Top = 8

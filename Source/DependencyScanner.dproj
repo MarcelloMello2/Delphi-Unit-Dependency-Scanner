@@ -5,7 +5,7 @@
         <FrameworkType>VCL</FrameworkType>
         <MainSource>DependencyScanner.dpr</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Release</Config>
+        <Config Condition="'$(Config)'==''">Debug</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>1</TargetedPlatforms>
         <AppType>Application</AppType>
@@ -142,13 +142,20 @@
         <DCCReference Include="Duds.Vcl.Form.Rename.pas">
             <Form>frmRenameUnit</Form>
         </DCCReference>
+        <DCCReference Include="Duds.Vcl.Form.AddNewUnitWhereThisUnitIsUsed.pas">
+            <Form>frmAddNewUnit</Form>
+        </DCCReference>
         <DCCReference Include="Duds.Common.Interfaces.pas"/>
         <DCCReference Include="Duds.Common.Types.pas"/>
+        <DCCReference Include="Duds.Common.Language.pas"/>
         <DCCReference Include="Duds.Common.Files.pas"/>
         <DCCReference Include="Duds.Common.Strings.pas"/>
         <DCCReference Include="Duds.Common.Helper.IniFile.pas"/>
         <DCCReference Include="Duds.Common.Classes.pas"/>
         <DCCReference Include="Duds.Common.Utils.pas"/>
+        <DCCReference Include="Duds.Common.Singleton.pas"/>
+        <DCCReference Include="Duds.Common.Refactoring.pas"/>
+        <DCCReference Include="Duds.Common.Log.pas"/>
         <DCCReference Include="Duds.Vcl.HourGlass.pas"/>
         <DCCReference Include="Duds.Common.Parser.Pascal.pas"/>
         <DCCReference Include="Duds.Common.Parser.Pascal.Tokeniser.pas"/>
@@ -208,7 +215,13 @@
                 </Source>
             </Delphi.Personality>
             <Deployment Version="3">
-                <DeployFile LocalName="C:\Bin\Unit Dependency Scanner\Win32\Debug\DependencyScanner.exe" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="..\bin\Win32\Debug\DependencyScanner.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>DependencyScanner.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="..\bin\Win32\Release\DependencyScanner.exe" Configuration="Release" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>DependencyScanner.exe</RemoteName>
                         <Overwrite>true</Overwrite>

@@ -43,12 +43,6 @@ type
   end;
   PNodeData = ^TNodeData;
 
-  TLogEntry = record
-    Text: String;
-    Severity: Integer;
-  end;
-  TLogEntries = TList<TLogEntry>;
-
   TDelphiFile = class(TObject)
   strict private
     FUnitInfo: IUnitInfo;
@@ -230,6 +224,10 @@ end;
 
 procedure TProjectSettings.DoLoadFromIniFile(const IniFile: TIniFile);
 begin
+  FRootFiles.Clear;
+  FSearchPaths.Clear;
+  FUnitScopeNames.Clear;
+
   IniFile.ReadStrings('RootFiles', FRootFiles);
   IniFile.ReadStrings('SearchPaths', FSearchPaths);
   IniFile.ReadStrings('UnitScopeNames', FUnitScopeNames);
