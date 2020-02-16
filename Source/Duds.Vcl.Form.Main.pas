@@ -58,6 +58,7 @@ uses
   Duds.Common.Refactoring,
   Duds.Common.Language,
   Duds.Common.Log,
+  Duds.Model,
 
   Duds.Vcl.HourGlass,
   Duds.Vcl.Utils,
@@ -267,8 +268,7 @@ type
     procedure actApplyRenameListExecute(Sender: TObject);
     procedure actAddUnitToUsesExecute(Sender: TObject);    
   private
-    FFiles: TDictionary<String, String>;
-    FDelphiFiles: TObjectDictionary<String, TDelphiFile>;
+    FModel: TDudsModel;
     FNodeObjects: TObjectList<TNodeObject>;
     FSearchText: String;
     FPascalUnitExtractor: TPascalUnitExtractor;
@@ -450,8 +450,7 @@ begin
   vtUsesUnits.NodeDataSize := SizeOf(TNodeData);
   vtStats.NodeDataSize := SizeOf(TNodeData);
 
-  FFiles := TDictionary<String, String>.Create;
-  FDelphiFiles := TObjectDictionary<String, TDelphiFile>.Create([doOwnsValues]);
+  FModel := TDudsModel.Create;
   FDelphiFileList := TObjectList<TDelphiFile>.Create(FALSE);
   FNodeObjects := TObjectList<TNodeObject>.Create(TRUE);
   FStats := TStringList.Create;
@@ -477,8 +476,7 @@ procedure TfrmMain.FormDestroy(Sender: TObject);
 begin
   SaveSettings;
 
-  FreeAndNil(FFiles);
-  FreeAndNil(FDelphiFiles);
+  FreeAndNil(FModel);
   FreeAndNil(FDelphiFileList);
   FreeAndNil(FStats);
   FreeAndNil(FEnvironmentSettings);
@@ -538,7 +536,7 @@ procedure TfrmMain.LoadFilesInSearchPaths;
                     ScannedFiles[i].Filename], LogWarning);
               end
               else
-                FFiles.Add(DelphiUnitName, ScannedFiles[i].Filename);
+                FModel.Files.Add(DelphiUnitName, ScannedFiles[i].Filename);
             end;
           end;
         finally
@@ -598,7 +596,7 @@ begin
   ExpandAndScanSearchPaths;
 
   if not NoLog then
-    Log(StrDFilesFound, [FFiles.Count]);
+    Log(StrDFilesFound, [FModel.Files.Count]);
 end;
 
 function TfrmMain.TryGetSearchUnit(const DelphiUnitName: String; var UnitFilename: String; UseScopes: Boolean): Boolean;
@@ -608,14 +606,14 @@ var
 begin
   UpperDelphiUnitName := UpperCase(DelphiUnitName);
 
-  Result := FFiles.TryGetValue(UpperDelphiUnitName, UnitFilename);
+  Result := FModel.Files.TryGetValue(UpperDelphiUnitName, UnitFilename);
 
   // Try the scopes
   if (not Result) and (UseScopes) then
   begin
     for i := 0 to pred(FProjectSettings.UnitScopeNames.Count) do
     begin
-      Result := FFiles.TryGetValue(UpperCase(FProjectSettings.UnitScopeNames[i]) + '.' + UpperDelphiUnitName,
+      Result := FModel.Files.TryGetValue(UpperCase(FProjectSettings.UnitScopeNames[i]) + '.' + UpperDelphiUnitName,
         UnitFilename);
 
       if Result then
@@ -1667,7 +1665,7 @@ begin
   vtUnits.Header.Columns[1].Options := vtUnits.Header.Columns[1].Options - [coVisible];
 
   FDelphiFileList.Clear;
-  FDelphiFiles.Clear;
+  FModel.DelphiFiles.Clear;
   FStats.Clear;
   TDudsLogger.GetInstance.Clear;
   UpdateLogEntries;
@@ -2424,8 +2422,8 @@ begin
   else
   begin
     ClearLog;
-    FFiles.Clear;
-    FDelphiFiles.Clear;
+    FModel.Files.Clear;
+    FModel.DelphiFiles.Clear;
     ClearStats;
     FStartTime := now;
     FCancelled := FALSE;
@@ -2577,11 +2575,11 @@ begin
   NodeDictionary := TDictionary<String, String>.Create;
   try
     // Build Dictionary
-    for UnitName in FDelphiFiles.Keys do
+    for UnitName in FModel.DelphiFiles.Keys do
     begin
-      if (FDelphiFiles[UnitName].InSearchPath) or (actShowUnitsNotInPath.Checked) then
+      if (FModel.DelphiFiles[UnitName].InSearchPath) or (actShowUnitsNotInPath.Checked) then
       begin
-        TrimmedUnitName := Trim(FDelphiFiles[UnitName].UnitInfo.DelphiUnitName);
+        TrimmedUnitName := Trim(FModel.DelphiFiles[UnitName].UnitInfo.DelphiUnitName);
 
         Node := graph.AddChild('node');
         Node.Attributes['id'] := 'n' + IntToStr(NodeID);
@@ -2597,19 +2595,19 @@ begin
     end;
 
     // Build XML
-    for UnitName in FDelphiFiles.Keys do
+    for UnitName in FModel.DelphiFiles.Keys do
     begin
-      if (FDelphiFiles[UnitName].InSearchPath) or (actShowUnitsNotInPath.Checked) then
+      if (FModel.DelphiFiles[UnitName].InSearchPath) or (actShowUnitsNotInPath.Checked) then
       begin
-        TrimmedUnitName := Trim(FDelphiFiles[UnitName].UnitInfo.DelphiUnitName);
+        TrimmedUnitName := Trim(FModel.DelphiFiles[UnitName].UnitInfo.DelphiUnitName);
 
-        for n := 0 to pred(FDelphiFiles[UnitName].UnitInfo.UsedUnits.Count) do
+        for n := 0 to pred(FModel.DelphiFiles[UnitName].UnitInfo.UsedUnits.Count) do
         begin
-          if (FDelphiFiles.ContainsKey(UpperCase(FDelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName))) and
+          if (FModel.DelphiFiles.ContainsKey(UpperCase(FModel.DelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName))) and
             ((actShowUnitsNotInPath.Checked) or
-            (FDelphiFiles[UpperCase(FDelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName)].InSearchPath)) and
+            (FModel.DelphiFiles[UpperCase(FModel.DelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName)].InSearchPath)) and
             (NodeDictionary.TryGetValue(UpperCase(TrimmedUnitName), EdgeNode1)) and
-            (NodeDictionary.TryGetValue(UpperCase(Trim(FDelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName)),
+            (NodeDictionary.TryGetValue(UpperCase(Trim(FModel.DelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName)),
             EdgeNode2)) then
           begin
             edge := graph.AddChild('edge');
@@ -2621,7 +2619,7 @@ begin
             data.Attributes['key'] := 'd1';
             line := data.AddChild('y:PolyLineEdge');
 
-            case FDelphiFiles[UnitName].UnitInfo.UsedUnits[n].UsesType of
+            case FModel.DelphiFiles[UnitName].UnitInfo.UsedUnits[n].UsesType of
               utImplementation:
                 ColourString := '000000'
             else
@@ -2653,21 +2651,21 @@ var
 begin
   Lines := TStringList.Create;
   try
-    for UnitName in FDelphiFiles.Keys do
+    for UnitName in FModel.DelphiFiles.Keys do
     begin
-      if (FDelphiFiles[UnitName].InSearchPath) or (actShowUnitsNotInPath.Checked) then
+      if (FModel.DelphiFiles[UnitName].InSearchPath) or (actShowUnitsNotInPath.Checked) then
       begin
-        TrimmedUnitName := Trim(FDelphiFiles[UnitName].UnitInfo.DelphiUnitName);
+        TrimmedUnitName := Trim(FModel.DelphiFiles[UnitName].UnitInfo.DelphiUnitName);
 
         CurrentLine := TrimmedUnitName;
 
-        for n := 0 to pred(FDelphiFiles[UnitName].UnitInfo.UsedUnits.Count) do
+        for n := 0 to pred(FModel.DelphiFiles[UnitName].UnitInfo.UsedUnits.Count) do
         begin
-          if (FDelphiFiles.ContainsKey(UpperCase(FDelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName))) and
+          if (FModel.DelphiFiles.ContainsKey(UpperCase(FModel.DelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName))) and
             ((actShowUnitsNotInPath.Checked) or
-            (FDelphiFiles[UpperCase(FDelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName)].InSearchPath)) then
+            (FModel.DelphiFiles[UpperCase(FModel.DelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName)].InSearchPath)) then
           begin
-            AddToken(CurrentLine, Trim(FDelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName), ';');
+            AddToken(CurrentLine, Trim(FModel.DelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName), ';');
           end;
         end;
 
@@ -2833,13 +2831,13 @@ function TfrmMain.CreateDelphiFile(const DelphiUnitName: String): TDelphiFile;
 begin
   Result := TDelphiFile.Create;
 
-  FDelphiFiles.Add(UpperCase(DelphiUnitName), Result);
+  FModel.DelphiFiles.Add(UpperCase(DelphiUnitName), Result);
   FDelphiFileList.Add(Result);
 end;
 
 function TfrmMain.FindParsedDelphiUnit(const DelphiUnitName: string): TDelphiFile;
 begin
-  FDelphiFiles.TryGetValue(UpperCase(DelphiUnitName), Result);
+  FModel.DelphiFiles.TryGetValue(UpperCase(DelphiUnitName), Result);
 end;
 
 procedure TfrmMain.FixDPI;
@@ -2949,13 +2947,13 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
       DelphiFile.BaseNode := Result;
 
       ListNode := vtUnitsList.AddChild(nil);
-      SetID(ListNode, pred(FDelphiFiles.Count));
+      SetID(ListNode, pred(FModel.DelphiFiles.Count));
 
       NewNode := vtUsedByUnits.AddChild(nil);
-      SetID(NewNode, pred(FDelphiFiles.Count));
+      SetID(NewNode, pred(FModel.DelphiFiles.Count));
 
       NewNode := vtUsesUnits.AddChild(nil);
-      SetID(NewNode, pred(FDelphiFiles.Count));
+      SetID(NewNode, pred(FModel.DelphiFiles.Count));
 
       FLineCount := FLineCount + UnitInfo.LineCount;
     end
@@ -3021,7 +3019,7 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
 
             for i := 0 to pred(UnitInfo.UsedUnits.Count) do
               if UnitInfo.UsedUnits[i].Filename <> '' then
-                FFiles.AddOrSetValue(UpperCase(UnitInfo.UsedUnits[i].DelphiUnitName), UnitInfo.UsedUnits[i].Filename);
+                FModel.Files.AddOrSetValue(UpperCase(UnitInfo.UsedUnits[i].DelphiUnitName), UnitInfo.UsedUnits[i].Filename);
 
             Inc(FParsedFileCount);
 
@@ -3080,7 +3078,7 @@ begin
   vtUsedByUnits.BeginUpdate;
   vtUsesUnits.BeginUpdate;
   try
-    FDelphiFiles.Clear;
+    FModel.DelphiFiles.Clear;
     FDelphiFileList.Clear;
 
     for i := 0 to pred(FProjectSettings.RootFiles.Count) do
@@ -3110,7 +3108,7 @@ begin
     if vtUnitsList.FocusedNode = nil then
       vtUnitsList.SelectNodeEx(vtUnitsList.GetFirst);
 
-    Log(StrDFilesWithATo, [FDelphiFiles.Count, FLineCount]);
+    Log(StrDFilesWithATo, [FModel.DelphiFiles.Count, FLineCount]);
   finally
     ExpandAll;
 
@@ -3167,12 +3165,12 @@ begin
     AddStat(StrScannedFiles, FormatCardinal(FScannedFiles));
     AddStat(StrSemiCircularFiles, FormatCardinal(FSemiCircularFiles));
     AddStat(StrFCircularFiles, FormatCardinal(FCircularFiles));
-    AddStat(StrFilesFound, FormatCardinal(FDelphiFiles.Count));
+    AddStat(StrFilesFound, FormatCardinal(FModel.DelphiFiles.Count));
     AddStat(StrParsedFiles, FormatCardinal(FParsedFileCount));
     AddStat(StrVCLFormCount, FormatCardinal(FVCLFormCount));
     AddStat(StrFMXFormCount, FormatCardinal(FFMXFormCount));
     AddStat(StrTotalLines, FormatCardinal(FLineCount));
-    AddStat(StrSearchPathFiles, FormatCardinal(FFiles.Count));
+    AddStat(StrSearchPathFiles, FormatCardinal(FModel.Files.Count));
     AddStat(StrDeepestScanDepth, FDeppestScanDepth);
 
     if FBusy then
