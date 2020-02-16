@@ -61,6 +61,7 @@ uses
   Duds.Model,
   Duds.Export.Gephi,
   Duds.Export.GraphML,
+  Duds.FileScanner,
 
   Duds.Vcl.HourGlass,
   Duds.Vcl.Utils,
@@ -300,13 +301,11 @@ type
     FShowTermParents: Boolean;
     FRunScanOnLoad: Boolean;
 
-    procedure LoadFilesInSearchPaths(NoLog: Boolean = FALSE);
     procedure BuildDependencyTree(NoLog: Boolean = FALSE);
     procedure SearchTree(const SearchText: String; FromFirstNode: Boolean);
     function IsSearchHitNode(Node: PVirtualNode): Boolean;
     function GetNodePath(Node: PVirtualNode): String;
     procedure SetNodePathRichEdit(Node: PVirtualNode; ARichEdit: TRichEdit);
-    function GetUnitFilename(const DelphiUnitName: String): String;
     procedure ShowUnitsNotInPath;
     procedure SetNodeVisibility(VT: TVirtualStringTree; Node: PVirtualNode; DelphiFile: TDelphiFile);
     function GetLinkedNode(Node: PVirtualNode): PVirtualNode;
@@ -332,7 +331,6 @@ type
     function SaveProject: Boolean;
     function SaveProjectAs: Boolean;
     function IsUnitUsed(const DelphiUnitName: String; DelphiFile: TDelphiFile): Boolean;
-    function TryGetSearchUnit(const DelphiUnitName: String; var UnitFilename: String; UseScopes: Boolean): Boolean;
     function RenameDelphiFileWithDialog(RenameType: TRenameType): Boolean; overload;
     function RenameDelphiFileWithDialog(const DelphiFile: TDelphiFile; RenameType: TRenameType): Boolean; overload;
     procedure ApplyMultipleRenames(aCsvFilename: String; DummyRun, RenameHistoryFiles, InsertOldNameComment,
@@ -494,133 +492,6 @@ end;
 procedure TfrmMain.Log(const Msg: String; const Args: array of const; const Severity: Integer);
 begin
   Log(Format(Msg, Args), Severity);
-end;
-
-procedure TfrmMain.LoadFilesInSearchPaths;
-
-  procedure ScanPasFiles(Dirs: TStrings);
-  var
-    ScannedFiles: TObjectList<TFileInfo>;
-    i, n: Integer;
-    Extension, Dir, DelphiUnitName, ExistingFilename: String;
-  begin
-    for n := 0 to pred(Dirs.Count) do
-    begin
-      Application.ProcessMessages;
-
-      Dir := Dirs[n];
-
-      if FileExists(Dir) then
-        Dir := ExtractFileDir(Dir);
-
-      if DirectoryExists(Dir) then
-      begin
-        ScannedFiles := ScanFiles(Dir, '*.*', FALSE, FALSE, TRUE);
-        try
-          for i := 0 to pred(ScannedFiles.Count) do
-          begin
-            if FCancelled then
-              Break;
-
-            UpdateStats(FALSE);
-
-            Extension := LowerCase(ExtractFileExt(ScannedFiles[i].Filename));
-
-            if ((Extension = '.pas') or (Extension = '.dpk') or (Extension = '.dpr')) then
-            begin
-              DelphiUnitName := UpperCase(ExtractFilenameNoExt(ScannedFiles[i].Filename));
-
-              if TryGetSearchUnit(DelphiUnitName, ExistingFilename, TRUE) then
-              begin
-                if not SameText(ExistingFilename, ScannedFiles[i].Filename) then
-                  Log(StrSFoundInMultip, [ExtractFilenameNoExt(ScannedFiles[i].Filename), ExistingFilename,
-                    ScannedFiles[i].Filename], LogWarning);
-              end
-              else
-                FModel.Files.Add(DelphiUnitName, ScannedFiles[i].Filename);
-            end;
-          end;
-        finally
-          FreeAndNil(ScannedFiles);
-        end;
-      end;
-    end;
-  end;
-
-  procedure ExpandAndScanSearchPaths;
-  var
-    aExpandedPaths: TStringList;
-    i, j: Integer;
-    CurrentDir: String;
-    Dir: String;
-    ScannedFiles: TObjectList<TFileInfo>;
-  begin
-    aExpandedPaths := TStringList.Create;
-    try
-      for i := 0 to pred(FProjectSettings.SearchPaths.Count) do
-      begin
-        CurrentDir := FProjectSettings.SearchPaths[i];
-        if CurrentDir.EndsWith(ExpandSearchPathSign) then // has "expand" sign?
-        begin
-          CurrentDir := Copy(CurrentDir, 1, Length(CurrentDir) - Length(ExpandSearchPathSign));
-          aExpandedPaths.Add(CurrentDir);
-          ScannedFiles := ScanFiles(CurrentDir, '*.*', TRUE, TRUE, TRUE);
-          try
-            for j := 0 to pred(ScannedFiles.Count) do
-              if ScannedFiles[j].IsDir then
-                aExpandedPaths.Add(ScannedFiles[j].Filename);
-          finally
-            FreeAndNil(ScannedFiles);
-          end;
-
-        end
-        else
-          aExpandedPaths.Add(CurrentDir)
-      end;
-
-      if not NoLog then
-        Log(StrScanningDSearchSearchPaths, [aExpandedPaths.Count, FProjectSettings.SearchPaths.Count]);
-
-      ScanPasFiles(aExpandedPaths);
-    finally
-      FreeAndNil(aExpandedPaths);
-    end;
-  end;
-
-begin
-  // step 1: scan root files
-  if not NoLog then
-    Log(StrScanningDSearchRootFiles, [FProjectSettings.RootFiles.Count]);
-  ScanPasFiles(FProjectSettings.RootFiles);
-
-  // step 2: scan search paths
-  ExpandAndScanSearchPaths;
-
-  if not NoLog then
-    Log(StrDFilesFound, [FModel.Files.Count]);
-end;
-
-function TfrmMain.TryGetSearchUnit(const DelphiUnitName: String; var UnitFilename: String; UseScopes: Boolean): Boolean;
-var
-  i: Integer;
-  UpperDelphiUnitName: String;
-begin
-  UpperDelphiUnitName := UpperCase(DelphiUnitName);
-
-  Result := FModel.Files.TryGetValue(UpperDelphiUnitName, UnitFilename);
-
-  // Try the scopes
-  if (not Result) and (UseScopes) then
-  begin
-    for i := 0 to pred(FProjectSettings.UnitScopeNames.Count) do
-    begin
-      Result := FModel.Files.TryGetValue(UpperCase(FProjectSettings.UnitScopeNames[i]) + '.' + UpperDelphiUnitName,
-        UnitFilename);
-
-      if Result then
-        Break;
-    end;
-  end;
 end;
 
 function TfrmMain.LoadProjectSettings(const Filename: String; RunScanAfterLoad: Boolean): Boolean;
@@ -1125,11 +996,6 @@ begin
 
     Node := Node.Parent;
   end;
-end;
-
-function TfrmMain.GetUnitFilename(const DelphiUnitName: String): String;
-begin
-  TryGetSearchUnit(DelphiUnitName, Result, TRUE);
 end;
 
 procedure TfrmMain.vtUnitsGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
@@ -2414,6 +2280,8 @@ begin
 end;
 
 procedure TfrmMain.actStartScanExecute(Sender: TObject);
+var
+  FileScanner: TDudsFileScanner;
 begin
   if FProjectSettings.RootFiles.Count = 0 then
   begin
@@ -2444,7 +2312,13 @@ begin
       UpdateStats(TRUE);
       Refresh;
 
-      LoadFilesInSearchPaths;
+      FileScanner := TDudsFileScanner.Create;
+      try
+        FileScanner.LoadFilesInSearchPaths(FModel, FProjectSettings);
+        Log(StrDFilesFound, [FModel.Files.Count]);
+      finally
+        FreeAndNil(FileScanner);
+      end;
 
       if not FCancelled then
         BuildDependencyTree;
@@ -2850,8 +2724,8 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
 
       if FScanDepth > FDeppestScanDepth then
         FDeppestScanDepth := FScanDepth;
-      UnitFilename := GetUnitFilename(UsedUnitInfo.DelphiUnitName);
 
+      FModel.SearchUnitByNameWithScopes(UsedUnitInfo.DelphiUnitName, UnitFilename, FProjectSettings.UnitScopeNames);
       InPath := UnitFilename <> '';
       Parsed := FALSE;
 
