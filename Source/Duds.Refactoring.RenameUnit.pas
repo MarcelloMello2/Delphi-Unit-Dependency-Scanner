@@ -22,7 +22,7 @@ type
   private
     FModel: TDudsModel;
   public
-    procedure RenameDelphiFile(const aClearLog: Boolean; const SearchStringOrOldUnitName, ReplaceStringOrNewUnitName: String;
+    procedure RenameDelphiFile(const SearchStringOrOldUnitName, ReplaceStringOrNewUnitName: String;
       const DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment, LowerCaseExtension: Boolean);
 
     property Model: TDudsModel read FModel write FModel;
@@ -31,7 +31,7 @@ type
 
 implementation
 
-procedure TDudsRenameRefacotring.RenameDelphiFile(const aClearLog: Boolean; const SearchStringOrOldUnitName, ReplaceStringOrNewUnitName: String;
+procedure TDudsRenameRefacotring.RenameDelphiFile(const SearchStringOrOldUnitName, ReplaceStringOrNewUnitName: String;
   const DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment, LowerCaseExtension: Boolean);
 
   function IsUnitNameMatch(const UnitName: String): Boolean;
@@ -243,9 +243,6 @@ var
   DelphiFile: TDelphiFile;
   UsedUnitInfo: IUsedUnitInfo;
 begin
-  if aClearLog then
-    TDudsLogger.GetInstance.Clear;
-
   if DummyRun then
     TDudsLogger.GetInstance.Log(StrTHISISADUMMYRUN, LogWarning);
 

@@ -63,6 +63,7 @@ uses
   Duds.Export.GraphML,
   Duds.FileScanner,
   Duds.Refactoring.RenameUnit,
+  Duds.Refactoring.AddUnitToUses,
 
   Duds.Vcl.HourGlass,
   Duds.Vcl.Utils,
@@ -351,7 +352,6 @@ type
     procedure UpdateLogEntries;
     procedure ClearLog;
     procedure FixDPI;
-    procedure AddUnitToUses(DummyRun: Boolean; DelphiFile: TDelphiFile; NewUnitName: String);
 
     property Modified: Boolean read FModified write SetModified;
   end;
@@ -365,7 +365,7 @@ uses
   Duds.Vcl.Form.Rename,
   Duds.Vcl.Form.Settings,
   Duds.Vcl.Form.FindReplace,
-  Duds.Vcl.Form.AddNewUnitWhereThisUnitIsUsed;
+  Duds.Vcl.Form.AddUnitToUses;
 
 {$R *.dfm}
 
@@ -1553,6 +1553,11 @@ begin
   RenameDelphiFileWithDialog(rtRename);
 end;
 
+procedure TfrmMain.actSearchAndReplaceExecute(Sender: TObject);
+begin
+  RenameDelphiFileWithDialog(rtSearchAndReplace);
+end;
+
 procedure TfrmMain.actApplyRenameListExecute(Sender: TObject);
 var
   aFileName: String;
@@ -1599,6 +1604,7 @@ end;
 procedure TfrmMain.actAddUnitToUsesExecute(Sender: TObject);
 var
   ShowDlgResult: Boolean;
+  AddUnitToUsesRefactoring: TAddUnitToUsesRefactoring;
 begin
   if GetFocusedDelphiFile <> nil then
   begin
@@ -1613,7 +1619,21 @@ begin
         ShowDlgResult := ShowModal = mrOK;
 
         if ShowDlgResult then
-          AddUnitToUses(chkDummyRun.Checked, GetFocusedDelphiFile, edtNewName.Text);
+        begin
+          ClearLog();
+          try
+            AddUnitToUsesRefactoring := TAddUnitToUsesRefactoring.Create;
+            try
+              AddUnitToUsesRefactoring.Model := FModel;
+              AddUnitToUsesRefactoring.AddUnitToUses(chkDummyRun.Checked, GetFocusedDelphiFile, edtNewName.Text);
+            finally
+              FreeAndNil(AddUnitToUsesRefactoring);
+            end;
+          finally
+            UpdateLogEntries;
+          end;
+        end;
+
       finally
         Free;
       end;
@@ -1804,12 +1824,14 @@ procedure TfrmMain.RenameDelphiFile(const aClearLog: Boolean; const SearchString
 var
   RenameRefactoring: TDudsRenameRefacotring;
 begin
+  if aClearLog then
+    ClearLog();
   try
     RenameRefactoring := TDudsRenameRefacotring.Create;
     try
       RenameRefactoring.Model := FModel;
       RenameRefactoring.RenameDelphiFile(
-        aClearLog, SearchString, ReplaceString,
+        SearchString, ReplaceString,
         DummyRun, RenameHistoryFiles, ExactMatch,
         InsertOldNameComment, LowerCaseExtension);
     finally
@@ -1823,60 +1845,6 @@ begin
     SearchList(vtUnitsList, edtListSearch.Text);
 
     vtUsedByUnits.Invalidate;
-  end;
-end;
-
-procedure TfrmMain.AddUnitToUses(DummyRun: Boolean; DelphiFile: TDelphiFile; NewUnitName: String);
-var
-  ReferencedUnitName: string;
-  UpdatedCount, AlreadyReferencedCount: Integer;
-  CurrentDelphiFile: TDelphiFile;
-begin
-  ClearLog();
-
-  try
-    UpdatedCount := 0;
-    AlreadyReferencedCount := 0;
-
-    if DummyRun then
-      Log(StrTHISISADUMMYRUN, LogWarning);
-
-    ReferencedUnitName := DelphiFile.UnitInfo.DelphiUnitName;
-
-    Log('Adding unit <%s> to all uses clauses that already reference unit <%s>.', [NewUnitName, ReferencedUnitName]);
-
-    // Walk through all units
-    for CurrentDelphiFile in FModel.DelphiFileList do
-    begin
-      // Only update .pas files, not project files
-      if CurrentDelphiFile.UnitInfo.DelphiFileType = ftPAS then
-      begin
-        if FModel.IsUnitUsed(ReferencedUnitName, CurrentDelphiFile) then
-          if FModel.IsUnitUsed(NewUnitName, CurrentDelphiFile) then
-          begin
-            Log('Unit <%s> already references unit <%s>. No update needed.', [CurrentDelphiFile.UnitInfo.DelphiUnitName,
-              NewUnitName]);
-            Inc(AlreadyReferencedCount);
-          end else
-          begin
-            Log('Adding unit <%s> to uses clause of unit <%s>.',
-              [NewUnitName, CurrentDelphiFile.UnitInfo.DelphiUnitName]);
-
-            AddUnitToUsesInFile(DummyRun, CurrentDelphiFile, ReferencedUnitName, NewUnitName);
-
-            Inc(UpdatedCount);
-          end;
-      end;
-    end;
-
-    if AlreadyReferencedCount > 0 then
-       Log(StrNumberOfAlreadyReferencingUnits, [AlreadyReferencedCount]);
-    Log(StrFinishedUpdated, [UpdatedCount]);
-
-    if DummyRun then
-      Log(StrTHISWASADUMMYRUN, LogWarning);
-  finally
-
   end;
 end;
 
@@ -2119,11 +2087,6 @@ begin
 
     SaveProjectSettings(FProjectFilename);
   end;
-end;
-
-procedure TfrmMain.actSearchAndReplaceExecute(Sender: TObject);
-begin
-  RenameDelphiFileWithDialog(rtSearchAndReplace);
 end;
 
 procedure TfrmMain.actSettingsExecute(Sender: TObject);

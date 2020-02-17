@@ -142,7 +142,7 @@
         <DCCReference Include="Duds.Vcl.Form.Rename.pas">
             <Form>frmRenameUnit</Form>
         </DCCReference>
-        <DCCReference Include="Duds.Vcl.Form.AddNewUnitWhereThisUnitIsUsed.pas">
+        <DCCReference Include="Duds.Vcl.Form.AddUnitToUses.pas">
             <Form>frmAddNewUnit</Form>
         </DCCReference>
         <DCCReference Include="Duds.Common.Interfaces.pas"/>
@@ -159,6 +159,7 @@
         <DCCReference Include="Duds.Model.pas"/>
         <DCCReference Include="Duds.FileScanner.pas"/>
         <DCCReference Include="Duds.Refactoring.RenameUnit.pas"/>
+        <DCCReference Include="Duds.Refactoring.AddUnitToUses.pas"/>
         <DCCReference Include="Duds.Export.Gephi.pas"/>
         <DCCReference Include="Duds.Export.GraphML.pas"/>
         <DCCReference Include="Duds.Vcl.HourGlass.pas"/>

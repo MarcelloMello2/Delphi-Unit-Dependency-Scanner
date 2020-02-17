@@ -1,4 +1,4 @@
-unit Duds.Vcl.Form.AddNewUnitWhereThisUnitIsUsed;
+unit Duds.Vcl.Form.AddUnitToUses;
 
 interface
 

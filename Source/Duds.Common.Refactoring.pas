@@ -13,9 +13,6 @@ uses
 function SafeReplaceTextInFile(DummyRun: Boolean; Filename, OldUnitName, NewUnitName: String;
   Position: Integer): Boolean;
 
-procedure AddUnitToUsesInFile(DummyRun: Boolean; DelphiFile: TDelphiFile; InsertAtUsesUnitName: string;
-  NewUnitName: String);
-
 implementation
 
 function SafeReplaceTextInString(var FileText: String; const Filename, OldText, NewText: String; Position: Integer): Boolean;
@@ -70,29 +67,6 @@ begin
   end;
 end;
 
-procedure AddUnitToUsesInFile(DummyRun: Boolean; DelphiFile: TDelphiFile; InsertAtUsesUnitName: string;
-  NewUnitName: String);
-var
-  InsertAtUnit: IUsedUnitInfo;
-  usedUnit: IUsedUnitInfo;
-  ReplacementText: string;
-begin
-  InsertAtUnit := nil;
-  for usedUnit in DelphiFile.UnitInfo.UsedUnits do
-    if usedUnit.DelphiUnitName.Equals(InsertAtUsesUnitName) then
-       InsertAtUnit := usedUnit;
 
-  if InsertAtUnit = nil then
-     raise Exception.Create('internal error - referenced unit not found in uses clause');  
-
-
-  ReplacementText := NewUnitName + ', ' + InsertAtUsesUnitName;
-
-  SafeReplaceTextInFile(DummyRun, DelphiFile.UnitInfo.Filename, InsertAtUsesUnitName, ReplacementText, InsertAtUnit.Position);
-
-  //TODO: Insert a "used unit"
-  //TODO: Update offsets
-  //TODO: update GUI trees
-end;
 
 end.
