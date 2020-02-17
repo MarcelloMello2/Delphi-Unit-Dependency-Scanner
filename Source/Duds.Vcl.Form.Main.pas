@@ -296,8 +296,7 @@ type
     FFMXFormCount: Integer;
     FVCLFormCount: Integer;
     FNextStatusUpdate: TDateTime;
-    FDeppestScanDepth: Integer;
-    FLastScanNode: PVirtualNode;
+    FDeepestScanDepth: Integer;
     FClosing: Boolean;
     FShowTermParents: Boolean;
     FRunScanOnLoad: Boolean;
@@ -1519,8 +1518,7 @@ begin
 
   vtUnitsTree.Header.Columns[1].Options := vtUnitsTree.Header.Columns[1].Options - [coVisible];
 
-  FModel.DelphiFileList.Clear;
-  FModel.DelphiFiles.Clear;
+  FModel.Clear;
   FStats.Clear;
   TDudsLogger.GetInstance.Clear;
   UpdateLogEntries;
@@ -1944,8 +1942,7 @@ begin
   else
   begin
     ClearLog;
-    FModel.Files.Clear;
-    FModel.DelphiFiles.Clear;
+    FModel.Clear;
     ClearStats;
     FStartTime := now;
     FCancelled := FALSE;
@@ -2217,16 +2214,6 @@ end;
 
 procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
 
-  procedure ExtractUnits(var UnitString: String; Units: TStringList);
-  var
-    UnitList: String;
-  begin
-    UnitList := NextBlock(UnitString, ';');
-
-    while UnitList <> '' do
-      Units.Add(NextBlock(UnitList, ','));
-  end;
-
   function GetParentCircularRelationship(TreeNode: PVirtualNode; const DelphiUnitName: String)
     : TCircularRelationshipType;
   var
@@ -2338,7 +2325,7 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
       SetNodeVisibility(vtUnitsList, ListNode, DelphiFile);
   end;
 
-  procedure BuildDependencyTreeRec(Parent: PVirtualNode; UsedUnitInfo: IUsedUnitInfo);
+  procedure BuildDependencyTreeRec(Parent: PVirtualNode; Unitname: string);
   var
     i: Integer;
     TreeNode: PVirtualNode;
@@ -2357,17 +2344,17 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
       Inc(FScannedFiles);
       Inc(FScanDepth);
 
-      if FScanDepth > FDeppestScanDepth then
-        FDeppestScanDepth := FScanDepth;
+      if FScanDepth > FDeepestScanDepth then
+        FDeepestScanDepth := FScanDepth;
 
-      FModel.SearchUnitByNameWithScopes(UsedUnitInfo.DelphiUnitName, UnitFilename, FProjectSettings.UnitScopeNames);
+      FModel.SearchUnitByNameWithScopes(Unitname, UnitFilename, FProjectSettings.UnitScopeNames);
       InPath := UnitFilename <> '';
       Parsed := FALSE;
 
       // Parse the unit
       if InPath then
       begin
-        DelphiFile := FModel.FindParsedDelphiUnit(UsedUnitInfo.DelphiUnitName);
+        DelphiFile := FModel.FindParsedDelphiUnit(Unitname);
 
         if DelphiFile = nil then
         begin
@@ -2396,19 +2383,17 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
       end
       else
       begin
-        UnitInfo := TUnitInfo.Create;
-        UnitInfo.DelphiUnitName := UsedUnitInfo.DelphiUnitName;
+        UnitInfo                := TUnitInfo.Create;
+        UnitInfo.DelphiUnitName := Unitname;
       end;
 
       TreeNode := AddUnitNode(Parent, UnitInfo, InPath);
-
-      FLastScanNode := TreeNode;
 
       if (not FCancelled) and (Parsed) and (InPath) and (FTreeNodeObjects[GetID(TreeNode)].CircularReference = crNone) and
         (FTreeNodeObjects[GetID(TreeNode)].Link = nil) then
       begin
         for i := 0 to pred(UnitInfo.UsedUnits.Count) do
-          BuildDependencyTreeRec(TreeNode, UnitInfo.UsedUnits[i]);
+          BuildDependencyTreeRec(TreeNode, UnitInfo.UsedUnits[i].DelphiUnitName);
       end;
     end;
 
@@ -2417,7 +2402,6 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
   end;
 
 var
-  RootUnitInfo: IUsedUnitInfo;
   i: Integer;
   RootFile: String;
 begin
@@ -2435,9 +2419,6 @@ begin
   vtUsedByUnits.BeginUpdate;
   vtUsesUnits.BeginUpdate;
   try
-    FModel.DelphiFiles.Clear;
-    FModel.DelphiFileList.Clear;
-
     for i := 0 to pred(FProjectSettings.RootFiles.Count) do
     begin
       if FCancelled then
@@ -2446,17 +2427,10 @@ begin
       RootFile := FProjectSettings.RootFiles[i];
 
       if not RootFile.IsEmpty then // allow empty definition lines (e.g. for visual structuring)
-      begin
         if not FileExists(RootFile) then
           Log(StrRootFileNotFound, [RootFile], LogWarning)
         else
-        begin
-          RootUnitInfo := TUsedUnitInfo.Create;
-          RootUnitInfo.DelphiUnitName := ExtractFilenameNoExt(RootFile);
-
-          BuildDependencyTreeRec(nil, RootUnitInfo);
-        end;
-      end;
+          BuildDependencyTreeRec(nil, ExtractFilenameNoExt(RootFile));
     end;
 
     if vtUnitsTree.FocusedNode = nil then
@@ -2474,8 +2448,6 @@ begin
     vtUsedByUnits.EndUpdate;
     vtUsesUnits.EndUpdate;
 
-    FLastScanNode := nil;
-
     UpdateListControls(vtUnitsList.FocusedNode);
 
     UpdateStats(TRUE);
@@ -2489,11 +2461,10 @@ begin
   FCircularFiles := 0;
   FParsedFileCount := 0;
   FLineCount := 0;
-  FDeppestScanDepth := 0;
+  FDeepestScanDepth := 0;
   FScanDepth := 0;
   FFMXFormCount := 0;
   FVCLFormCount := 0;
-  FLastScanNode := nil;
 end;
 
 procedure TfrmMain.UpdateStats(ForceUpdate: Boolean);
@@ -2528,7 +2499,7 @@ begin
     AddStat(StrFMXFormCount, FormatCardinal(FFMXFormCount));
     AddStat(StrTotalLines, FormatCardinal(FLineCount));
     AddStat(StrSearchPathFiles, FormatCardinal(FModel.Files.Count));
-    AddStat(StrDeepestScanDepth, FDeppestScanDepth);
+    AddStat(StrDeepestScanDepth, FDeepestScanDepth);
 
     if FBusy then
     begin

@@ -18,6 +18,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
+    procedure Clear;
     function CreateDelphiFile(const DelphiUnitName: String): TDelphiFile;
     function SearchUnitByNameWithScopes(
       const DelphiUnitName: String;
@@ -34,6 +35,13 @@ type
 implementation
 
 { TDudsModel }
+
+procedure TDudsModel.Clear;
+begin
+  FFiles.Clear;
+  FDelphiFiles.Clear;
+  FDelphiFileList.Clear;
+end;
 
 constructor TDudsModel.Create;
 begin
