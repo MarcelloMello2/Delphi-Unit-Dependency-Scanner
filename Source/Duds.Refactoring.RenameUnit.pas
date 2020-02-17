@@ -14,7 +14,7 @@ uses
   Duds.Common.Language,
   Duds.Common.Log,
   Duds.Common.Interfaces,
-  Duds.Model,
+  Duds.Scan.Model,
   Duds.Common.Refactoring;
 
 type

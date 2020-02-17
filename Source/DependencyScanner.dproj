@@ -156,8 +156,9 @@
         <DCCReference Include="Duds.Common.Singleton.pas"/>
         <DCCReference Include="Duds.Common.Refactoring.pas"/>
         <DCCReference Include="Duds.Common.Log.pas"/>
-        <DCCReference Include="Duds.Model.pas"/>
-        <DCCReference Include="Duds.FileScanner.pas"/>
+        <DCCReference Include="Duds.Scan.Model.pas"/>
+        <DCCReference Include="Duds.Scan.FileScanner.pas"/>
+        <DCCReference Include="Duds.Scan.DependencyAnalyzer.pas"/>
         <DCCReference Include="Duds.Refactoring.RenameUnit.pas"/>
         <DCCReference Include="Duds.Refactoring.AddUnitToUses.pas"/>
         <DCCReference Include="Duds.Export.Gephi.pas"/>

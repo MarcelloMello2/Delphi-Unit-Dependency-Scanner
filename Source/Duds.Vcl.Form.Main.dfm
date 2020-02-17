@@ -683,9 +683,9 @@ object frmMain: TfrmMain
         BevelOuter = bvNone
         TabOrder = 1
         object Panel9: TPanel
-          Left = 852
+          Left = 792
           Top = 0
-          Width = 264
+          Width = 324
           Height = 150
           Align = alRight
           BevelOuter = bvNone
@@ -694,7 +694,7 @@ object frmMain: TfrmMain
             AlignWithMargins = True
             Left = 2
             Top = 3
-            Width = 259
+            Width = 319
             Height = 144
             Margins.Left = 2
             Align = alClient
@@ -709,7 +709,7 @@ object frmMain: TfrmMain
             Columns = <
               item
                 Position = 0
-                Width = 175
+                Width = 235
               end
               item
                 Position = 1
@@ -721,7 +721,7 @@ object frmMain: TfrmMain
           AlignWithMargins = True
           Left = 0
           Top = 3
-          Width = 852
+          Width = 792
           Height = 144
           Margins.Left = 0
           Margins.Right = 0

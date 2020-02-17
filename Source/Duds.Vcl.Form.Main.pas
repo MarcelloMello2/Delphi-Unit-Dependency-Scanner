@@ -58,10 +58,11 @@ uses
   Duds.Common.Refactoring,
   Duds.Common.Language,
   Duds.Common.Log,
-  Duds.Model,
+  Duds.Scan.Model,
+  Duds.Scan.FileScanner,
+  Duds.Scan.DependencyAnalyzer,
   Duds.Export.Gephi,
   Duds.Export.GraphML,
-  Duds.FileScanner,
   Duds.Refactoring.RenameUnit,
   Duds.Refactoring.AddUnitToUses,
 
@@ -274,12 +275,13 @@ type
     procedure actAddUnitToUsesExecute(Sender: TObject);    
   private
     FModel: TDudsModel;
+    FDependencyAnalyzer: TDudsDependencyAnalyzer;
     FTreeNodeObjects: TObjectList<TNodeObject>;
     FSearchText: String;
     FPascalUnitExtractor: TPascalUnitExtractor;
     FLineCount: Integer;
     FStats: TStringList;
-    FScannedFiles: Integer;
+    FScannedUsesCount: Integer;
     FSemiCircularFiles: Integer;
     FCircularFiles: Integer;
     FScanDepth: Integer;
@@ -295,6 +297,7 @@ type
     FParsedFileCount: Integer;
     FFMXFormCount: Integer;
     FVCLFormCount: Integer;
+    FFilesNotInPath: Integer;
     FNextStatusUpdate: TDateTime;
     FDeepestScanDepth: Integer;
     FClosing: Boolean;
@@ -446,6 +449,7 @@ begin
   vtStats.NodeDataSize := SizeOf(TNodeData);
 
   FModel := TDudsModel.Create;
+  FDependencyAnalyzer := nil;
   FTreeNodeObjects := TObjectList<TNodeObject>.Create(TRUE);
   FStats := TStringList.Create;
 
@@ -1962,6 +1966,7 @@ begin
       UpdateStats(TRUE);
       Refresh;
 
+      // step 1: scanning the disk for files (rootfiles & search paths)
       FileScanner := TDudsFileScanner.Create;
       try
         FileScanner.LoadFilesInSearchPaths(FModel, FProjectSettings);
@@ -1970,9 +1975,33 @@ begin
         FreeAndNil(FileScanner);
       end;
 
+      // step 2: recursively parsing the root files for all used units
       if not FCancelled then
-        BuildDependencyTree;
+      begin
+        FDependencyAnalyzer := TDudsDependencyAnalyzer.Create;
+        try
+          FDependencyAnalyzer.Model           := FModel;
+          FDependencyAnalyzer.ProjectSettings := FProjectSettings;
+          FDependencyAnalyzer.ScanRootFilesAndBuildUsesLists;
+
+          FParsedFileCount   := FDependencyAnalyzer.ParsedFileCount;
+          FScannedUsesCount  := FDependencyAnalyzer.ScannedUsesCount;
+          FDeepestScanDepth  := FDependencyAnalyzer.DeepestScanDepth;
+          FFMXFormCount      := FDependencyAnalyzer.FMXFormCount;
+          FVCLFormCount      := FDependencyAnalyzer.VCLFormCount;
+          FLineCount         := FDependencyAnalyzer.LineCount;
+          FSemiCircularFiles := FDependencyAnalyzer.SemiCircularFiles;
+          FCircularFiles     := FDependencyAnalyzer.CircularFiles;
+          FFilesNotInPath    := FDependencyAnalyzer.FilesNotInPath;
+        finally
+          FreeAndNil(FDependencyAnalyzer);
+        end;
+      end;
+
+      //if not FCancelled then
+      //  BuildDependencyTree;
     finally
+      UpdateLogEntries;
       FBusy := FALSE;
 
       actStartScan.Visible := TRUE;
@@ -2007,6 +2036,8 @@ end;
 procedure TfrmMain.actStopScanExecute(Sender: TObject);
 begin
   FCancelled := TRUE;
+  if Assigned(FDependencyAnalyzer) then
+     FDependencyAnalyzer.Cancelled := FCancelled;
 
   actStopScan.Enabled := FALSE;
 end;
@@ -2291,13 +2322,13 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
       DelphiFile.BaseNode     := Result;
 
       ListNode := vtUnitsList.AddChild(nil);
-      SetID(ListNode, pred(FModel.DelphiFiles.Count));
+      SetID(ListNode, pred(FModel.ParsedDelphiFiles.Count));
 
       NewNode := vtUsedByUnits.AddChild(nil);
-      SetID(NewNode, pred(FModel.DelphiFiles.Count));
+      SetID(NewNode, pred(FModel.ParsedDelphiFiles.Count));
 
       NewNode := vtUsesUnits.AddChild(nil);
-      SetID(NewNode, pred(FModel.DelphiFiles.Count));
+      SetID(NewNode, pred(FModel.ParsedDelphiFiles.Count));
 
       FLineCount := FLineCount + UnitInfo.LineCount;
     end
@@ -2341,7 +2372,7 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
     begin
       UpdateStats(FALSE);
 
-      Inc(FScannedFiles);
+      Inc(FScannedUsesCount);
       Inc(FScanDepth);
 
       if FScanDepth > FDeepestScanDepth then
@@ -2439,7 +2470,7 @@ begin
     if vtUnitsList.FocusedNode = nil then
       vtUnitsList.SelectNodeEx(vtUnitsList.GetFirst);
 
-    Log(StrDFilesWithATo, [FModel.DelphiFiles.Count, FLineCount]);
+    Log(StrDFilesWithATo, [FModel.ParsedDelphiFiles.Count, FormatCardinal(FLineCount)]);
   finally
     ExpandAll;
 
@@ -2456,7 +2487,7 @@ end;
 
 procedure TfrmMain.ClearStats;
 begin
-  FScannedFiles := 0;
+  FScannedUsesCount := 0;
   FSemiCircularFiles := 0;
   FCircularFiles := 0;
   FParsedFileCount := 0;
@@ -2465,6 +2496,7 @@ begin
   FScanDepth := 0;
   FFMXFormCount := 0;
   FVCLFormCount := 0;
+  FFilesNotInPath := 0;
 end;
 
 procedure TfrmMain.UpdateStats(ForceUpdate: Boolean);
@@ -2490,15 +2522,19 @@ begin
     Index := 0;
 
     AddStat(StrTime, SecondsToTimeString(SecondsBetween(now, FStartTime)));
-    AddStat(StrScannedFiles, FormatCardinal(FScannedFiles));
+    AddStat(StrSearchPathFiles, FormatCardinal(FModel.Files.Count));
+    AddStat(StrScannedUsesCount, FormatCardinal(FScannedUsesCount));
+
+    AddStat(StrFilesFound, FormatCardinal(FModel.ParsedDelphiFiles.Count));
+    AddStat(StrNotInSearchPathFiles, FormatCardinal(FFilesNotInPath));
+    AddStat(StrParsedFiles, FormatCardinal(FParsedFileCount));
+
     AddStat(StrSemiCircularFiles, FormatCardinal(FSemiCircularFiles));
     AddStat(StrFCircularFiles, FormatCardinal(FCircularFiles));
-    AddStat(StrFilesFound, FormatCardinal(FModel.DelphiFiles.Count));
-    AddStat(StrParsedFiles, FormatCardinal(FParsedFileCount));
+
     AddStat(StrVCLFormCount, FormatCardinal(FVCLFormCount));
     AddStat(StrFMXFormCount, FormatCardinal(FFMXFormCount));
     AddStat(StrTotalLines, FormatCardinal(FLineCount));
-    AddStat(StrSearchPathFiles, FormatCardinal(FModel.Files.Count));
     AddStat(StrDeepestScanDepth, FDeepestScanDepth);
 
     if FBusy then

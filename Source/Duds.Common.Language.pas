@@ -10,7 +10,7 @@ resourcestring
   StrScanningDSearchSearchPaths = 'Scanning %d search paths (expanded from %d defined paths)';
   StrDFilesFound = '%d matching file(s) found in the search paths';
   StrParsingFiles = 'Parsing files';
-  StrDFilesWithATo = '%d used unit(s) found and a total of %d lines parsed';
+  StrDFilesWithATo = '%d used unit(s) found and a total of %s lines parsed';
   StrUpdateTheUsesClauseIn = 'Update the uses clause in "%s"?';
   StrUnableToFindFile = 'Unable to find file "%s"';
   StrUsesClauseIn = '"%s" not updated as the text has been changed from "%s" to "%s"';
@@ -20,13 +20,14 @@ resourcestring
   StrUnableToRenameS = 'Unable to rename "%s" as the unit name was not found';
   StrUpdatedDelphiUnitNameIn = 'Updated unit name in "%s" from "%s" to "%s"';
   StrUpdatedUsesClause = 'Replaced "%s" with "%s" in the uses clause of "%s"';
-  StrScannedFiles = 'Processed Files';
-  StrSemiCircularFiles = 'Semi Circular references';
-  StrFCircularFiles = 'Circular references';
+  StrScannedUsesCount = 'Processed Uses';
+  StrSemiCircularFiles = 'Semi Circular References';
+  StrFCircularFiles = 'Circular References';
   StrParsedFiles = 'Unique Parsed Files';
-  StrFilesFound = 'Total Used Units';
+  StrFilesFound = 'Total Used Units & Project Files';
   StrTotalLines = 'Total Lines of Code';
   StrSearchPathFiles = 'Search Path Files';
+  StrNotInSearchPathFiles = 'Not in Search Path Files';
   StrScanDepth = 'Current Scan Depth';
   StrSFoundInMultip = '"%s" found in multiple search paths. "%s" will be used and "%s" ignored';
   StrTime = 'Elapsed Time';

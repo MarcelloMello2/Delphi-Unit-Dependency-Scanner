@@ -1,4 +1,4 @@
-unit Duds.FileScanner;
+unit Duds.Scan.FileScanner;
 
 interface
 
@@ -8,7 +8,7 @@ uses
   Duds.Common.Files,
   Duds.Common.Types,
   Duds.Common.Classes,
-  Duds.Model,
+  Duds.Scan.Model,
   Duds.Common.Log,
   Duds.Common.Language;
 

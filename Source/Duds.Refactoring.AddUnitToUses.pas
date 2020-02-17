@@ -14,8 +14,8 @@ uses
   Duds.Common.Language,
   Duds.Common.Log,
   Duds.Common.Interfaces,
-  Duds.Model,
-  Duds.Common.Refactoring;
+  Duds.Common.Refactoring,
+  Duds.Scan.Model;
 
 type
   TAddUnitToUsesRefactoring = class(TObject)

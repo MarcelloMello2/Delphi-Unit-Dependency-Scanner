@@ -1,4 +1,4 @@
-unit Duds.Model;
+unit Duds.Scan.Model;
 
 interface
 
@@ -11,7 +11,7 @@ type
   TDudsModel = class(TObject)
   private
     FFiles: TDictionary<String, String>;
-    FDelphiFiles: TObjectDictionary<String, TDelphiFile>;
+    FParsedDelphiFiles: TObjectDictionary<String, TDelphiFile>;
     FDelphiFileList: TObjectList<TDelphiFile>;
 
   public
@@ -28,7 +28,7 @@ type
     function FindParsedDelphiUnit(const DelphiUnitName: string): TDelphiFile;
 
     property Files: TDictionary<String, String> read FFiles;
-    property DelphiFiles: TObjectDictionary<String, TDelphiFile> read FDelphiFiles;
+    property ParsedDelphiFiles: TObjectDictionary<String, TDelphiFile> read FParsedDelphiFiles;
     property DelphiFileList: TObjectList<TDelphiFile> read FDelphiFileList;
   end;
 
@@ -39,7 +39,7 @@ implementation
 procedure TDudsModel.Clear;
 begin
   FFiles.Clear;
-  FDelphiFiles.Clear;
+  FParsedDelphiFiles.Clear;
   FDelphiFileList.Clear;
 end;
 
@@ -47,14 +47,14 @@ constructor TDudsModel.Create;
 begin
   inherited Create;
   FFiles          := TDictionary<String, String>.Create;
-  FDelphiFiles    := TObjectDictionary<String, TDelphiFile>.Create([doOwnsValues]);
+  FParsedDelphiFiles    := TObjectDictionary<String, TDelphiFile>.Create([doOwnsValues]);
   FDelphiFileList := TObjectList<TDelphiFile>.Create(FALSE);
 end;
 
 destructor TDudsModel.Destroy;
 begin
   FreeAndNil(FFiles);
-  FreeAndNil(FDelphiFiles);
+  FreeAndNil(FParsedDelphiFiles);
   FreeAndNil(FDelphiFileList);
   inherited;
 end;
@@ -101,14 +101,14 @@ end;
 
 function TDudsModel.FindParsedDelphiUnit(const DelphiUnitName: string): TDelphiFile;
 begin
-  FDelphiFiles.TryGetValue(UpperCase(DelphiUnitName), Result);
+  FParsedDelphiFiles.TryGetValue(UpperCase(DelphiUnitName), Result);
 end;
 
 function TDudsModel.CreateDelphiFile(const DelphiUnitName: String): TDelphiFile;
 begin
   Result := TDelphiFile.Create;
 
-  FDelphiFiles.Add(UpperCase(DelphiUnitName), Result);
+  FParsedDelphiFiles.Add(UpperCase(DelphiUnitName), Result);
   FDelphiFileList.Add(Result);
 end;
 

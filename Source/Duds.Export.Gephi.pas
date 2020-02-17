@@ -8,7 +8,7 @@ uses
   Duds.Common.Interfaces,
   Duds.Common.Strings,
   Duds.Common.Classes,
-  Duds.Model;
+  Duds.Scan.Model;
 
 procedure ExportToGephi(Model: TDudsModel; ExportUnitsNotInPath: Boolean; const Filename: String);
 
@@ -23,7 +23,7 @@ var
 begin
   Lines := TStringList.Create;
   try
-    for DelphiFile in Model.DelphiFiles.Values do
+    for DelphiFile in Model.ParsedDelphiFiles.Values do
     begin
       if DelphiFile.InSearchPath or ExportUnitsNotInPath then
       begin
@@ -32,7 +32,7 @@ begin
 
         // Add references to all used units
         for UsedUnitInfo in DelphiFile.UnitInfo.UsedUnits do
-          if Model.DelphiFiles.TryGetValue(UpperCase(UsedUnitInfo.DelphiUnitName), UsedDelphiFile) then
+          if Model.ParsedDelphiFiles.TryGetValue(UpperCase(UsedUnitInfo.DelphiUnitName), UsedDelphiFile) then
             if UsedDelphiFile.InSearchPath or ExportUnitsNotInPath then
               AddToken(CurrentLine, Trim(UsedUnitInfo.DelphiUnitName), ';');
 
