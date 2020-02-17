@@ -1783,7 +1783,7 @@ begin
           Log(StrStartBatchRename, [OldUnitName, NewUnitName], LogInfo);
           Application.ProcessMessages;
 
-          RenameDelphiFile(FALSE, OldUnitName, NewUnitName, FALSE, DummyRun, RenameHistoryFiles, TRUE,
+          RenameDelphiFile(FALSE, OldUnitName, NewUnitName, DummyRun, RenameHistoryFiles, TRUE,
             InsertOldNameComment, RenameLowerCaseExtension);
           Inc(renameCount);
         end;
@@ -1807,12 +1807,16 @@ begin
   try
     RenameRefactoring := TDudsRenameRefacotring.Create;
     try
-      RenameRefactoring.RenameDelphiFile(aClearLog, SearchString, ReplaceString,
-        DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment, LowerCaseExtension);
+      RenameRefactoring.Model := FModel;
+      RenameRefactoring.RenameDelphiFile(
+        aClearLog, SearchString, ReplaceString,
+        DummyRun, RenameHistoryFiles, ExactMatch,
+        InsertOldNameComment, LowerCaseExtension);
     finally
       FreeAndNil(RenameRefactoring);
     end;
   finally
+    UpdateLogEntries;
     UpdateTreeControls(vtUnitsTree.FocusedNode);
     UpdateListControls(vtUnitsList.FocusedNode);
 

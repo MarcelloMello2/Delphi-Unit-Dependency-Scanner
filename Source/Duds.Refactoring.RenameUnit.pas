@@ -7,42 +7,39 @@ uses
   System.DateUtils,
   System.Generics.Collections, System.IOUtils, System.RegularExpressions,
 
+  Duds.Common.Types,
   Duds.Common.Strings,
-
   Duds.Common.Classes,
   Duds.Common.Files,
   Duds.Common.Language,
   Duds.Common.Log,
   Duds.Common.Interfaces,
+  Duds.Model,
   Duds.Common.Refactoring;
 
 type
   TDudsRenameRefacotring = class(TObject)
+  private
+    FModel: TDudsModel;
   public
-    procedure RenameDelphiFile(const aClearLog: Boolean; const SearchString, ReplaceString: String;
+    procedure RenameDelphiFile(const aClearLog: Boolean; const SearchStringOrOldUnitName, ReplaceStringOrNewUnitName: String;
       const DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment, LowerCaseExtension: Boolean);
+
+    property Model: TDudsModel read FModel write FModel;
 
   end;
 
 implementation
 
-procedure TDudsRenameRefacotring.RenameDelphiFile(const aClearLog: Boolean; const SearchString, ReplaceString: String;
+procedure TDudsRenameRefacotring.RenameDelphiFile(const aClearLog: Boolean; const SearchStringOrOldUnitName, ReplaceStringOrNewUnitName: String;
   const DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment, LowerCaseExtension: Boolean);
-
-  function GetDelphiUnitName(Node: PVirtualNode): String;
-  begin
-    if FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.PreviousUnitName <> '' then
-      Result := FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.PreviousUnitName
-    else
-      Result := FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName;
-  end;
 
   function IsUnitNameMatch(const UnitName: String): Boolean;
   begin
     if ExactMatch then
-      Result := SameText(SearchString, UnitName)
+      Result := SameText(SearchStringOrOldUnitName, UnitName)
     else
-      Result := TRegEx.IsMatch(UnitName, SearchString);
+      Result := TRegEx.IsMatch(UnitName, SearchStringOrOldUnitName);
   end;
 
   function SearchAndReplaceUnitName(const UnitName: String): String;
@@ -50,12 +47,12 @@ procedure TDudsRenameRefacotring.RenameDelphiFile(const aClearLog: Boolean; cons
     if IsUnitNameMatch(UnitName) then
     begin
       if ExactMatch then
-        Result := StringReplace(UnitName, SearchString, ReplaceString, [rfReplaceAll, rfIgnoreCase])
+        Result := StringReplace(UnitName, SearchStringOrOldUnitName, ReplaceStringOrNewUnitName, [rfIgnoreCase])
       else
-        Result := TRegEx.Replace(UnitName, SearchString, ReplaceString);
+        Result := TRegEx.Replace(UnitName, SearchStringOrOldUnitName, ReplaceStringOrNewUnitName);
     end
     else
-      Result := UnitName;
+      raise Exception.Create('Why here? This function should only be called for renaming a unitname...')
   end;
 
   function RenameMatchingFiles(const OldFilename, NewUnitName: String; const IsHistory: Boolean;
@@ -113,67 +110,57 @@ procedure TDudsRenameRefacotring.RenameDelphiFile(const aClearLog: Boolean; cons
 var
   UpdatedCount: Integer;
 
-  procedure UpdateUsesClause(UpdateNode: PVirtualNode);
+  procedure UpdateUsesClauseInDelphiFile(DelphiFile: TDelphiFile; UsedUnitInfo: IUsedUnitInfo);
   var
-    StepNode: PVirtualNode;
-    PosOffset: Integer;
-    FileUsingTheUnit: IUnitInfo;
-    UsedUnitIndex: Integer;
-    UsedUnitInfo: IUsedUnitInfo;
+    PositionOffset: Integer;
     OldUnitName, NewUnitName: String;
-    SomethingChanged: Boolean;
+    ReplaceSuccessful: Boolean;
+    IsUsesAfterRenamedUses: Boolean;
+    FollowingUsedUnitInfo: IUsedUnitInfo;
   begin
-    OldUnitName := GetDelphiUnitName(UpdateNode);
-    NewUnitName := SearchAndReplaceUnitName(OldUnitName);
-
-    FileUsingTheUnit := FNodeObjects[GetID(UpdateNode.Parent)].DelphiFile.UnitInfo;
-    // file to update (using the unit to rename)
-
-    UsedUnitIndex := GetNodeIndex(UpdateNode);
-    // Index of the unit in the uses list of the file to update
-    UsedUnitInfo := FileUsingTheUnit.UsedUnits[UsedUnitIndex];
-    // detail info about the used unit we are renaming
+    OldUnitName    := UsedUnitInfo.DelphiUnitName;
+    NewUnitName    := SearchAndReplaceUnitName(OldUnitName);
+    PositionOffset := Length(NewUnitName) - Length(OldUnitName);
 
     // step 1: apply the rename in the file
-    SomethingChanged := FALSE;
+    ReplaceSuccessful := FALSE;
 
     // replace text occurence for <OldUnitName in '....\OldUnitName.pas'>
     // ->                                               ^^^^^^^^^^^
     if UsedUnitInfo.InFilePosition > 0 then
-      SomethingChanged := SafeReplaceTextInFile(DummyRun, FileUsingTheUnit.Filename, OldUnitName, NewUnitName,
-        UsedUnitInfo.InFilePosition);
+    begin
+      ReplaceSuccessful := SafeReplaceTextInFile(DummyRun, DelphiFile.UnitInfo.Filename, OldUnitName, NewUnitName, UsedUnitInfo.InFilePosition);
+      if ReplaceSuccessful then
+        if not DummyRun then
+        begin
+          UsedUnitInfo.InFilePosition := UsedUnitInfo.InFilePosition + PositionOffset;
+          PositionOffset := PositionOffset * 2; // x 2 because there were two text-replaces when
+        end;
+
+    end;
 
     // replace text occurence for <OldUnitName in '....\OldUnitName.pas'>
     // ->                          ^^^^^^^^^^^
-    SomethingChanged := SafeReplaceTextInFile(DummyRun, FileUsingTheUnit.Filename, OldUnitName, NewUnitName,
-      UsedUnitInfo.Position) or SomethingChanged;
+    ReplaceSuccessful := SafeReplaceTextInFile(DummyRun, DelphiFile.UnitInfo.Filename, OldUnitName, NewUnitName, UsedUnitInfo.Position)
+                         or ReplaceSuccessful;
 
-    if SomethingChanged then
+    if ReplaceSuccessful then
     begin
-      TDudsLogger.GetInstance.Log(StrUpdatedUsesClause, [OldUnitName, NewUnitName, FileUsingTheUnit.Filename]);
+      TDudsLogger.GetInstance.Log(StrUpdatedUsesClause, [OldUnitName, NewUnitName, DelphiFile.UnitInfo.Filename]);
 
       if not DummyRun then
       begin
-        PosOffset := Length(NewUnitName) - Length(OldUnitName);
-
-        // step 2: update the recently changed uses in the meta data
+        // step 2: update the recently changed uses in the meta data (start position stays valid...)
         UsedUnitInfo.DelphiUnitName := NewUnitName;
-        if UsedUnitInfo.InFilePosition > 0 then
-        begin
-          if UsedUnitInfo.Position > 0 then
-            UsedUnitInfo.InFilePosition := UsedUnitInfo.InFilePosition + PosOffset;
-
-          PosOffset := PosOffset * 2;
-        end;
 
         // step 3: update position of all following uses in the meta data
-        StepNode := UpdateNode.NextSibling;
-
-        while StepNode <> nil do
+        IsUsesAfterRenamedUses := false;
+        for FollowingUsedUnitInfo in DelphiFile.UnitInfo.UsedUnits do
         begin
-          FileUsingTheUnit.UsedUnits[GetNodeIndex(StepNode)].UpdatePosition(PosOffset);
-
-          StepNode := StepNode.NextSibling;
+          if IsUsesAfterRenamedUses then
+            FollowingUsedUnitInfo.UpdatePosition(PositionOffset);
+          if FollowingUsedUnitInfo = UsedUnitInfo then
+            IsUsesAfterRenamedUses := true;
         end;
 
       end;
@@ -188,6 +175,7 @@ var
     i: Integer;
     PosOffset: Integer;
     UnitInfo: IUnitInfo;
+    UsedUnitInfo: IUsedUnitInfo;
   begin
     Result := FALSE;
 
@@ -241,71 +229,54 @@ var
             PosOffset := Length(NewUnitName + OldUnitNameComment) - Length(OldUnitName);
 
             // Update the position of all the used units
-            for i := 0 to pred(UnitInfo.UsedUnits.Count) do
-              UnitInfo.UsedUnits[i].UpdatePosition(PosOffset);
+            for UsedUnitInfo in UnitInfo.UsedUnits do
+              UsedUnitInfo.UpdatePosition(PosOffset);
           end;
         end;
       end;
   end;
 
 var
-  StepNode: PVirtualNode;
-  NodeDelphiUnitName, UpdateFilename: String;
+  // StepNode: PVirtualNode;
+  NodeDelphiUnitName: String;
   PreviousUnitName: String;
+  DelphiFile: TDelphiFile;
+  UsedUnitInfo: IUsedUnitInfo;
 begin
   if aClearLog then
     TDudsLogger.GetInstance.Clear;
 
-  // Clear PreviousUnitNames
-  StepNode := vtUnitsTree.GetFirst;
-
-  while StepNode <> nil do
-  begin
-    FNodeObjects[GetID(StepNode)].DelphiFile.UnitInfo.PreviousUnitName := '';
-
-    StepNode := vtUnitsTree.GetNext(StepNode);
-  end;
-
-  UpdatedCount := 0;
-
   if DummyRun then
     TDudsLogger.GetInstance.Log(StrTHISISADUMMYRUN, LogWarning);
 
+  // Clear PreviousUnitNames in all files
+  for DelphiFile in FModel.DelphiFileList do
+     DelphiFile.UnitInfo.PreviousUnitName := '';
+
+  UpdatedCount := 0;
+
   // Update all the uses clauses in the files
-  StepNode := vtUnitsTree.GetFirst;
-
-  while StepNode <> nil do
+  for DelphiFile in FModel.DelphiFileList do
   begin
-    NodeDelphiUnitName := GetDelphiUnitName(StepNode);
 
-    // Does this name unit match?
-    if IsUnitNameMatch(NodeDelphiUnitName) then
+    // Is this the file we are renaming?
+    if (DelphiFile.UnitInfo.DelphiFileType = ftPas) and IsUnitNameMatch(DelphiFile.UnitInfo.DelphiUnitName) then
     begin
-      // Get the filename for the unit
-      UpdateFilename := FNodeObjects[GetID(StepNode)].DelphiFile.UnitInfo.Filename;
-
-      // Update the filename if this is the original file node
-      if FNodeObjects[GetID(StepNode)].DelphiFile.BaseNode = StepNode then
-      begin
-        PreviousUnitName := FNodeObjects[GetID(StepNode)].DelphiFile.UnitInfo.DelphiUnitName;
-
-        if RenameDelphiFile(FNodeObjects[GetID(StepNode)].DelphiFile) then
-          FNodeObjects[GetID(StepNode)].DelphiFile.UnitInfo.PreviousUnitName := PreviousUnitName;
-      end;
-
-      // Only update the uses clasuses for non root nodes
-      if vtUnitsTree.GetNodeLevel(StepNode) > 0 then
-        UpdateUsesClause(StepNode);
+      PreviousUnitName := DelphiFile.UnitInfo.DelphiUnitName;
+      if RenameDelphiFile(DelphiFile) then
+        DelphiFile.UnitInfo.PreviousUnitName := PreviousUnitName;
     end;
 
-    StepNode := vtUnitsTree.GetNext(StepNode);
+    // check all uses of the file
+    for UsedUnitInfo in DelphiFile.UnitInfo.UsedUnits do
+       if IsUnitNameMatch(UsedUnitInfo.DelphiUnitName) then
+          UpdateUsesClauseInDelphiFile(DelphiFile, UsedUnitInfo);
   end;
 
   TDudsLogger.GetInstance.Log(StrFinishedUpdated, [UpdatedCount]);
 
   if DummyRun then
     TDudsLogger.GetInstance.Log(StrTHISWASADUMMYRUN, LogWarning);
-
 end;
 
 end.

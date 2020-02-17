@@ -1,6 +1,7 @@
 object frmRenameUnit: TfrmRenameUnit
   Left = 0
   Top = 0
+  ActiveControl = edtNewName
   AutoSize = True
   BorderStyle = bsDialog
   Caption = 'Rename Unit'
@@ -28,7 +29,6 @@ object frmRenameUnit: TfrmRenameUnit
     ParentBackground = False
     TabOrder = 0
     Visible = False
-    ExplicitTop = 200
     object Panel5: TPanel
       AlignWithMargins = True
       Left = 1
@@ -84,7 +84,6 @@ object frmRenameUnit: TfrmRenameUnit
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitTop = 159
     object btnOK: TButton
       Left = 142
       Top = 8
