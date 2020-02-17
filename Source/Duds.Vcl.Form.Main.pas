@@ -273,7 +273,7 @@ type
     procedure actAddUnitToUsesExecute(Sender: TObject);    
   private
     FModel: TDudsModel;
-    FNodeObjects: TObjectList<TNodeObject>;
+    FTreeNodeObjects: TObjectList<TNodeObject>;
     FSearchText: String;
     FPascalUnitExtractor: TPascalUnitExtractor;
     FLineCount: Integer;
@@ -447,7 +447,7 @@ begin
   vtStats.NodeDataSize := SizeOf(TNodeData);
 
   FModel := TDudsModel.Create;
-  FNodeObjects := TObjectList<TNodeObject>.Create(TRUE);
+  FTreeNodeObjects := TObjectList<TNodeObject>.Create(TRUE);
   FStats := TStringList.Create;
 
   FEnvironmentSettings := TEnvironmentSettings.Create;
@@ -472,10 +472,10 @@ begin
   SaveSettings;
 
   FreeAndNil(FModel);
+  FreeAndNil(FTreeNodeObjects);
   FreeAndNil(FStats);
   FreeAndNil(FEnvironmentSettings);
   FreeAndNil(FProjectSettings);
-  FreeAndNil(FNodeObjects);
 end;
 
 procedure TfrmMain.Log(const Msg: String; const Severity: Integer);
@@ -750,17 +750,17 @@ begin
 
           while ParentStepNode <> vtUnitsTree.RootNode do
           begin
-            if FNodeObjects[GetID(ParentStepNode)].SearchTermInChildren then
+            if FTreeNodeObjects[GetID(ParentStepNode)].SearchTermInChildren then
               Break
             else
-              FNodeObjects[GetID(ParentStepNode)].SearchTermInChildren := TRUE;
+              FTreeNodeObjects[GetID(ParentStepNode)].SearchTermInChildren := TRUE;
 
             ParentStepNode := ParentStepNode.Parent;
           end;
         end;
       end
       else
-        FNodeObjects[GetID(Node)].SearchTermInChildren := FALSE;
+        FTreeNodeObjects[GetID(Node)].SearchTermInChildren := FALSE;
 
       Node := vtUnitsTree.GetNext(Node);
 
@@ -826,8 +826,8 @@ begin
     EraseAction := eaColor;
     ItemColor := $008CFFFF;
   end
-  else if (FNodeObjects[GetID(Node)].SearchTermInChildren) or
-    ((Node.Parent <> Sender.RootNode) and (FNodeObjects[GetID(Node.Parent)].SearchTermInChildren)) then
+  else if (FTreeNodeObjects[GetID(Node)].SearchTermInChildren) or
+    ((Node.Parent <> Sender.RootNode) and (FTreeNodeObjects[GetID(Node.Parent)].SearchTermInChildren)) then
   begin
     EraseAction := eaColor;
     ItemColor := $00CCFFCC;
@@ -839,8 +839,8 @@ procedure TfrmMain.vtUnitsTreeCompareNodes(Sender: TBaseVirtualTree; Node1, Node
 var
   NodeObject1, NodeObject2: TNodeObject;
 begin
-  NodeObject1 := FNodeObjects[GetID(Node1)];
-  NodeObject2 := FNodeObjects[GetID(Node2)];
+  NodeObject1 := FTreeNodeObjects[GetID(Node1)];
+  NodeObject2 := FTreeNodeObjects[GetID(Node2)];
 
   case Column of
     0:
@@ -862,10 +862,10 @@ begin
     6:
       Result := 0;
     7:
-      Result := CompareInteger(Integer(FNodeObjects[GetID(Node1)].CircularReference),
-        Integer(FNodeObjects[GetID(Node2)].CircularReference));
+      Result := CompareInteger(Integer(FTreeNodeObjects[GetID(Node1)].CircularReference),
+        Integer(FTreeNodeObjects[GetID(Node2)].CircularReference));
     8:
-      Result := CompareBoolean(FNodeObjects[GetID(Node1)].Link <> nil, FNodeObjects[GetID(Node2)].Link <> nil);
+      Result := CompareBoolean(FTreeNodeObjects[GetID(Node1)].Link <> nil, FTreeNodeObjects[GetID(Node2)].Link <> nil);
     9:
       Result := CompareStr(NodeObject1.DelphiFile.UnitInfo.Filename, NodeObject2.DelphiFile.UnitInfo.Filename);
   end;
@@ -889,7 +889,7 @@ begin
   if memParentFile.Modified then
     case MessageDlg(Format(StrSHasBeenModifi, [tabParentFile.Caption]), mtWarning, [mbYes, mbNo, mbCancel], 0) of
       mrYes:
-        memParentFile.Lines.SaveToFile(FNodeObjects[GetID(OldNode.Parent)].DelphiFile.UnitInfo.Filename);
+        memParentFile.Lines.SaveToFile(FTreeNodeObjects[GetID(OldNode.Parent)].DelphiFile.UnitInfo.Filename);
       mrCancel:
         begin
           Allowed := FALSE;
@@ -901,7 +901,7 @@ begin
   if memSelectedFile.Modified then
     case MessageDlg(Format(StrSHasBeenModifi, [tabSelectedFile.Caption]), mtWarning, [mbYes, mbNo, mbCancel], 0) of
       mrYes:
-        memSelectedFile.Lines.SaveToFile(FNodeObjects[GetID(OldNode)].DelphiFile.UnitInfo.Filename);
+        memSelectedFile.Lines.SaveToFile(FTreeNodeObjects[GetID(OldNode)].DelphiFile.UnitInfo.Filename);
       mrCancel:
         Allowed := FALSE;
     end;
@@ -915,24 +915,24 @@ begin
   SetNodePathRichEdit(Node, RichEditUnitPath);
 
   tabParentFile.TabVisible := (Node <> nil) and (Node.Parent <> vtUnitsTree.RootNode);
-  tabSelectedFile.TabVisible := (Node <> nil) and (FNodeObjects[GetID(Node)].DelphiFile.InSearchPath);
+  tabSelectedFile.TabVisible := (Node <> nil) and (FTreeNodeObjects[GetID(Node)].DelphiFile.InSearchPath);
 
   if Node <> nil then
   begin
     pcSource.Visible := TRUE;
 
-    if (FNodeObjects[GetID(Node)].DelphiFile.InSearchPath) and
-      (FileExists(FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.Filename)) then
+    if (FTreeNodeObjects[GetID(Node)].DelphiFile.InSearchPath) and
+      (FileExists(FTreeNodeObjects[GetID(Node)].DelphiFile.UnitInfo.Filename)) then
     begin
-      tabSelectedFile.Caption := ExtractFileName(FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.Filename);
-      memSelectedFile.Lines.LoadFromFile(FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.Filename);
+      tabSelectedFile.Caption := ExtractFileName(FTreeNodeObjects[GetID(Node)].DelphiFile.UnitInfo.Filename);
+      memSelectedFile.Lines.LoadFromFile(FTreeNodeObjects[GetID(Node)].DelphiFile.UnitInfo.Filename);
       memSelectedFile.Modified := FALSE;
     end;
 
-    if (Node.Parent <> vtUnitsTree.RootNode) and (FileExists(FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.Filename))
+    if (Node.Parent <> vtUnitsTree.RootNode) and (FileExists(FTreeNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.Filename))
     then
     begin
-      ParentFileInfo := FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo;
+      ParentFileInfo := FTreeNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo;
       UsedUnitInfo := ParentFileInfo.UsedUnits[GetNodeIndex(Node)];
 
       tabParentFile.Caption := ExtractFileName(ParentFileInfo.Filename);
@@ -964,7 +964,7 @@ begin
     if Result <> '' then
       Result := ' -> ' + Result;
 
-    Result := FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName + Result;
+    Result := FTreeNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName + Result;
 
     Node := Node.Parent;
   end;
@@ -979,13 +979,13 @@ begin
   ARichEdit.Clear;
 
   if Node <> nil then
-    LStartNodeFile := FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName;
+    LStartNodeFile := FTreeNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName;
 
   LArrow := '';
 
   while (Node <> nil) and (Node <> vtUnitsTree.RootNode) do
   begin
-    LParentNodeFile := FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName;
+    LParentNodeFile := FTreeNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName;
 
     RichEditUnitPath.SelStart := 0;
 
@@ -1006,7 +1006,7 @@ procedure TfrmMain.vtUnitsTreeGetImageIndex(Sender: TBaseVirtualTree; Node: PVir
 begin
   if (Kind in [ikNormal, ikSelected]) and (Column = 0) then
   begin
-    case FNodeObjects[GetID(Node)].CircularReference of
+    case FTreeNodeObjects[GetID(Node)].CircularReference of
       crNone:
         ImageIndex := 0;
       crSemiCircular:
@@ -1028,7 +1028,7 @@ begin
     Result := nil
   else
   begin
-    Result := FNodeObjects[GetID(Node)].Link;
+    Result := FTreeNodeObjects[GetID(Node)].Link;
 
     if Result = nil then
       Result := Node;
@@ -1058,7 +1058,7 @@ var
   DelphiFile: TDelphiFile;
   ParentUnitFilename: String;
 begin
-  DelphiFile := FNodeObjects[GetID(Node)].DelphiFile;
+  DelphiFile := FTreeNodeObjects[GetID(Node)].DelphiFile;
   UnitInfo := DelphiFile.UnitInfo;
 
   if TextType = ttStatic then
@@ -1066,9 +1066,9 @@ begin
     CellText := '';
 
     if (Node.Parent <> Sender.RootNode) and (Column = 0) and
-      (GetNodeIndex(Node) < FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.UsedUnits.Count) then
+      (GetNodeIndex(Node) < FTreeNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.UsedUnits.Count) then
     begin
-      ParentUnitFilename := FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.UsedUnits[GetNodeIndex(Node)
+      ParentUnitFilename := FTreeNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.UsedUnits[GetNodeIndex(Node)
         ].DelphiUnitName;
 
       if not SameText(ParentUnitFilename, UnitInfo.DelphiUnitName) then
@@ -1102,16 +1102,16 @@ begin
           CellText := IntToStr(DelphiFile.UnitInfo.UsedUnits.Count);
 
       6:
-        if (DelphiFile.InSearchPath) and (Sender.GetNodeLevel(Node) > 0) and (FNodeObjects[GetID(Node)] <> nil) and
-          (GetNodeIndex(Node) < FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.UsedUnits.Count) then
-          CellText := UsesTypeStrings[FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.UsedUnits[GetNodeIndex(Node)
+        if (DelphiFile.InSearchPath) and (Sender.GetNodeLevel(Node) > 0) and (FTreeNodeObjects[GetID(Node)] <> nil) and
+          (GetNodeIndex(Node) < FTreeNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.UsedUnits.Count) then
+          CellText := UsesTypeStrings[FTreeNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.UsedUnits[GetNodeIndex(Node)
             ].UsesType];
 
       7:
-        CellText := CircularRelationshipTypeDescriptions[FNodeObjects[GetID(Node)].CircularReference];
+        CellText := CircularRelationshipTypeDescriptions[FTreeNodeObjects[GetID(Node)].CircularReference];
 
       8:
-        if FNodeObjects[GetID(Node)].Link <> nil then
+        if FTreeNodeObjects[GetID(Node)].Link <> nil then
           CellText := StrYes
         else
           CellText := StrNo;
@@ -1308,19 +1308,19 @@ begin
 
     if not Sender.Selected[Node] then
     begin
-      if not FNodeObjects[GetID(Node)].DelphiFile.InSearchPath then
+      if not FTreeNodeObjects[GetID(Node)].DelphiFile.InSearchPath then
         TargetCanvas.Font.Color := clGray
-      else if FNodeObjects[GetID(GetLinkedNode(Node))].DelphiFile.UnitInfo.DelphiFileType = ftUnknown then
+      else if FTreeNodeObjects[GetID(GetLinkedNode(Node))].DelphiFile.UnitInfo.DelphiFileType = ftUnknown then
         TargetCanvas.Font.Color := clRed;
     end;
 
     if Column = 0 then
     begin
-      if FNodeObjects[GetID(Node)].Link <> nil then
+      if FTreeNodeObjects[GetID(Node)].Link <> nil then
       begin
         if not Sender.Selected[Node] then
         begin
-          if FNodeObjects[GetID(Node)].DelphiFile.InSearchPath then
+          if FTreeNodeObjects[GetID(Node)].DelphiFile.InSearchPath then
             TargetCanvas.Font.Color := clBlue
           else
             TargetCanvas.Font.Color := $00FEC9B1;
@@ -1335,7 +1335,7 @@ end;
 function TfrmMain.IsSearchHitNode(Node: PVirtualNode): Boolean;
 begin
   Result := (Node <> nil) and
-    (pos(FSearchText, LowerCase(FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName)) > 0);
+    (pos(FSearchText, LowerCase(FTreeNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName)) > 0);
 end;
 
 procedure TfrmMain.actCloseProjectExecute(Sender: TObject);
@@ -1400,12 +1400,12 @@ begin
 
     while Node <> nil do
     begin
-      if FNodeObjects[GetID(Node)].DelphiFile.InSearchPath then
+      if FTreeNodeObjects[GetID(Node)].DelphiFile.InSearchPath then
       begin
-        if FNodeObjects[GetID(Node)].CircularReference in [crSemiCircular, crCircular] then
+        if FTreeNodeObjects[GetID(Node)].CircularReference in [crSemiCircular, crCircular] then
         begin
-          LStrs.Add(CircularRelationshipTypeDescriptions[FNodeObjects[GetID(Node)].CircularReference] + ';' +
-            FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.DelphiUnitName + ';' + FNodeObjects[GetID(Node)
+          LStrs.Add(CircularRelationshipTypeDescriptions[FTreeNodeObjects[GetID(Node)].CircularReference] + ';' +
+            FTreeNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.DelphiUnitName + ';' + FTreeNodeObjects[GetID(Node)
             ].DelphiFile.UnitInfo.DelphiUnitName);
         end;
       end;
@@ -1623,7 +1623,7 @@ end;
 function TfrmMain.GetFocusedDelphiFile: TDelphiFile;
 begin
   if (vtUnitsTree.Focused) and (vtUnitsTree.FocusedNode <> nil) then
-    Result := FNodeObjects[GetID(vtUnitsTree.FocusedNode)].DelphiFile
+    Result := FTreeNodeObjects[GetID(vtUnitsTree.FocusedNode)].DelphiFile
   else
 
     if (vtUnitsList.Focused) and (vtUnitsList.FocusedNode <> nil) then
@@ -1906,7 +1906,7 @@ var
           end
           else
           begin
-            NodeObject := FNodeObjects[GetID(Node)];
+            NodeObject := FTreeNodeObjects[GetID(Node)];
 
             if NodeObject <> nil then
               DelphiFile := NodeObject.DelphiFile;
@@ -2045,10 +2045,10 @@ end;
 procedure TfrmMain.actSaveChangesExecute(Sender: TObject);
 begin
   if memParentFile.Modified then
-    memParentFile.Lines.SaveToFile(FNodeObjects[GetID(vtUnitsTree.FocusedNode.Parent)].DelphiFile.UnitInfo.Filename);
+    memParentFile.Lines.SaveToFile(FTreeNodeObjects[GetID(vtUnitsTree.FocusedNode.Parent)].DelphiFile.UnitInfo.Filename);
 
   if memSelectedFile.Modified then
-    memSelectedFile.Lines.SaveToFile(FNodeObjects[GetID(vtUnitsTree.FocusedNode.Parent)].DelphiFile.UnitInfo.Filename);
+    memSelectedFile.Lines.SaveToFile(FTreeNodeObjects[GetID(vtUnitsTree.FocusedNode.Parent)].DelphiFile.UnitInfo.Filename);
 
   if memListFile.Modified then
     memListFile.Lines.SaveToFile(FModel.DelphiFileList[GetFocusedID(vtUnitsList)].UnitInfo.Filename);
@@ -2162,7 +2162,7 @@ begin
       ((not DelphiFile.InSearchPath) and (actShowUnitsNotInPath.Checked));
 end;
 
-procedure TfrmMain.ShowUnitsNotInPath;
+procedure TfrmMain.ShowUnitsNotInPath; // TODO: This seems to be doubled logic, compare with Search-Methods for tree and list...
 var
   Node: PVirtualNode;
 begin
@@ -2172,7 +2172,7 @@ begin
 
     while Node <> nil do
     begin
-      SetNodeVisibility(vtUnitsTree, Node, FNodeObjects[GetID(Node)].DelphiFile);
+      SetNodeVisibility(vtUnitsTree, Node, FTreeNodeObjects[GetID(Node)].DelphiFile);
 
       Node := vtUnitsTree.GetNext(Node);
     end;
@@ -2276,14 +2276,14 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
       begin
         UsedUnitType := utImplementation;
 
-        if FNodeObjects[GetID(TreeNode)] <> nil then
+        if FTreeNodeObjects[GetID(TreeNode)] <> nil then
         begin
-          for i := 0 to pred(FNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.UsedUnits.Count) do
+          for i := 0 to pred(FTreeNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.UsedUnits.Count) do
           begin
-            if SameText(FNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.UsedUnits[i].DelphiUnitName, DelphiUnitName)
+            if SameText(FTreeNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.UsedUnits[i].DelphiUnitName, DelphiUnitName)
             then
             begin
-              UsedUnitType := FNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.UsedUnits[i].UsesType;
+              UsedUnitType := FTreeNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.UsedUnits[i].UsesType;
 
               Break;
             end;
@@ -2292,7 +2292,7 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
 
         while (TreeNode <> nil) and (TreeNode <> vtUnitsTree.RootNode) do
         begin
-          if SameText(FNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.DelphiUnitName, DelphiUnitName) then
+          if SameText(FTreeNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.DelphiUnitName, DelphiUnitName) then
           begin
             if UsedUnitType = utInterface then
               Result := crCircular
@@ -2316,7 +2316,7 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
   begin
     NodeObject := TNodeObject.Create;
     Result := vtUnitsTree.AddChild(Parent);
-    SetID(Result, FNodeObjects.Add(NodeObject));
+    SetID(Result, FTreeNodeObjects.Add(NodeObject));
 
     ListNode := nil;
 
@@ -2334,7 +2334,7 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
         DelphiFile.UsedCount := 1;
 
       DelphiFile.InSearchPath := InPath;
-      DelphiFile.BaseNode := Result;
+      DelphiFile.BaseNode     := Result;
 
       ListNode := vtUnitsList.AddChild(nil);
       SetID(ListNode, pred(FModel.DelphiFiles.Count));
@@ -2352,13 +2352,13 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
       DelphiFile.UsedCount := DelphiFile.UsedCount + 1;
 
       if FProjectSettings.LinkUnits then
-        FNodeObjects[GetID(Result)].Link := DelphiFile.BaseNode;
+        NodeObject.Link := DelphiFile.BaseNode;
     end;
 
-    FNodeObjects[GetID(Result)].DelphiFile := DelphiFile;
-    FNodeObjects[GetID(Result)].CircularReference := GetParentCircularRelationship(Result, UnitInfo.DelphiUnitName);
+    NodeObject.DelphiFile := DelphiFile;
+    NodeObject.CircularReference := GetParentCircularRelationship(Result, UnitInfo.DelphiUnitName);
 
-    case FNodeObjects[GetID(Result)].CircularReference of
+    case NodeObject.CircularReference of
       crSemiCircular:
         Inc(FSemiCircularFiles);
       crCircular:
@@ -2374,7 +2374,7 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
   procedure BuildDependencyTreeRec(Parent: PVirtualNode; UsedUnitInfo: IUsedUnitInfo);
   var
     i: Integer;
-    Node: PVirtualNode;
+    TreeNode: PVirtualNode;
     UnitFilename: String;
     InPath: Boolean;
     Parsed: Boolean;
@@ -2433,15 +2433,15 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
         UnitInfo.DelphiUnitName := UsedUnitInfo.DelphiUnitName;
       end;
 
-      Node := AddUnitNode(Parent, UnitInfo, InPath);
+      TreeNode := AddUnitNode(Parent, UnitInfo, InPath);
 
-      FLastScanNode := Node;
+      FLastScanNode := TreeNode;
 
-      if (not FCancelled) and (Parsed) and (InPath) and (FNodeObjects[GetID(Node)].CircularReference = crNone) and
-        (FNodeObjects[GetID(Node)].Link = nil) then
+      if (not FCancelled) and (Parsed) and (InPath) and (FTreeNodeObjects[GetID(TreeNode)].CircularReference = crNone) and
+        (FTreeNodeObjects[GetID(TreeNode)].Link = nil) then
       begin
         for i := 0 to pred(UnitInfo.UsedUnits.Count) do
-          BuildDependencyTreeRec(Node, UnitInfo.UsedUnits[i]);
+          BuildDependencyTreeRec(TreeNode, UnitInfo.UsedUnits[i]);
       end;
     end;
 

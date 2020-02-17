@@ -20,19 +20,14 @@ type
   TDudsRenameRefacotring = class(TObject)
   public
     procedure RenameDelphiFile(const aClearLog: Boolean; const SearchString, ReplaceString: String;
-  const DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment,
-  LowerCaseExtension: Boolean);
+      const DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment, LowerCaseExtension: Boolean);
 
   end;
 
 implementation
 
 procedure TDudsRenameRefacotring.RenameDelphiFile(const aClearLog: Boolean; const SearchString, ReplaceString: String;
-  const DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment,
-  LowerCaseExtension: Boolean);
-
-var
-  UpdatedCount: Integer;
+  const DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment, LowerCaseExtension: Boolean);
 
   function GetDelphiUnitName(Node: PVirtualNode): String;
   begin
@@ -114,6 +109,9 @@ var
       FreeAndNil(ScanFilenames);
     end;
   end;
+
+var
+  UpdatedCount: Integer;
 
   procedure UpdateUsesClause(UpdateNode: PVirtualNode);
   var
@@ -268,46 +266,45 @@ begin
     StepNode := vtUnitsTree.GetNext(StepNode);
   end;
 
+  UpdatedCount := 0;
 
-    UpdatedCount := 0;
+  if DummyRun then
+    TDudsLogger.GetInstance.Log(StrTHISISADUMMYRUN, LogWarning);
 
-    if DummyRun then
-      TDudsLogger.GetInstance.Log(StrTHISISADUMMYRUN, LogWarning);
+  // Update all the uses clauses in the files
+  StepNode := vtUnitsTree.GetFirst;
 
-    // Update all the uses clauses in the files
-    StepNode := vtUnitsTree.GetFirst;
+  while StepNode <> nil do
+  begin
+    NodeDelphiUnitName := GetDelphiUnitName(StepNode);
 
-    while StepNode <> nil do
+    // Does this name unit match?
+    if IsUnitNameMatch(NodeDelphiUnitName) then
     begin
-      NodeDelphiUnitName := GetDelphiUnitName(StepNode);
+      // Get the filename for the unit
+      UpdateFilename := FNodeObjects[GetID(StepNode)].DelphiFile.UnitInfo.Filename;
 
-      // Does this name unit match?
-      if IsUnitNameMatch(NodeDelphiUnitName) then
+      // Update the filename if this is the original file node
+      if FNodeObjects[GetID(StepNode)].DelphiFile.BaseNode = StepNode then
       begin
-        // Get the filename for the unit
-        UpdateFilename := FNodeObjects[GetID(StepNode)].DelphiFile.UnitInfo.Filename;
+        PreviousUnitName := FNodeObjects[GetID(StepNode)].DelphiFile.UnitInfo.DelphiUnitName;
 
-        // Update the filename if this is the original file node
-        if FNodeObjects[GetID(StepNode)].DelphiFile.BaseNode = StepNode then
-        begin
-          PreviousUnitName := FNodeObjects[GetID(StepNode)].DelphiFile.UnitInfo.DelphiUnitName;
-
-          if RenameDelphiFile(FNodeObjects[GetID(StepNode)].DelphiFile) then
-            FNodeObjects[GetID(StepNode)].DelphiFile.UnitInfo.PreviousUnitName := PreviousUnitName;
-        end;
-
-        // Only update the uses clasuses for non root nodes
-        if vtUnitsTree.GetNodeLevel(StepNode) > 0 then
-          UpdateUsesClause(StepNode);
+        if RenameDelphiFile(FNodeObjects[GetID(StepNode)].DelphiFile) then
+          FNodeObjects[GetID(StepNode)].DelphiFile.UnitInfo.PreviousUnitName := PreviousUnitName;
       end;
 
-      StepNode := vtUnitsTree.GetNext(StepNode);
+      // Only update the uses clasuses for non root nodes
+      if vtUnitsTree.GetNodeLevel(StepNode) > 0 then
+        UpdateUsesClause(StepNode);
     end;
 
-    TDudsLogger.GetInstance.Log(StrFinishedUpdated, [UpdatedCount]);
+    StepNode := vtUnitsTree.GetNext(StepNode);
+  end;
 
-    if DummyRun then
-      TDudsLogger.GetInstance.Log(StrTHISWASADUMMYRUN, LogWarning);
+  TDudsLogger.GetInstance.Log(StrFinishedUpdated, [UpdatedCount]);
+
+  if DummyRun then
+    TDudsLogger.GetInstance.Log(StrTHISWASADUMMYRUN, LogWarning);
 
 end;
 
