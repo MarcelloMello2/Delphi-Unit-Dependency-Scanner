@@ -12,18 +12,23 @@ type
   private
     FFiles: TDictionary<String, String>;
     FDelphiFiles: TObjectDictionary<String, TDelphiFile>;
+    FDelphiFileList: TObjectList<TDelphiFile>;
 
   public
     constructor Create;
     destructor Destroy; override;
 
+    function CreateDelphiFile(const DelphiUnitName: String): TDelphiFile;
     function SearchUnitByNameWithScopes(
       const DelphiUnitName: String;
       var UnitFilename: String;
       UnitScopeNames: TStringList): Boolean;
+    function IsUnitUsed(const DelphiUnitName: String; DelphiFile: TDelphiFile): Boolean;
+    function FindParsedDelphiUnit(const DelphiUnitName: string): TDelphiFile;
 
     property Files: TDictionary<String, String> read FFiles;
     property DelphiFiles: TObjectDictionary<String, TDelphiFile> read FDelphiFiles;
+    property DelphiFileList: TObjectList<TDelphiFile> read FDelphiFileList;
   end;
 
 implementation
@@ -33,14 +38,16 @@ implementation
 constructor TDudsModel.Create;
 begin
   inherited Create;
-  FFiles       := TDictionary<String, String>.Create;
-  FDelphiFiles := TObjectDictionary<String, TDelphiFile>.Create([doOwnsValues]);
+  FFiles          := TDictionary<String, String>.Create;
+  FDelphiFiles    := TObjectDictionary<String, TDelphiFile>.Create([doOwnsValues]);
+  FDelphiFileList := TObjectList<TDelphiFile>.Create(FALSE);
 end;
 
 destructor TDudsModel.Destroy;
 begin
   FreeAndNil(FFiles);
   FreeAndNil(FDelphiFiles);
+  FreeAndNil(FDelphiFileList);
   inherited;
 end;
 
@@ -67,6 +74,34 @@ begin
         Break;
     end;
   end;
+end;
+
+function TDudsModel.IsUnitUsed(const DelphiUnitName: String; DelphiFile: TDelphiFile): Boolean;
+var
+  i: Integer;
+begin
+  Result := FALSE;
+
+  for i := 0 to pred(DelphiFile.UnitInfo.UsedUnits.Count) do
+    if SameText(DelphiFile.UnitInfo.UsedUnits[i].DelphiUnitName, DelphiUnitName) then
+    begin
+      Result := TRUE;
+
+      Break;
+    end;
+end;
+
+function TDudsModel.FindParsedDelphiUnit(const DelphiUnitName: string): TDelphiFile;
+begin
+  FDelphiFiles.TryGetValue(UpperCase(DelphiUnitName), Result);
+end;
+
+function TDudsModel.CreateDelphiFile(const DelphiUnitName: String): TDelphiFile;
+begin
+  Result := TDelphiFile.Create;
+
+  FDelphiFiles.Add(UpperCase(DelphiUnitName), Result);
+  FDelphiFileList.Add(Result);
 end;
 
 end.
