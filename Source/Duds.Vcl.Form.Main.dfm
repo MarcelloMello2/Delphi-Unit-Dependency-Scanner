@@ -153,7 +153,7 @@ object frmMain: TfrmMain
                 OnKeyDown = edtSearchEditKeyDown
                 OnKeyPress = edtSearchEditKeyPress
               end
-              object vtUnits: TVirtualStringTree
+              object vtUnitsTree: TVirtualStringTree
                 AlignWithMargins = True
                 Left = 3
                 Top = 29
@@ -170,15 +170,15 @@ object frmMain: TfrmMain
                 TreeOptions.AutoOptions = [toAutoDropExpand, toAutoSort, toAutoTristateTracking, toAutoHideButtons, toAutoDeleteMovedNodes]
                 TreeOptions.SelectionOptions = [toFullRowSelect, toRightClickSelect]
                 TreeOptions.StringOptions = [toSaveCaptions, toShowStaticText, toAutoAcceptEditChange]
-                OnBeforeItemErase = vtUnitsBeforeItemErase
-                OnCompareNodes = vtUnitsCompareNodes
-                OnDblClick = vtUnitsDblClick
-                OnFocusChanged = vtUnitsFocusChanged
-                OnFocusChanging = vtUnitsFocusChanging
-                OnGetText = vtUnitsGetText
-                OnPaintText = vtUnitsPaintText
-                OnGetImageIndex = vtUnitsGetImageIndex
-                OnGetNodeDataSize = vtUnitsGetNodeDataSize
+                OnBeforeItemErase = vtUnitsTreeBeforeItemErase
+                OnCompareNodes = vtUnitsTreeCompareNodes
+                OnDblClick = vtUnitsTreeDblClick
+                OnFocusChanged = vtUnitsTreeFocusChanged
+                OnFocusChanging = vtUnitsTreeFocusChanging
+                OnGetText = vtUnitsTreeGetText
+                OnPaintText = vtUnitsTreePaintText
+                OnGetImageIndex = vtUnitsTreeGetImageIndex
+                OnGetNodeDataSize = vtUnitsTreeGetNodeDataSize
                 OnHeaderClick = vtCommonHeaderClick
                 Columns = <
                   item
@@ -289,6 +289,10 @@ object frmMain: TfrmMain
                 object tabSelectedFile: TTabSheet
                   Caption = 'Selected File'
                   ImageIndex = 1
+                  ExplicitLeft = 0
+                  ExplicitTop = 0
+                  ExplicitWidth = 0
+                  ExplicitHeight = 0
                   object memSelectedFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
@@ -328,6 +332,10 @@ object frmMain: TfrmMain
           object tabList: TTabSheet
             Caption = 'List'
             ImageIndex = 1
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
             object Splitter3: TSplitter
               Left = 497
               Top = 0
@@ -446,6 +454,10 @@ object frmMain: TfrmMain
                 TabOrder = 0
                 object tabUsedBy: TTabSheet
                   Caption = 'Used By Units'
+                  ExplicitLeft = 0
+                  ExplicitTop = 0
+                  ExplicitWidth = 0
+                  ExplicitHeight = 0
                   object edtSearchUsedByList: TEdit
                     AlignWithMargins = True
                     Left = 0
@@ -531,6 +543,10 @@ object frmMain: TfrmMain
                 object tabUsesList: TTabSheet
                   Caption = 'Uses Units'
                   ImageIndex = 2
+                  ExplicitLeft = 0
+                  ExplicitTop = 0
+                  ExplicitWidth = 0
+                  ExplicitHeight = 0
                   object edtSearchUsesList: TEdit
                     AlignWithMargins = True
                     Left = 0
@@ -616,6 +632,10 @@ object frmMain: TfrmMain
                 object tabSource: TTabSheet
                   Caption = 'Source'
                   ImageIndex = 1
+                  ExplicitLeft = 0
+                  ExplicitTop = 0
+                  ExplicitWidth = 0
+                  ExplicitHeight = 0
                   object memListFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0

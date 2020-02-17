@@ -174,7 +174,7 @@ type
     edtSearchUsedByList: TEdit;
     edtSearchUsesList: TEdit;
     vtUnitsList: TVirtualStringTree;
-    vtUnits: TVirtualStringTree;
+    vtUnitsTree: TVirtualStringTree;
     vtUsedByUnits: TVirtualStringTree;
     vtUsesUnits: TVirtualStringTree;
     vtStats: TVirtualStringTree;
@@ -194,22 +194,22 @@ type
     Addunittouseslistinallfilesthatcurrentlyusethisunit2: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure vtUnitsGetNodeDataSize(Sender: TBaseVirtualTree; var NodeDataSize: Integer);
-    procedure vtUnitsGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
+    procedure vtUnitsTreeGetNodeDataSize(Sender: TBaseVirtualTree; var NodeDataSize: Integer);
+    procedure vtUnitsTreeGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
       var CellText: string);
     procedure edtSearchEditChange(Sender: TObject);
-    procedure vtUnitsPaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;
+    procedure vtUnitsTreePaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType);
-    procedure vtUnitsBeforeItemErase(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
+    procedure vtUnitsTreeBeforeItemErase(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
       ItemRect: TRect; var ItemColor: TColor; var EraseAction: TItemEraseAction);
-    procedure vtUnitsFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
-    procedure vtUnitsGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
+    procedure vtUnitsTreeFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
+    procedure vtUnitsTreeGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
       Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
-    procedure vtUnitsDblClick(Sender: TObject);
+    procedure vtUnitsTreeDblClick(Sender: TObject);
     procedure actStartScanExecute(Sender: TObject);
     procedure actShowUnitsNotInPathExecute(Sender: TObject);
     procedure ActionManager1Update(Action: TBasicAction; var Handled: Boolean);
-    procedure vtUnitsFocusChanging(Sender: TBaseVirtualTree; OldNode, NewNode: PVirtualNode;
+    procedure vtUnitsTreeFocusChanging(Sender: TBaseVirtualTree; OldNode, NewNode: PVirtualNode;
       OldColumn, NewColumn: TColumnIndex; var Allowed: Boolean);
     procedure memParentFileChange(Sender: TObject);
     procedure memSelectedFileChange(Sender: TObject);
@@ -241,7 +241,7 @@ type
     procedure vtUnitsListCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
       var Result: Integer);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    procedure vtUnitsCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
+    procedure vtUnitsTreeCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
       var Result: Integer);
     procedure actExitExecute(Sender: TObject);
     procedure actSettingsExecute(Sender: TObject);
@@ -444,7 +444,7 @@ begin
   pcList.ActivePageIndex := 0;
 
   vtUnitsList.NodeDataSize := SizeOf(TNodeData);
-  vtUnits.NodeDataSize := SizeOf(TNodeData);
+  vtUnitsTree.NodeDataSize := SizeOf(TNodeData);
   vtUsedByUnits.NodeDataSize := SizeOf(TNodeData);
   vtUsesUnits.NodeDataSize := SizeOf(TNodeData);
   vtStats.NodeDataSize := SizeOf(TNodeData);
@@ -709,33 +709,33 @@ procedure TfrmMain.SearchTree(const SearchText: String; FromFirstNode: Boolean);
 var
   Node, EndNode, ParentStepNode: PVirtualNode;
 begin
-  vtUnits.BeginUpdate;
+  vtUnitsTree.BeginUpdate;
   try
     FSearchText := LowerCase(SearchText);
 
-    if (vtUnits.FocusedNode = nil) or (FromFirstNode) then
+    if (vtUnitsTree.FocusedNode = nil) or (FromFirstNode) then
     begin
-      Node := vtUnits.GetFirst;
+      Node := vtUnitsTree.GetFirst;
 
       EndNode := nil;
     end
     else
     begin
-      Node := vtUnits.GetNext(vtUnits.FocusedNode);
+      Node := vtUnitsTree.GetNext(vtUnitsTree.FocusedNode);
 
       if Node = nil then
-        Node := vtUnits.GetFirst;
+        Node := vtUnitsTree.GetFirst;
 
-      EndNode := vtUnits.GetPrevious(Node);
+      EndNode := vtUnitsTree.GetPrevious(Node);
     end;
 
     while Node <> EndNode do
     begin
       if IsSearchHitNode(Node) then
       begin
-        if vtUnits.IsVisible[Node] then
+        if vtUnitsTree.IsVisible[Node] then
         begin
-          vtUnits.SelectNodeEx(Node, TRUE, TRUE);
+          vtUnitsTree.SelectNodeEx(Node, TRUE, TRUE);
 
           if not FShowTermParents then
             Break;
@@ -745,7 +745,7 @@ begin
         begin
           ParentStepNode := Node.Parent;
 
-          while ParentStepNode <> vtUnits.RootNode do
+          while ParentStepNode <> vtUnitsTree.RootNode do
           begin
             if FNodeObjects[GetID(ParentStepNode)].SearchTermInChildren then
               Break
@@ -759,15 +759,15 @@ begin
       else
         FNodeObjects[GetID(Node)].SearchTermInChildren := FALSE;
 
-      Node := vtUnits.GetNext(Node);
+      Node := vtUnitsTree.GetNext(Node);
 
       if (Node = nil) and (EndNode <> nil) then
-        Node := vtUnits.GetFirst;
+        Node := vtUnitsTree.GetFirst;
     end;
 
-    vtUnits.Invalidate;
+    vtUnitsTree.Invalidate;
   finally
-    vtUnits.EndUpdate;
+    vtUnitsTree.EndUpdate;
   end;
 end;
 
@@ -815,7 +815,7 @@ begin
     TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
 end;
 
-procedure TfrmMain.vtUnitsBeforeItemErase(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
+procedure TfrmMain.vtUnitsTreeBeforeItemErase(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
   ItemRect: TRect; var ItemColor: TColor; var EraseAction: TItemEraseAction);
 begin
   if IsSearchHitNode(Node) then
@@ -831,7 +831,7 @@ begin
   end;
 end;
 
-procedure TfrmMain.vtUnitsCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
+procedure TfrmMain.vtUnitsTreeCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
   var Result: Integer);
 var
   NodeObject1, NodeObject2: TNodeObject;
@@ -869,18 +869,18 @@ begin
 
 end;
 
-procedure TfrmMain.vtUnitsDblClick(Sender: TObject);
+procedure TfrmMain.vtUnitsTreeDblClick(Sender: TObject);
 begin
-  if vtUnits.FocusedNode <> nil then
-    vtUnits.SelectNodeEx(GetLinkedNode(vtUnits.FocusedNode));
+  if vtUnitsTree.FocusedNode <> nil then
+    vtUnitsTree.SelectNodeEx(GetLinkedNode(vtUnitsTree.FocusedNode));
 end;
 
-procedure TfrmMain.vtUnitsFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
+procedure TfrmMain.vtUnitsTreeFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
 begin
   UpdateTreeControls(Node);
 end;
 
-procedure TfrmMain.vtUnitsFocusChanging(Sender: TBaseVirtualTree; OldNode, NewNode: PVirtualNode;
+procedure TfrmMain.vtUnitsTreeFocusChanging(Sender: TBaseVirtualTree; OldNode, NewNode: PVirtualNode;
   OldColumn, NewColumn: TColumnIndex; var Allowed: Boolean);
 begin
   if memParentFile.Modified then
@@ -911,7 +911,7 @@ var
 begin
   SetNodePathRichEdit(Node, RichEditUnitPath);
 
-  tabParentFile.TabVisible := (Node <> nil) and (Node.Parent <> vtUnits.RootNode);
+  tabParentFile.TabVisible := (Node <> nil) and (Node.Parent <> vtUnitsTree.RootNode);
   tabSelectedFile.TabVisible := (Node <> nil) and (FNodeObjects[GetID(Node)].DelphiFile.InSearchPath);
 
   if Node <> nil then
@@ -926,7 +926,7 @@ begin
       memSelectedFile.Modified := FALSE;
     end;
 
-    if (Node.Parent <> vtUnits.RootNode) and (FileExists(FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.Filename))
+    if (Node.Parent <> vtUnitsTree.RootNode) and (FileExists(FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.Filename))
     then
     begin
       ParentFileInfo := FNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo;
@@ -956,7 +956,7 @@ function TfrmMain.GetNodePath(Node: PVirtualNode): String;
 begin
   Result := '';
 
-  while (Node <> nil) and (Node <> vtUnits.RootNode) do
+  while (Node <> nil) and (Node <> vtUnitsTree.RootNode) do
   begin
     if Result <> '' then
       Result := ' -> ' + Result;
@@ -980,7 +980,7 @@ begin
 
   LArrow := '';
 
-  while (Node <> nil) and (Node <> vtUnits.RootNode) do
+  while (Node <> nil) and (Node <> vtUnitsTree.RootNode) do
   begin
     LParentNodeFile := FNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName;
 
@@ -998,7 +998,7 @@ begin
   end;
 end;
 
-procedure TfrmMain.vtUnitsGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
+procedure TfrmMain.vtUnitsTreeGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
   Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
 begin
   if (Kind in [ikNormal, ikSelected]) and (Column = 0) then
@@ -1014,7 +1014,7 @@ begin
   end;
 end;
 
-procedure TfrmMain.vtUnitsGetNodeDataSize(Sender: TBaseVirtualTree; var NodeDataSize: Integer);
+procedure TfrmMain.vtUnitsTreeGetNodeDataSize(Sender: TBaseVirtualTree; var NodeDataSize: Integer);
 begin
   NodeDataSize := SizeOf(TNodeData);
 end;
@@ -1048,7 +1048,7 @@ begin
   end;
 end;
 
-procedure TfrmMain.vtUnitsGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
+procedure TfrmMain.vtUnitsTreeGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
   TextType: TVSTTextType; var CellText: string);
 var
   UnitInfo: IUnitInfo;
@@ -1185,8 +1185,8 @@ begin
   begin
     pcView.ActivePage := tabTree;
 
-    vtUnits.SelectNodeEx(FDelphiFileList[GetFocusedID(TVirtualStringTree(Sender))].BaseNode);
-    vtUnits.SetFocus;
+    vtUnitsTree.SelectNodeEx(FDelphiFileList[GetFocusedID(TVirtualStringTree(Sender))].BaseNode);
+    vtUnitsTree.SetFocus;
   end;
 end;
 
@@ -1305,7 +1305,7 @@ begin
     end;
 end;
 
-procedure TfrmMain.vtUnitsPaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;
+procedure TfrmMain.vtUnitsTreePaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;
   Column: TColumnIndex; TextType: TVSTTextType);
 begin
   if TextType = ttStatic then
@@ -1362,17 +1362,17 @@ end;
 
 procedure TfrmMain.actCollapseAllExecute(Sender: TObject);
 begin
-  vtUnits.CollapseAll(nil);
+  vtUnitsTree.CollapseAll(nil);
 end;
 
 procedure TfrmMain.actCollapseExecute(Sender: TObject);
 begin
-  vtUnits.Expanded[vtUnits.FocusedNode] := FALSE;
+  vtUnitsTree.Expanded[vtUnitsTree.FocusedNode] := FALSE;
 end;
 
 procedure TfrmMain.actExpandExecute(Sender: TObject);
 begin
-  vtUnits.ExpandAll(vtUnits.FocusedNode);
+  vtUnitsTree.ExpandAll(vtUnitsTree.FocusedNode);
 end;
 
 procedure TfrmMain.actExitExecute(Sender: TObject);
@@ -1387,9 +1387,9 @@ end;
 
 procedure TfrmMain.ExpandAll;
 begin
-  vtUnits.ExpandAll(nil);
+  vtUnitsTree.ExpandAll(nil);
 
-  vtUnits.AutoFitColumns
+  vtUnitsTree.AutoFitColumns
 end;
 
 procedure TfrmMain.ActionManager1Update(Action: TBasicAction; var Handled: Boolean);
@@ -1404,11 +1404,11 @@ var
   Node: PVirtualNode;
   LStrs: TStringList;
 begin
-  vtUnits.BeginUpdate;
+  vtUnitsTree.BeginUpdate;
   LStrs := TStringList.Create;
   try
     LStrs.Add('Kind;Unit;Ref');
-    Node := vtUnits.GetFirst;
+    Node := vtUnitsTree.GetFirst;
 
     while Node <> nil do
     begin
@@ -1422,16 +1422,16 @@ begin
         end;
       end;
 
-      Node := vtUnits.GetNext(Node);
+      Node := vtUnitsTree.GetNext(Node);
     end;
 
-    if vtUnits.FocusedNode <> nil then
-      vtUnits.ScrollIntoView(vtUnits.FocusedNode, TRUE);
+    if vtUnitsTree.FocusedNode <> nil then
+      vtUnitsTree.ScrollIntoView(vtUnitsTree.FocusedNode, TRUE);
   finally
     if SaveDialogGephiCSV.Execute then
       LStrs.SaveToFile(SaveDialogGephiCSV.Filename);
     LStrs.Free;
-    vtUnits.EndUpdate;
+    vtUnitsTree.EndUpdate;
   end;
 end;
 
@@ -1441,7 +1441,7 @@ var
 begin
   DelphiFile := GetFocusedDelphiFile;
 
-  actShowUnitsNotInPath.Enabled := (not FBusy) and (vtUnits.RootNodeCount > 0);
+  actShowUnitsNotInPath.Enabled := (not FBusy) and (vtUnitsTree.RootNodeCount > 0);
   actSaveChanges.Enabled := (not FBusy) and ((memParentFile.Modified) or (memSelectedFile.Modified) or
     (memListFile.Modified));
 
@@ -1450,12 +1450,12 @@ begin
   actApplyRenameList.Enabled := actRename.Enabled;
   actAddUnitToUses.Enabled := actRename.Enabled;
 
-  actSearchAndReplace.Enabled := (not FBusy) and (vtUnits.RootNodeCount > 0);
+  actSearchAndReplace.Enabled := (not FBusy) and (vtUnitsTree.RootNodeCount > 0);
 
-  actExpandAll.Enabled := (not FBusy) and (pcView.ActivePage = tabTree) and (vtUnits.RootNodeCount > 0);
-  actCollapseAll.Enabled := (not FBusy) and (pcView.ActivePage = tabTree) and (vtUnits.RootNodeCount > 0);
-  actExpand.Enabled := (not FBusy) and (vtUnits.FocusedNode <> nil);
-  actCollapse.Enabled := (not FBusy) and (vtUnits.FocusedNode <> nil);
+  actExpandAll.Enabled := (not FBusy) and (pcView.ActivePage = tabTree) and (vtUnitsTree.RootNodeCount > 0);
+  actCollapseAll.Enabled := (not FBusy) and (pcView.ActivePage = tabTree) and (vtUnitsTree.RootNodeCount > 0);
+  actExpand.Enabled := (not FBusy) and (vtUnitsTree.FocusedNode <> nil);
+  actCollapse.Enabled := (not FBusy) and (vtUnitsTree.FocusedNode <> nil);
   actLoadProject.Enabled := not FBusy;
   actSaveProject.Enabled := (not FBusy) and (FProjectFilename <> '');
   actSaveProjectAs.Enabled := not FBusy;
@@ -1523,13 +1523,13 @@ end;
 
 procedure TfrmMain.CloseControls;
 begin
-  vtUnits.Clear;
+  vtUnitsTree.Clear;
   vtUnitsList.Clear;
   vtUsedByUnits.Clear;
   vtUsesUnits.Clear;
   vtStats.Clear;
 
-  vtUnits.Header.Columns[1].Options := vtUnits.Header.Columns[1].Options - [coVisible];
+  vtUnitsTree.Header.Columns[1].Options := vtUnitsTree.Header.Columns[1].Options - [coVisible];
 
   FDelphiFileList.Clear;
   FModel.DelphiFiles.Clear;
@@ -1636,8 +1636,8 @@ end;
 
 function TfrmMain.GetFocusedDelphiFile: TDelphiFile;
 begin
-  if (vtUnits.Focused) and (vtUnits.FocusedNode <> nil) then
-    Result := FNodeObjects[GetID(vtUnits.FocusedNode)].DelphiFile
+  if (vtUnitsTree.Focused) and (vtUnitsTree.FocusedNode <> nil) then
+    Result := FNodeObjects[GetID(vtUnitsTree.FocusedNode)].DelphiFile
   else
 
     if (vtUnitsList.Focused) and (vtUnitsList.FocusedNode <> nil) then
@@ -1734,7 +1734,7 @@ begin
   end;
 
   if Result then
-    vtUnits.Header.Columns[1].Options := vtUnits.Header.Columns[1].Options + [coVisible];
+    vtUnitsTree.Header.Columns[1].Options := vtUnitsTree.Header.Columns[1].Options + [coVisible];
 end;
 
 procedure TfrmMain.ApplyMultipleRenames(aCsvFilename: String; DummyRun, RenameHistoryFiles, InsertOldNameComment,
@@ -2049,20 +2049,20 @@ begin
     ClearLog();
 
   // Clear PreviousUnitNames
-  StepNode := vtUnits.GetFirst;
+  StepNode := vtUnitsTree.GetFirst;
 
   while StepNode <> nil do
   begin
     FNodeObjects[GetID(StepNode)].DelphiFile.UnitInfo.PreviousUnitName := '';
 
-    StepNode := vtUnits.GetNext(StepNode);
+    StepNode := vtUnitsTree.GetNext(StepNode);
   end;
 
   if PromptBeforeUpdate then
   begin
     pcView.ActivePage := tabTree;
 
-    FocusedNode := vtUnits.FocusedNode;
+    FocusedNode := vtUnitsTree.FocusedNode;
   end
   else
     FocusedNode := nil;
@@ -2073,7 +2073,7 @@ begin
       Log(StrTHISISADUMMYRUN, LogWarning);
 
     // Update all the uses clauses in the files
-    StepNode := vtUnits.GetFirst;
+    StepNode := vtUnitsTree.GetFirst;
 
     while StepNode <> nil do
     begin
@@ -2095,12 +2095,12 @@ begin
         end;
 
         // Only update the uses clasuses for non root nodes
-        if vtUnits.GetNodeLevel(StepNode) > 0 then
+        if vtUnitsTree.GetNodeLevel(StepNode) > 0 then
         begin
           // This is a node that needs changing
           if PromptBeforeUpdate then
           begin
-            vtUnits.SelectNodeEx(StepNode);
+            vtUnitsTree.SelectNodeEx(StepNode);
 
             case MessageDlg(Format(StrUpdateTheUsesClauseIn, [UpdateFilename]), mtWarning,
               [mbYes, mbNo, mbCancel, mbYesToAll], 0) of
@@ -2121,7 +2121,7 @@ begin
         end;
       end;
 
-      StepNode := vtUnits.GetNext(StepNode);
+      StepNode := vtUnitsTree.GetNext(StepNode);
     end;
 
     Log(StrFinishedUpdated, [UpdatedCount]);
@@ -2130,9 +2130,9 @@ begin
       Log(StrTHISWASADUMMYRUN, LogWarning);
   finally
     if FocusedNode <> nil then
-      vtUnits.SelectNodeEx(FocusedNode);
+      vtUnitsTree.SelectNodeEx(FocusedNode);
 
-    UpdateTreeControls(vtUnits.FocusedNode);
+    UpdateTreeControls(vtUnitsTree.FocusedNode);
     UpdateListControls(vtUnitsList.FocusedNode);
 
     SearchList(vtUnitsList, edtListSearch.Text);
@@ -2331,7 +2331,7 @@ begin
       ShowHideControls;
 
       UpdateStats(TRUE);
-      UpdateTreeControls(vtUnits.FocusedNode);
+      UpdateTreeControls(vtUnitsTree.FocusedNode);
     end;
   end;
 end;
@@ -2364,10 +2364,10 @@ end;
 procedure TfrmMain.actSaveChangesExecute(Sender: TObject);
 begin
   if memParentFile.Modified then
-    memParentFile.Lines.SaveToFile(FNodeObjects[GetID(vtUnits.FocusedNode.Parent)].DelphiFile.UnitInfo.Filename);
+    memParentFile.Lines.SaveToFile(FNodeObjects[GetID(vtUnitsTree.FocusedNode.Parent)].DelphiFile.UnitInfo.Filename);
 
   if memSelectedFile.Modified then
-    memSelectedFile.Lines.SaveToFile(FNodeObjects[GetID(vtUnits.FocusedNode.Parent)].DelphiFile.UnitInfo.Filename);
+    memSelectedFile.Lines.SaveToFile(FNodeObjects[GetID(vtUnitsTree.FocusedNode.Parent)].DelphiFile.UnitInfo.Filename);
 
   if memListFile.Modified then
     memListFile.Lines.SaveToFile(FDelphiFileList[GetFocusedID(vtUnitsList)].UnitInfo.Filename);
@@ -2406,7 +2406,7 @@ begin
   if SaveDialog2.Execute then
   begin
     if pcView.ActivePage = tabTree then
-      ExportToXML(vtUnits, SaveDialog2.Filename)
+      ExportToXML(vtUnitsTree, SaveDialog2.Filename)
     else
       ExportToXML(vtUnitsList, SaveDialog2.Filename)
   end;
@@ -2485,21 +2485,21 @@ procedure TfrmMain.ShowUnitsNotInPath;
 var
   Node: PVirtualNode;
 begin
-  vtUnits.BeginUpdate;
+  vtUnitsTree.BeginUpdate;
   try
-    Node := vtUnits.GetFirst;
+    Node := vtUnitsTree.GetFirst;
 
     while Node <> nil do
     begin
-      SetNodeVisibility(vtUnits, Node, FNodeObjects[GetID(Node)].DelphiFile);
+      SetNodeVisibility(vtUnitsTree, Node, FNodeObjects[GetID(Node)].DelphiFile);
 
-      Node := vtUnits.GetNext(Node);
+      Node := vtUnitsTree.GetNext(Node);
     end;
 
-    if vtUnits.FocusedNode <> nil then
-      vtUnits.ScrollIntoView(vtUnits.FocusedNode, TRUE);
+    if vtUnitsTree.FocusedNode <> nil then
+      vtUnitsTree.ScrollIntoView(vtUnitsTree.FocusedNode, TRUE);
   finally
-    vtUnits.EndUpdate;
+    vtUnitsTree.EndUpdate;
   end;
 
   vtUnitsList.BeginUpdate;
@@ -2572,7 +2572,7 @@ procedure TfrmMain.FixDPI;
   end;
 
 begin
-  ScaleVT(vtUnits);
+  ScaleVT(vtUnitsTree);
   ScaleVT(vtUnitsList);
   ScaleVT(vtUsedByUnits);
   ScaleVT(vtUsesUnits);
@@ -2604,7 +2604,7 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
     begin
       TreeNode := TreeNode.Parent;
 
-      if (TreeNode <> nil) and (TreeNode <> vtUnits.RootNode) then
+      if (TreeNode <> nil) and (TreeNode <> vtUnitsTree.RootNode) then
       begin
         UsedUnitType := utImplementation;
 
@@ -2622,7 +2622,7 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
           end;
         end;
 
-        while (TreeNode <> nil) and (TreeNode <> vtUnits.RootNode) do
+        while (TreeNode <> nil) and (TreeNode <> vtUnitsTree.RootNode) do
         begin
           if SameText(FNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.DelphiUnitName, DelphiUnitName) then
           begin
@@ -2647,7 +2647,7 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
     NodeObject: TNodeObject;
   begin
     NodeObject := TNodeObject.Create;
-    Result := vtUnits.AddChild(Parent);
+    Result := vtUnitsTree.AddChild(Parent);
     SetID(Result, FNodeObjects.Add(NodeObject));
 
     ListNode := nil;
@@ -2697,7 +2697,7 @@ procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
         Inc(FCircularFiles);
     end;
 
-    SetNodeVisibility(vtUnits, Result, DelphiFile);
+    SetNodeVisibility(vtUnitsTree, Result, DelphiFile);
 
     if ListNode <> nil then
       SetNodeVisibility(vtUnitsList, ListNode, DelphiFile);
@@ -2786,7 +2786,7 @@ var
   i: Integer;
   RootFile: String;
 begin
-  vtUnits.Clear;
+  vtUnitsTree.Clear;
   vtUnitsList.Clear;
   vtUsedByUnits.Clear;
   vtUsesUnits.Clear;
@@ -2795,7 +2795,7 @@ begin
 
   Log(StrParsingFiles);
 
-  vtUnits.BeginUpdate;
+  vtUnitsTree.BeginUpdate;
   vtUnitsList.BeginUpdate;
   vtUsedByUnits.BeginUpdate;
   vtUsesUnits.BeginUpdate;
@@ -2824,8 +2824,8 @@ begin
       end;
     end;
 
-    if vtUnits.FocusedNode = nil then
-      vtUnits.SelectNodeEx(vtUnits.GetFirst);
+    if vtUnitsTree.FocusedNode = nil then
+      vtUnitsTree.SelectNodeEx(vtUnitsTree.GetFirst);
 
     if vtUnitsList.FocusedNode = nil then
       vtUnitsList.SelectNodeEx(vtUnitsList.GetFirst);
@@ -2834,7 +2834,7 @@ begin
   finally
     ExpandAll;
 
-    vtUnits.EndUpdate;
+    vtUnitsTree.EndUpdate;
     vtUnitsList.EndUpdate;
     vtUsedByUnits.EndUpdate;
     vtUsesUnits.EndUpdate;
