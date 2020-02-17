@@ -44,7 +44,6 @@ type
     pnlMain: TPanel;
     chkRenameLowerCaseExtension: TCheckBox;
     chkInsertOldNameComment: TCheckBox;
-    chkPromptBeforeUpdate: TCheckBox;
     chkRenameHistoryFiles: TCheckBox;
     chkDummyRun: TCheckBox;
     edtNewName: TEdit;

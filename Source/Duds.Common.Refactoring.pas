@@ -89,6 +89,10 @@ begin
   ReplacementText := NewUnitName + ', ' + InsertAtUsesUnitName;
 
   SafeReplaceTextInFile(DummyRun, DelphiFile.UnitInfo.Filename, InsertAtUsesUnitName, ReplacementText, InsertAtUnit.Position);
+
+  //TODO: Insert a "used unit"
+  //TODO: Update offsets
+  //TODO: update GUI trees
 end;
 
 end.

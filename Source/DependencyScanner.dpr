@@ -20,6 +20,7 @@ uses
   Duds.Common.Log in 'Duds.Common.Log.pas',
   Duds.Model in 'Duds.Model.pas',
   Duds.FileScanner in 'Duds.FileScanner.pas',
+  Duds.Refactoring.RenameUnit in 'Duds.Refactoring.RenameUnit.pas',
   Duds.Export.Gephi in 'Duds.Export.Gephi.pas',
   Duds.Export.GraphML in 'Duds.Export.GraphML.pas',
   Duds.Vcl.HourGlass in 'Duds.Vcl.HourGlass.pas',

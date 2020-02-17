@@ -33,7 +33,7 @@ object frmSearchAndReplace: TfrmSearchAndReplace
   object Label3: TLabel
     Left = 8
     Top = 87
-    Width = 22
+    Width = 23
     Height = 13
     Caption = 'Test:'
   end
@@ -53,16 +53,6 @@ object frmSearchAndReplace: TfrmSearchAndReplace
     OnChange = edtSearchChange
     OnKeyPress = edtSearchKeyPress
   end
-  object chkPromptBeforeUpdate: TCheckBox
-    Left = 8
-    Top = 167
-    Width = 237
-    Height = 17
-    Caption = 'Prompt before updating uses clauses'
-    Checked = True
-    State = cbChecked
-    TabOrder = 6
-  end
   object btnOK: TButton
     Left = 150
     Top = 191
@@ -72,7 +62,7 @@ object frmSearchAndReplace: TfrmSearchAndReplace
     Default = True
     Enabled = False
     ModalResult = 1
-    TabOrder = 7
+    TabOrder = 6
   end
   object btnCancel: TButton
     Left = 230
@@ -82,7 +72,7 @@ object frmSearchAndReplace: TfrmSearchAndReplace
     Cancel = True
     Caption = '&Cancel'
     ModalResult = 2
-    TabOrder = 8
+    TabOrder = 7
   end
   object chkDummyRun: TCheckBox
     Left = 8

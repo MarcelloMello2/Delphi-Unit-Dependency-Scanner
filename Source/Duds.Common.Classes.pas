@@ -130,7 +130,6 @@ type
     FWindowTop: Integer;
     FWindowWidth: Integer;
     FWindowHeight: Integer;
-    FPromptBeforeUpdate: Boolean;
     FDummyRun: Boolean;
     FRenameHistoryFiles: Boolean;
     FRenameInsertOldNameComment: Boolean;
@@ -155,7 +154,6 @@ type
     property WindowTop: Integer read FWindowTop write FWindowTop;
     property WindowWidth: Integer read FWindowWidth write FWindowWidth;
     property WindowHeight: Integer read FWindowHeight write FWindowHeight;
-    property PromptBeforeUpdate: Boolean read FPromptBeforeUpdate write FPromptBeforeUpdate;
     property DummyRun: Boolean read FDummyRun write FDummyRun;
     property RenameHistoryFiles: Boolean read FRenameHistoryFiles write FRenameHistoryFiles;
     property RenameInsertOldNameComment: Boolean read FRenameInsertOldNameComment write FRenameInsertOldNameComment;
@@ -296,7 +294,6 @@ begin
   FWindowHeight := IniFile.ReadInteger(WindowSection, 'WindowHeight', FWindowHeight);
   FUnitPatchHeight := IniFile.ReadInteger(WindowSection, 'UnitPatchHeight', 19);
 
-  FPromptBeforeUpdate         := IniFile.ReadBool(DialogsSection, 'PromptBeforeUpdate', FPromptBeforeUpdate);
   FDummyRun                   := IniFile.ReadBool(DialogsSection, 'DummyRun', FDummyRun);
   FRenameHistoryFiles         := IniFile.ReadBool(DialogsSection, 'RenameHistoryFiles', FRenameHistoryFiles);
   FRenameInsertOldNameComment := IniFile.ReadBool(DialogsSection, 'RenameInsertOldNameComment', FRenameInsertOldNameComment);
@@ -321,7 +318,6 @@ begin
   IniFile.WriteInteger(WindowSection, 'WindowHeight', FWindowHeight);
   IniFile.WriteInteger(WindowSection, 'UnitPatchHeight', FUnitPatchHeight);
 
-  IniFile.WriteBool(DialogsSection, 'PromptBeforeUpdate', FPromptBeforeUpdate);
   IniFile.WriteBool(DialogsSection, 'DummyRun', FDummyRun);
   IniFile.WriteBool(DialogsSection, 'RenameHistoryFiles', FRenameHistoryFiles);
   IniFile.WriteBool(DialogsSection, 'RenameInsertOldNameComment', FRenameInsertOldNameComment);

@@ -39,7 +39,6 @@ type
   TfrmSearchAndReplace = class(TForm)
     edtSearch: TEdit;
     Label1: TLabel;
-    chkPromptBeforeUpdate: TCheckBox;
     btnOK: TButton;
     btnCancel: TButton;
     chkDummyRun: TCheckBox;

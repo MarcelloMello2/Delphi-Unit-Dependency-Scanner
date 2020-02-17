@@ -4,7 +4,7 @@ object frmRenameUnit: TfrmRenameUnit
   AutoSize = True
   BorderStyle = bsDialog
   Caption = 'Rename Unit'
-  ClientHeight = 334
+  ClientHeight = 310
   ClientWidth = 446
   Color = clBtnFace
   Font.Charset = ANSI_CHARSET
@@ -19,7 +19,7 @@ object frmRenameUnit: TfrmRenameUnit
   object infoRenameCSV: TPanel
     AlignWithMargins = True
     Left = 3
-    Top = 200
+    Top = 176
     Width = 440
     Height = 131
     Align = alTop
@@ -28,6 +28,7 @@ object frmRenameUnit: TfrmRenameUnit
     ParentBackground = False
     TabOrder = 0
     Visible = False
+    ExplicitTop = 200
     object Panel5: TPanel
       AlignWithMargins = True
       Left = 1
@@ -77,12 +78,13 @@ object frmRenameUnit: TfrmRenameUnit
   object pnlButtons: TPanel
     AlignWithMargins = True
     Left = 3
-    Top = 159
+    Top = 135
     Width = 440
     Height = 35
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitTop = 159
     object btnOK: TButton
       Left = 142
       Top = 8
@@ -110,13 +112,13 @@ object frmRenameUnit: TfrmRenameUnit
     Left = 3
     Top = 3
     Width = 440
-    Height = 150
+    Height = 126
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 2
     DesignSize = (
       440
-      150)
+      126)
     object Label1: TLabel
       Left = 8
       Top = 7
@@ -126,7 +128,7 @@ object frmRenameUnit: TfrmRenameUnit
     end
     object chkRenameLowerCaseExtension: TCheckBox
       Left = 8
-      Top = 127
+      Top = 108
       Width = 248
       Height = 17
       Caption = 'Lowercase extension e.g. ".Pas" => ".pas"'
@@ -136,23 +138,13 @@ object frmRenameUnit: TfrmRenameUnit
     end
     object chkInsertOldNameComment: TCheckBox
       Left = 8
-      Top = 106
+      Top = 87
       Width = 425
       Height = 17
       Caption = 'Insert "{renamed from xyz.pas} comment"'
       Checked = True
       State = cbChecked
       TabOrder = 1
-    end
-    object chkPromptBeforeUpdate: TCheckBox
-      Left = 8
-      Top = 85
-      Width = 237
-      Height = 17
-      Caption = 'Prompt before updating uses clauses'
-      Checked = True
-      State = cbChecked
-      TabOrder = 2
     end
     object chkRenameHistoryFiles: TCheckBox
       Left = 8
@@ -162,7 +154,7 @@ object frmRenameUnit: TfrmRenameUnit
       Caption = 'Rename files in the "__history" folder'
       Checked = True
       State = cbChecked
-      TabOrder = 3
+      TabOrder = 2
     end
     object chkDummyRun: TCheckBox
       Left = 8
@@ -170,7 +162,7 @@ object frmRenameUnit: TfrmRenameUnit
       Width = 248
       Height = 17
       Caption = 'Dummy Run - No files will be updated'
-      TabOrder = 4
+      TabOrder = 3
     end
     object edtNewName: TEdit
       Left = 8
@@ -178,7 +170,7 @@ object frmRenameUnit: TfrmRenameUnit
       Width = 432
       Height = 21
       Anchors = [akLeft, akTop, akRight]
-      TabOrder = 5
+      TabOrder = 4
       OnChange = edtNewNameChange
       OnKeyPress = edtNewNameKeyPress
     end
