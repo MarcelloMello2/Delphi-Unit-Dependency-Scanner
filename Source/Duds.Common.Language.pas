@@ -10,6 +10,7 @@ resourcestring
   StrScanningDSearchSearchPaths = 'Scanning %d search paths (expanded from %d defined paths)';
   StrDFilesFound = '%d matching file(s) found in the search paths';
   StrParsingFiles = 'Parsing files';
+  StrTransferingToGUI = 'Transfering model data to GUI';
   StrDFilesWithATo = '%d used unit(s) found and a total of %s lines parsed';
   StrUpdateTheUsesClauseIn = 'Update the uses clause in "%s"?';
   StrUnableToFindFile = 'Unable to find file "%s"';

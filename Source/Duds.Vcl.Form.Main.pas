@@ -304,7 +304,7 @@ type
     FShowTermParents: Boolean;
     FRunScanOnLoad: Boolean;
 
-    procedure BuildDependencyTree(NoLog: Boolean = FALSE);
+    procedure FillGUIFromModel;
     procedure SearchTree(const SearchText: String; FromFirstNode: Boolean);
     function IsSearchHitNode(Node: PVirtualNode): Boolean;
     function GetNodePath(Node: PVirtualNode): String;
@@ -337,7 +337,7 @@ type
       LowerCaseExtension: Boolean);
     procedure SearchList(VT: TVirtualStringTree; const SearchText: String);
     procedure SearchUnitsListChildList(VT: TVirtualStringTree; const SearchText: String; UsedBy: Boolean);
-    procedure CloseControls;
+    procedure ClearGUIAndModelAndCloseControls;
     function CheckNotRunning: Boolean;
     procedure ResetSettings;
     procedure ClearStats;
@@ -374,9 +374,7 @@ uses
 procedure TfrmMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   if FClosing then
-  begin
-    CloseControls;
-  end
+    ClearGUIAndModelAndCloseControls
   else
   begin
     CanClose := FALSE;
@@ -1191,7 +1189,7 @@ begin
   begin
     pcView.ActivePage := tabTree;
 
-    vtUnitsTree.SelectNodeEx(FModel.DelphiFileList[GetFocusedID(TVirtualStringTree(Sender))].BaseNode);
+    vtUnitsTree.SelectNodeEx(FModel.DelphiFileList[GetFocusedID(TVirtualStringTree(Sender))].BaseTreeNode);
     vtUnitsTree.SetFocus;
   end;
 end;
@@ -1347,7 +1345,7 @@ begin
   begin
     FProjectFilename := '';
 
-    CloseControls;
+    ClearGUIAndModelAndCloseControls;
   end;
 end;
 
@@ -1432,7 +1430,7 @@ var
 begin
   DelphiFile := GetFocusedDelphiFile;
 
-  actShowUnitsNotInPath.Enabled := (not FBusy) and (vtUnitsTree.RootNodeCount > 0);
+  actShowUnitsNotInPath.Enabled := (not FBusy);
   actSaveChanges.Enabled := (not FBusy) and ((memParentFile.Modified) or (memSelectedFile.Modified) or
     (memListFile.Modified));
 
@@ -1461,7 +1459,7 @@ end;
 
 procedure TfrmMain.actLoadProjectExecute(Sender: TObject);
 begin
-  if (OpenDialog1.Execute) and (CheckSaveProject) then
+  if OpenDialog1.Execute and CheckSaveProject then
   begin
     if LoadProjectSettings(OpenDialog1.Filename) then
     begin
@@ -1474,11 +1472,11 @@ end;
 
 procedure TfrmMain.actNewProjectExecute(Sender: TObject);
 begin
-  if (CheckNotRunning) and (CheckSaveProject) then
+  if CheckNotRunning and CheckSaveProject then
   begin
     FProjectFilename := '';
 
-    CloseControls;
+    ClearGUIAndModelAndCloseControls;
 
     ResetSettings;
 
@@ -1512,7 +1510,7 @@ begin
     vtLog.ScrollIntoView(vtLog.GetLast, FALSE);
 end;
 
-procedure TfrmMain.CloseControls;
+procedure TfrmMain.ClearGUIAndModelAndCloseControls;
 begin
   vtUnitsTree.Clear;
   vtUnitsList.Clear;
@@ -1934,6 +1932,156 @@ begin
   end;
 end;
 
+procedure TfrmMain.FillGUIFromModel;
+
+  function SearchForCircularRelationshipByWalkingUpParents(TreeNode: PVirtualNode; UsageType: TUsedUnitType; const DelphiUnitName: String): TCircularRelationshipType;
+  var
+    i: Integer;
+  begin
+    Result := crNone;
+
+    TreeNode := TreeNode.Parent;
+
+    if (TreeNode <> nil) and (TreeNode <> vtUnitsTree.RootNode) then
+    begin
+      while (TreeNode <> nil) and (TreeNode <> vtUnitsTree.RootNode) do
+      begin
+        if SameText(FTreeNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.DelphiUnitName, DelphiUnitName) then
+        begin
+          if UsageType = utInterface then
+            Result := crCircular
+          else
+            Result := crSemiCircular;
+
+          Break;
+        end
+        else
+          TreeNode := TreeNode.Parent;
+      end;
+    end;
+
+  end;
+
+  procedure AddTreeNode(Parent: PVirtualNode; UsageType: TUsedUnitType; UnitOrProjectFileName: string);
+  var
+    DelphiFile: TDelphiFile;
+    NodeObject: TNodeObject;
+    NodeObjectID: Cardinal;
+    TreeNode: PVirtualNode;
+    UsedUnitInfo: IUsedUnitInfo;
+    UnitWasAddedForTheFirstTime: Boolean;
+  begin
+    DelphiFile := FModel.FindParsedDelphiUnit(UnitOrProjectFileName);
+    if Assigned(DelphiFile) then
+    begin
+      NodeObject              := TNodeObject.Create;
+      NodeObject.DelphiFile   := DelphiFile;
+
+      NodeObjectID := FTreeNodeObjects.Add(NodeObject);
+      TreeNode     := vtUnitsTree.AddChild(Parent);
+      SetID(TreeNode, NodeObjectID);
+
+      // the first time we add a tree node for a unit, we remember that node to be the "base node"
+      UnitWasAddedForTheFirstTime := not Assigned(DelphiFile.BaseTreeNode);
+      if UnitWasAddedForTheFirstTime then
+         DelphiFile.BaseTreeNode := TreeNode;
+
+      // Calc Circular Ref by walking up the tree
+      if Parent = nil then
+         NodeObject.CircularReference := crNone
+      else
+         NodeObject.CircularReference := SearchForCircularRelationshipByWalkingUpParents(TreeNode, UsageType, DelphiFile.UnitInfo.DelphiUnitName);
+
+      case NodeObject.CircularReference of
+        crSemiCircular:
+          Inc(FSemiCircularFiles);
+        crCircular:
+          Inc(FCircularFiles);
+      end;
+
+      // Recursively add used units as tree nodes
+      // -> But add children of a unit only once in the tree. If the unit was already
+      //    added, provide a "jump-link" to the first occurence. This keeps the tree smaller.
+      if UnitWasAddedForTheFirstTime then
+      begin
+        if NodeObject.CircularReference = crNone then
+          for UsedUnitInfo in DelphiFile.UnitInfo.UsedUnits do
+            AddTreeNode(TreeNode, UsedUnitInfo.UsesType, UsedUnitInfo.DelphiUnitName)
+      end
+      else
+        // when the unit occurs for the second, third, ... time, just link back to the "base node"
+        if FProjectSettings.LinkUnits then
+          NodeObject.Link := DelphiFile.BaseTreeNode;
+
+      SetNodeVisibility(vtUnitsTree, TreeNode, DelphiFile);
+    end;
+  end;
+
+  procedure FillTree;
+  var
+    RootFile: TDelphiFile;
+  begin
+    for RootFile in FModel.ParsedDelphiRootFiles do
+      AddTreeNode(nil, utInterface, RootFile.UnitInfo.DelphiUnitName);
+  end;
+
+  procedure FillLists;
+  var
+    Node: PVirtualNode;
+    i: Integer;
+  begin
+    for i := 0 to pred(FModel.DelphiFileList.Count) do
+    begin
+
+      Node := vtUnitsList.AddChild(nil);
+      SetID(Node, i);
+
+      SetNodeVisibility(vtUnitsList, Node, FModel.DelphiFileList[i]);
+
+      Node := vtUsedByUnits.AddChild(nil);
+      SetID(Node, i);
+
+      Node := vtUsesUnits.AddChild(nil);
+      SetID(Node, i);
+    end;
+
+  end;
+
+begin
+  vtUnitsTree.Clear;
+  vtUnitsList.Clear;
+  vtUsedByUnits.Clear;
+  vtUsesUnits.Clear;
+  memParentFile.Clear;
+  memSelectedFile.Clear;
+
+  Log(StrTransferingToGUI);
+
+  vtUnitsTree.BeginUpdate;
+  vtUnitsList.BeginUpdate;
+  vtUsedByUnits.BeginUpdate;
+  vtUsesUnits.BeginUpdate;
+  try
+    FillTree;
+    FillLists;
+
+    if vtUnitsTree.FocusedNode = nil then
+      vtUnitsTree.SelectNodeEx(vtUnitsTree.GetFirst);
+
+    if vtUnitsList.FocusedNode = nil then
+      vtUnitsList.SelectNodeEx(vtUnitsList.GetFirst);
+  finally
+    ExpandAll;
+
+    vtUnitsTree.EndUpdate;
+    vtUnitsList.EndUpdate;
+    vtUsedByUnits.EndUpdate;
+    vtUsesUnits.EndUpdate;
+
+    UpdateListControls(vtUnitsList.FocusedNode);
+  end;
+end;
+
 procedure TfrmMain.actStartScanExecute(Sender: TObject);
 var
   FileScanner: TDudsFileScanner;
@@ -1945,9 +2093,7 @@ begin
   end
   else
   begin
-    ClearLog;
-    FModel.Clear;
-    ClearStats;
+    ClearGUIAndModelAndCloseControls;
     FStartTime := now;
     FCancelled := FALSE;
 
@@ -1998,8 +2144,9 @@ begin
         end;
       end;
 
-      //if not FCancelled then
-      //  BuildDependencyTree;
+      // step 3: fill gui trees with data
+      if not FCancelled then
+        FillGUIFromModel;
     finally
       UpdateLogEntries;
       FBusy := FALSE;
@@ -2213,14 +2360,11 @@ begin
   tmrLoaded.Enabled := FALSE;
 
   if FLoadLastProject then
-  begin
     if not LoadProjectSettings(FProjectFilename) then
     begin
       FProjectFilename := '';
-
-      CloseControls;
+      ClearGUIAndModelAndCloseControls;
     end;
-  end;
 
   Show;
 end;
@@ -2241,248 +2385,6 @@ begin
   ScaleVT(vtUsesUnits);
 
   RichEditUnitPath.Height := ScaleDimension(RichEditUnitPath.Height, PixelsPerInch);
-end;
-
-procedure TfrmMain.BuildDependencyTree(NoLog: Boolean);
-
-  function GetParentCircularRelationship(TreeNode: PVirtualNode; const DelphiUnitName: String)
-    : TCircularRelationshipType;
-  var
-    i: Integer;
-    UsedUnitType: TUsedUnitType;
-  begin
-    Result := crNone;
-
-    if TreeNode <> nil then
-    begin
-      TreeNode := TreeNode.Parent;
-
-      if (TreeNode <> nil) and (TreeNode <> vtUnitsTree.RootNode) then
-      begin
-        UsedUnitType := utImplementation;
-
-        if FTreeNodeObjects[GetID(TreeNode)] <> nil then
-        begin
-          for i := 0 to pred(FTreeNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.UsedUnits.Count) do
-          begin
-            if SameText(FTreeNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.UsedUnits[i].DelphiUnitName, DelphiUnitName)
-            then
-            begin
-              UsedUnitType := FTreeNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.UsedUnits[i].UsesType;
-
-              Break;
-            end;
-          end;
-        end;
-
-        while (TreeNode <> nil) and (TreeNode <> vtUnitsTree.RootNode) do
-        begin
-          if SameText(FTreeNodeObjects[GetID(TreeNode)].DelphiFile.UnitInfo.DelphiUnitName, DelphiUnitName) then
-          begin
-            if UsedUnitType = utInterface then
-              Result := crCircular
-            else
-              Result := crSemiCircular;
-
-            Break;
-          end
-          else
-            TreeNode := TreeNode.Parent;
-        end;
-      end;
-    end;
-  end;
-
-  function AddUnitNode(Parent: PVirtualNode; UnitInfo: IUnitInfo; InPath: Boolean): PVirtualNode;
-  var
-    DelphiFile: TDelphiFile;
-    ListNode, NewNode: PVirtualNode;
-    NodeObject: TNodeObject;
-  begin
-    NodeObject := TNodeObject.Create;
-    Result := vtUnitsTree.AddChild(Parent);
-    SetID(Result, FTreeNodeObjects.Add(NodeObject));
-
-    ListNode := nil;
-
-    DelphiFile := FModel.FindParsedDelphiUnit(UnitInfo.DelphiUnitName);
-
-    if DelphiFile = nil then
-    begin
-      DelphiFile := FModel.CreateDelphiFile(UnitInfo.DelphiUnitName);
-
-      DelphiFile.UnitInfo := UnitInfo;
-
-      if FScanDepth = 1 then
-        DelphiFile.UsedCount := 0
-      else
-        DelphiFile.UsedCount := 1;
-
-      DelphiFile.InSearchPath := InPath;
-      DelphiFile.BaseNode     := Result;
-
-      ListNode := vtUnitsList.AddChild(nil);
-      SetID(ListNode, pred(FModel.ParsedDelphiFiles.Count));
-
-      NewNode := vtUsedByUnits.AddChild(nil);
-      SetID(NewNode, pred(FModel.ParsedDelphiFiles.Count));
-
-      NewNode := vtUsesUnits.AddChild(nil);
-      SetID(NewNode, pred(FModel.ParsedDelphiFiles.Count));
-
-      FLineCount := FLineCount + UnitInfo.LineCount;
-    end
-    else
-    begin
-      DelphiFile.UsedCount := DelphiFile.UsedCount + 1;
-
-      if FProjectSettings.LinkUnits then
-        NodeObject.Link := DelphiFile.BaseNode;
-    end;
-
-    NodeObject.DelphiFile := DelphiFile;
-    NodeObject.CircularReference := GetParentCircularRelationship(Result, UnitInfo.DelphiUnitName);
-
-    case NodeObject.CircularReference of
-      crSemiCircular:
-        Inc(FSemiCircularFiles);
-      crCircular:
-        Inc(FCircularFiles);
-    end;
-
-    SetNodeVisibility(vtUnitsTree, Result, DelphiFile);
-
-    if ListNode <> nil then
-      SetNodeVisibility(vtUnitsList, ListNode, DelphiFile);
-  end;
-
-  procedure BuildDependencyTreeRec(Parent: PVirtualNode; Unitname: string);
-  var
-    i: Integer;
-    TreeNode: PVirtualNode;
-    UnitFilename: String;
-    InPath: Boolean;
-    Parsed: Boolean;
-    UnitInfo: IUnitInfo;
-    DelphiFile: TDelphiFile;
-  begin
-    Application.ProcessMessages;
-
-    if not FCancelled then
-    begin
-      UpdateStats(FALSE);
-
-      Inc(FScannedUsesCount);
-      Inc(FScanDepth);
-
-      if FScanDepth > FDeepestScanDepth then
-        FDeepestScanDepth := FScanDepth;
-
-      FModel.SearchUnitByNameWithScopes(Unitname, UnitFilename, FProjectSettings.UnitScopeNames);
-      InPath := UnitFilename <> '';
-      Parsed := FALSE;
-
-      // Parse the unit
-      if InPath then
-      begin
-        DelphiFile := FModel.FindParsedDelphiUnit(Unitname);
-
-        if DelphiFile = nil then
-        begin
-          try
-            Parsed := FPascalUnitExtractor.GetUsedUnits(UnitFilename, UnitInfo);
-
-            for i := 0 to pred(UnitInfo.UsedUnits.Count) do
-              if UnitInfo.UsedUnits[i].Filename <> '' then
-                FModel.Files.AddOrSetValue(UpperCase(UnitInfo.UsedUnits[i].DelphiUnitName), UnitInfo.UsedUnits[i].Filename);
-
-            Inc(FParsedFileCount);
-
-            if FileExists(ChangeFileExt(UnitInfo.Filename, '.dfm')) then
-              Inc(FVCLFormCount)
-            else if FileExists(ChangeFileExt(UnitInfo.Filename, '.fmx')) then
-              Inc(FFMXFormCount);
-          except
-            on e: Exception do
-            begin
-              Log(StrUnableToParseS, [UnitFilename, e.Message], LogError);
-            end;
-          end;
-        end
-        else
-          UnitInfo := DelphiFile.UnitInfo;
-      end
-      else
-      begin
-        UnitInfo                := TUnitInfo.Create;
-        UnitInfo.DelphiUnitName := Unitname;
-      end;
-
-      TreeNode := AddUnitNode(Parent, UnitInfo, InPath);
-
-      if (not FCancelled) and (Parsed) and (InPath) and (FTreeNodeObjects[GetID(TreeNode)].CircularReference = crNone) and
-        (FTreeNodeObjects[GetID(TreeNode)].Link = nil) then
-      begin
-        for i := 0 to pred(UnitInfo.UsedUnits.Count) do
-          BuildDependencyTreeRec(TreeNode, UnitInfo.UsedUnits[i].DelphiUnitName);
-      end;
-    end;
-
-    if FScanDepth > 0 then
-      Dec(FScanDepth);
-  end;
-
-var
-  i: Integer;
-  RootFile: String;
-begin
-  vtUnitsTree.Clear;
-  vtUnitsList.Clear;
-  vtUsedByUnits.Clear;
-  vtUsesUnits.Clear;
-  memParentFile.Clear;
-  memSelectedFile.Clear;
-
-  Log(StrParsingFiles);
-
-  vtUnitsTree.BeginUpdate;
-  vtUnitsList.BeginUpdate;
-  vtUsedByUnits.BeginUpdate;
-  vtUsesUnits.BeginUpdate;
-  try
-    for i := 0 to pred(FProjectSettings.RootFiles.Count) do
-    begin
-      if FCancelled then
-        Break;
-
-      RootFile := FProjectSettings.RootFiles[i];
-
-      if not RootFile.IsEmpty then // allow empty definition lines (e.g. for visual structuring)
-        if not FileExists(RootFile) then
-          Log(StrRootFileNotFound, [RootFile], LogWarning)
-        else
-          BuildDependencyTreeRec(nil, ExtractFilenameNoExt(RootFile));
-    end;
-
-    if vtUnitsTree.FocusedNode = nil then
-      vtUnitsTree.SelectNodeEx(vtUnitsTree.GetFirst);
-
-    if vtUnitsList.FocusedNode = nil then
-      vtUnitsList.SelectNodeEx(vtUnitsList.GetFirst);
-
-    Log(StrDFilesWithATo, [FModel.ParsedDelphiFiles.Count, FormatCardinal(FLineCount)]);
-  finally
-    ExpandAll;
-
-    vtUnitsTree.EndUpdate;
-    vtUnitsList.EndUpdate;
-    vtUsedByUnits.EndUpdate;
-    vtUsesUnits.EndUpdate;
-
-    UpdateListControls(vtUnitsList.FocusedNode);
-
-    UpdateStats(TRUE);
-  end;
 end;
 
 procedure TfrmMain.ClearStats;

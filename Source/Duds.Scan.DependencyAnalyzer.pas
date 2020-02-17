@@ -37,8 +37,8 @@ type
 
     FCancelled: Boolean;
 
-    procedure AnalyzeUnitOrProjectFile(Unitname: string);
-    function AddParsedDelphiFile(UnitInfo: IUnitInfo; InPath: Boolean): TDelphiFile;
+    procedure AnalyzeUnitOrProjectFile(Unitname: string; IsRootFile: Boolean);
+    procedure AddParsedDelphiFile(UnitInfo: IUnitInfo; IsRootFile: Boolean; InPath: Boolean);
   public
     constructor Create;
     destructor Destroy; override;
@@ -87,21 +87,23 @@ begin
   inherited;
 end;
 
-function TDudsDependencyAnalyzer.AddParsedDelphiFile(UnitInfo: IUnitInfo; InPath: Boolean): TDelphiFile;
+procedure TDudsDependencyAnalyzer.AddParsedDelphiFile(UnitInfo: IUnitInfo; IsRootFile: Boolean; InPath: Boolean);
+var
+  DelphiFile: TDelphiFile;
 begin
-  Result := FModel.CreateDelphiFile(UnitInfo.DelphiUnitName);
+  DelphiFile := FModel.CreateDelphiFile(UnitInfo.DelphiUnitName, IsRootFile);
 
-  Result.UnitInfo := UnitInfo;
+  DelphiFile.UnitInfo := UnitInfo;
 
   if FScanDepth = 1 then // this is for "root" files
-    Result.UsedCount := 0
+    DelphiFile.UsedCount := 0
   else
-    Result.UsedCount := 1;
+    DelphiFile.UsedCount := 1;
 
-  Result.InSearchPath := InPath;
+  DelphiFile.InSearchPath := InPath;
 end;
 
-procedure TDudsDependencyAnalyzer.AnalyzeUnitOrProjectFile(Unitname: string);
+procedure TDudsDependencyAnalyzer.AnalyzeUnitOrProjectFile(Unitname: string; IsRootFile: Boolean);
 var
   Filename: String;
   FoundFileInPaths: Boolean;
@@ -143,7 +145,7 @@ begin
             if UsedUnitInfo.Filename <> '' then
               FModel.Files.AddOrSetValue(UpperCase(UsedUnitInfo.DelphiUnitName), UsedUnitInfo.Filename);
 
-          DelphiFile := AddParsedDelphiFile(UnitInfo, TRUE);
+          AddParsedDelphiFile(UnitInfo, IsRootFile, TRUE);
 
           FLineCount := FLineCount + UnitInfo.LineCount;
           Inc(FParsedFileCount);
@@ -160,7 +162,7 @@ begin
         if Parsed then
           for UsedUnitInfo in UnitInfo.UsedUnits do
             if not FCancelled then
-              AnalyzeUnitOrProjectFile(UsedUnitInfo.DelphiUnitName);
+              AnalyzeUnitOrProjectFile(UsedUnitInfo.DelphiUnitName, FALSE);
 
       end else
       // we don't have the file on disk...
@@ -170,7 +172,7 @@ begin
         // create an empty "parsed file" for the file that was not found on disk (still needed for the "UsedCount" counter)
         UnitInfo := TUnitInfo.Create;
         UnitInfo.DelphiUnitName := Unitname;
-        AddParsedDelphiFile(UnitInfo, FALSE);
+        AddParsedDelphiFile(UnitInfo, IsRootFile, FALSE);
       end;
     end
     // the File was already parsed -> only increase the usage counter
@@ -194,7 +196,7 @@ begin
       if not FileExists(RootFile) then
         TDudsLogger.GetInstance.Log(StrRootFileNotFound, [RootFile], LogWarning)
       else
-        AnalyzeUnitOrProjectFile(ExtractFilenameNoExt(RootFile));
+        AnalyzeUnitOrProjectFile(ExtractFilenameNoExt(RootFile), TRUE);
 
   TDudsLogger.GetInstance.Log(StrDFilesWithATo, [FModel.ParsedDelphiFiles.Count, FormatCardinal(FLineCount)]);
 end;

@@ -50,10 +50,12 @@ type
     FInSearchPath: Boolean;
     FBaseNode: Pointer;
   public
+    constructor Create;
+
     property UnitInfo: IUnitInfo read FUnitInfo write FUnitInfo;
     property UsedCount: Integer read FUsedCount write FUsedCount;
     property InSearchPath: Boolean read FInSearchPath write FInSearchPath;
-    property BaseNode: Pointer read FBaseNode write FBaseNode;
+    property BaseTreeNode: Pointer read FBaseNode write FBaseNode;
   end;
 
   TNodeObject = class(TObject)
@@ -162,6 +164,14 @@ type
   end;
 
 implementation
+
+{ TDelphiFile }
+
+constructor TDelphiFile.Create;
+begin
+  FUnitInfo := nil;
+  FBaseNode := nil;
+end;
 
 { TBaseSettings }
 

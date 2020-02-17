@@ -99,7 +99,7 @@ object frmMain: TfrmMain
           Top = 0
           Width = 1116
           Height = 411
-          ActivePage = tabTree
+          ActivePage = tabList
           Align = alClient
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -289,10 +289,6 @@ object frmMain: TfrmMain
                 object tabSelectedFile: TTabSheet
                   Caption = 'Selected File'
                   ImageIndex = 1
-                  ExplicitLeft = 0
-                  ExplicitTop = 0
-                  ExplicitWidth = 0
-                  ExplicitHeight = 0
                   object memSelectedFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
@@ -332,10 +328,6 @@ object frmMain: TfrmMain
           object tabList: TTabSheet
             Caption = 'List'
             ImageIndex = 1
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object Splitter3: TSplitter
               Left = 497
               Top = 0
@@ -366,7 +358,7 @@ object frmMain: TfrmMain
                 Constraints.MinWidth = 30
                 DoubleBuffered = True
                 Font.Charset = DEFAULT_CHARSET
-                Font.Color = 4473924
+                Font.Color = clBlue
                 Font.Height = -11
                 Font.Name = 'Tahoma'
                 Font.Style = []
@@ -449,15 +441,11 @@ object frmMain: TfrmMain
                 Top = 0
                 Width = 608
                 Height = 381
-                ActivePage = tabUsedBy
+                ActivePage = tabUsesList
                 Align = alClient
                 TabOrder = 0
                 object tabUsedBy: TTabSheet
                   Caption = 'Used By Units'
-                  ExplicitLeft = 0
-                  ExplicitTop = 0
-                  ExplicitWidth = 0
-                  ExplicitHeight = 0
                   object edtSearchUsedByList: TEdit
                     AlignWithMargins = True
                     Left = 0
@@ -474,7 +462,7 @@ object frmMain: TfrmMain
                     Constraints.MinWidth = 30
                     DoubleBuffered = True
                     Font.Charset = DEFAULT_CHARSET
-                    Font.Color = 4473924
+                    Font.Color = clBlue
                     Font.Height = -11
                     Font.Name = 'Tahoma'
                     Font.Style = []
@@ -543,10 +531,6 @@ object frmMain: TfrmMain
                 object tabUsesList: TTabSheet
                   Caption = 'Uses Units'
                   ImageIndex = 2
-                  ExplicitLeft = 0
-                  ExplicitTop = 0
-                  ExplicitWidth = 0
-                  ExplicitHeight = 0
                   object edtSearchUsesList: TEdit
                     AlignWithMargins = True
                     Left = 0
@@ -563,7 +547,7 @@ object frmMain: TfrmMain
                     Constraints.MinWidth = 30
                     DoubleBuffered = True
                     Font.Charset = DEFAULT_CHARSET
-                    Font.Color = 4473924
+                    Font.Color = clBlue
                     Font.Height = -11
                     Font.Name = 'Tahoma'
                     Font.Style = []
@@ -632,10 +616,6 @@ object frmMain: TfrmMain
                 object tabSource: TTabSheet
                   Caption = 'Source'
                   ImageIndex = 1
-                  ExplicitLeft = 0
-                  ExplicitTop = 0
-                  ExplicitWidth = 0
-                  ExplicitHeight = 0
                   object memListFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
