@@ -15,6 +15,7 @@ uses
   Duds.Common.Log,
   Duds.Common.Interfaces,
   Duds.Common.Refactoring,
+  Duds.Common.Parser.Pascal,
   Duds.Scan.Model;
 
 type
@@ -40,6 +41,7 @@ var
   ReferencedUnitName: string;
   UpdatedCount, AlreadyReferencedCount: Integer;
   CurrentDelphiFile: TDelphiFile;
+  NewUnitDelphiFile: TDelphiFile;
 begin
   UpdatedCount := 0;
   AlreadyReferencedCount := 0;
@@ -51,6 +53,19 @@ begin
 
   TDudsLogger.GetInstance.Log('Adding unit <%s> to all uses clauses that already reference unit <%s>.',
     [NewUnitName, ReferencedUnitName]);
+
+  // Add the new unit to the model
+  NewUnitDelphiFile := FModel.FindParsedDelphiUnit(NewUnitName);
+  if not Assigned(NewUnitDelphiFile) then
+  begin
+    if not DummyRun then
+    begin
+      NewUnitDelphiFile := FModel.CreateDelphiFile(NewUnitName, false);
+      NewUnitDelphiFile.UnitInfo                := TUnitInfo.Create;
+      NewUnitDelphiFile.UnitInfo.DelphiUnitName := NewUnitName;
+    end;
+    TDudsLogger.GetInstance.Log('Unit <%s> was not part of the dependency model, adding it to the model now.', [NewUnitName]);
+  end;
 
   // Walk through all units
   for CurrentDelphiFile in FModel.DelphiFileList do
@@ -88,26 +103,62 @@ end;
 procedure TAddUnitToUsesRefactoring.AddUnitToUsesInFile(DummyRun: Boolean; DelphiFile: TDelphiFile; InsertAtUsesUnitName: string;
   NewUnitName: String);
 var
-  InsertAtUnit: IUsedUnitInfo;
-  usedUnit: IUsedUnitInfo;
+  InsertBeforeUsedUnit, NewUsedUnit: IUsedUnitInfo;
+  InsertBeforeUsedUnitIndex: Integer;
+  UsedUnit: IUsedUnitInfo;
   ReplacementText: string;
+  PositionOffset: Integer;
+  IsUsesAfterInserted: Boolean;
+  FollowingUsedUnitInfo: IUsedUnitInfo;
+  InsertedUnitDelphiFile: TDelphiFile;
 begin
-  InsertAtUnit := nil;
-  for usedUnit in DelphiFile.UnitInfo.UsedUnits do
-    if usedUnit.DelphiUnitName.Equals(InsertAtUsesUnitName) then
-       InsertAtUnit := usedUnit;
+  InsertBeforeUsedUnit := nil;
+  for UsedUnit in DelphiFile.UnitInfo.UsedUnits do
+    if UsedUnit.DelphiUnitName.Equals(InsertAtUsesUnitName) then
+       InsertBeforeUsedUnit := UsedUnit;
 
-  if InsertAtUnit = nil then
+  if InsertBeforeUsedUnit = nil then
      raise Exception.Create('internal error - referenced unit not found in uses clause');
 
 
   ReplacementText := NewUnitName + ', ' + InsertAtUsesUnitName;
+  PositionOffset  := Length(ReplacementText) - Length(InsertAtUsesUnitName);
 
-  SafeReplaceTextInFile(DummyRun, DelphiFile.UnitInfo.Filename, InsertAtUsesUnitName, ReplacementText, InsertAtUnit.Position);
+  // step 1: Replace text "UnitOld" with "unitNew, UnitOld"
+  SafeReplaceTextInFile(DummyRun, DelphiFile.UnitInfo.Filename, InsertAtUsesUnitName, ReplacementText, InsertBeforeUsedUnit.Position);
 
-  //TODO: Insert a "used unit"
-  //TODO: Update offsets
-  //TODO: update GUI trees
+  if not DummyRun then
+  begin
+    // step 2: "Insert" the new "used unit" into the usedUnits list
+    NewUsedUnit := TUsedUnitInfo.Create;
+
+    NewUsedUnit.Filename       := '';
+    NewUsedUnit.DelphiUnitName := NewUnitName;
+    NewUsedUnit.Position       := InsertBeforeUsedUnit.Position;  // takes over position from the "insert before unit"
+    NewUsedUnit.InFilePosition := 0;
+    NewUsedUnit.UsesType       := InsertBeforeUsedUnit.UsesType;  // same position, same uses type...
+
+    InsertBeforeUsedUnitIndex := DelphiFile.UnitInfo.UsedUnits.IndexOf(InsertBeforeUsedUnit);
+    DelphiFile.UnitInfo.UsedUnits.Insert(InsertBeforeUsedUnitIndex, NewUsedUnit);
+
+    // increase the used counter of the inserted unit
+    InsertedUnitDelphiFile := FModel.FindParsedDelphiUnit(NewUnitName);
+    if not Assigned(InsertedUnitDelphiFile) then
+      raise Exception.Create('this should not happen, the new unit should have been added to the model');
+    InsertedUnitDelphiFile.UsedCount := InsertedUnitDelphiFile.UsedCount + 1;
+
+    // step 3: Update positions offsets of existing uses
+    IsUsesAfterInserted := false;
+    for FollowingUsedUnitInfo in DelphiFile.UnitInfo.UsedUnits do
+    begin
+      if FollowingUsedUnitInfo = InsertBeforeUsedUnit then
+        IsUsesAfterInserted := true;
+      if IsUsesAfterInserted then
+        FollowingUsedUnitInfo.UpdatePosition(PositionOffset);
+    end;
+  end;
+
+  // After this action, the GUI Trees has to be rebuild because the model changed! See GUI for that...
 end;
 
 end.

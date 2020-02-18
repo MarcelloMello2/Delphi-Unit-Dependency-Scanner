@@ -1626,6 +1626,10 @@ begin
             try
               AddUnitToUsesRefactoring.Model := FModel;
               AddUnitToUsesRefactoring.AddUnitToUses(chkDummyRun.Checked, GetFocusedDelphiFile, edtNewName.Text);
+
+              // the refactoring changed the model, so we need to rebuild the gui from the model
+              FillGUIFromModel;
+              UpdateStats(TRUE);
             finally
               FreeAndNil(AddUnitToUsesRefactoring);
             end;
@@ -2017,10 +2021,19 @@ procedure TfrmMain.FillGUIFromModel;
     end;
   end;
 
-  procedure FillTree;
+  procedure FillTreeAndCalcCircularReferences;
   var
-    RootFile: TDelphiFile;
+    DelphiFile, RootFile: TDelphiFile;
   begin
+    // Reset stats
+    FSemiCircularFiles := 0;
+    FCircularFiles     := 0;
+
+    // Reset "Base Nodes" (to be able to re-run this method without re-building the model
+    for DelphiFile in FModel.DelphiFileList do
+      DelphiFile.BaseTreeNode := nil;
+
+    // Add root nodes to the tree and then recursively...
     for RootFile in FModel.ParsedDelphiRootFiles do
       AddTreeNode(nil, utInterface, RootFile.UnitInfo.DelphiUnitName);
   end;
@@ -2062,7 +2075,7 @@ begin
   vtUsedByUnits.BeginUpdate;
   vtUsesUnits.BeginUpdate;
   try
-    FillTree;
+    FillTreeAndCalcCircularReferences;
     FillLists;
 
     if vtUnitsTree.FocusedNode = nil then

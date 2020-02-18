@@ -253,6 +253,10 @@ object frmMain: TfrmMain
                 Visible = False
                 object tabParentFile: TTabSheet
                   Caption = 'Parent File'
+                  ExplicitLeft = 0
+                  ExplicitTop = 0
+                  ExplicitWidth = 0
+                  ExplicitHeight = 0
                   object memParentFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
@@ -289,6 +293,10 @@ object frmMain: TfrmMain
                 object tabSelectedFile: TTabSheet
                   Caption = 'Selected File'
                   ImageIndex = 1
+                  ExplicitLeft = 0
+                  ExplicitTop = 0
+                  ExplicitWidth = 0
+                  ExplicitHeight = 0
                   object memSelectedFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
@@ -446,6 +454,10 @@ object frmMain: TfrmMain
                 TabOrder = 0
                 object tabUsedBy: TTabSheet
                   Caption = 'Used By Units'
+                  ExplicitLeft = 0
+                  ExplicitTop = 0
+                  ExplicitWidth = 0
+                  ExplicitHeight = 0
                   object edtSearchUsedByList: TEdit
                     AlignWithMargins = True
                     Left = 0
@@ -616,6 +628,10 @@ object frmMain: TfrmMain
                 object tabSource: TTabSheet
                   Caption = 'Source'
                   ImageIndex = 1
+                  ExplicitLeft = 0
+                  ExplicitTop = 0
+                  ExplicitWidth = 0
+                  ExplicitHeight = 0
                   object memListFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0

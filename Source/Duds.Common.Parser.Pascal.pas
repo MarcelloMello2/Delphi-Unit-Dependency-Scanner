@@ -83,19 +83,16 @@ type
     FInFilePosition: Integer;
     FUsesType: TUsedUnitType;
     FFilename: String;
-    FOrder: Integer;
   private
     function GetPosition: Integer;
     function GetInFilePosition: Integer;
     function GetDelphiUnitName: String;
     function GetUsesType: TUsedUnitType;
-    function GetOrder: Integer;
 
     procedure SetPosition(const Value: Integer);
     procedure SetInFilePosition(const Value: Integer);
     procedure SetDelphiUnitName(const Value: String);
     procedure SetUsesType(const Value: TUsedUnitType);
-    procedure SetOrder(const Value: Integer);
     procedure SetFilename(const Value: String);
     function GetFilename: String;
   public
@@ -105,7 +102,6 @@ type
     property Position: Integer read GetPosition write SetPosition;
     property InFilePosition: Integer read GetInFilePosition write SetInFilePosition;
     property UsesType: TUsedUnitType read GetUsesType write SetUsesType;
-    property Order: Integer read GetOrder write SetOrder;
     property Filename: String read GetFilename write SetFilename;
   end;
 
@@ -234,7 +230,6 @@ function TPascalUnitExtractor.GetUsedUnits(const UnitFileName: String; var UnitI
         UsedUnitInfo.Position       := FTokeniser.Token.Position - 1;
         UsedUnitInfo.InFilePosition := InFilePos;
         UsedUnitInfo.UsesType       := UsesType;
-        UsedUnitInfo.Order          := UnitInfo.UsedUnits.Count - 1;
       end;
 
       if Delimiter = ';' then
@@ -388,16 +383,6 @@ end;
 procedure TUsedUnitInfo.SetUsesType(const Value: TUsedUnitType);
 begin
   FUsesType := Value;
-end;
-
-function TUsedUnitInfo.GetOrder: Integer;
-begin
-  Result := FOrder;
-end;
-
-procedure TUsedUnitInfo.SetOrder(const Value: Integer);
-begin
-  FOrder := Value;
 end;
 
 procedure TUsedUnitInfo.UpdatePosition(Offset: Integer);

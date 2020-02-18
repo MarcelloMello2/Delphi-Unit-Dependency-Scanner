@@ -5,7 +5,7 @@
         <FrameworkType>VCL</FrameworkType>
         <MainSource>DependencyScanner.dpr</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
+        <Config Condition="'$(Config)'==''">Release</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>1</TargetedPlatforms>
         <AppType>Application</AppType>
@@ -122,8 +122,8 @@
         <Icon_MainIcon>DependencyScanner_Icon.ico</Icon_MainIcon>
         <BT_BuildType>Debug</BT_BuildType>
         <VerInfo_MajorVer>2</VerInfo_MajorVer>
-        <VerInfo_MinorVer>1</VerInfo_MinorVer>
-        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=2.1.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=2.1.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_MinorVer>2</VerInfo_MinorVer>
+        <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=2.2.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=2.2.0.0;Comments=</VerInfo_Keys>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
     </PropertyGroup>
     <ItemGroup>

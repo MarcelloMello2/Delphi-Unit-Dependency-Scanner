@@ -41,14 +41,12 @@ type
     function GetInFilePosition: Integer;
     function GetDelphiUnitName: String;
     function GetUsesType: TUsedUnitType;
-    function GetOrder: Integer;
     function GetFilename: String;
 
     procedure SetPosition(const Value: Integer);
     procedure SetInFilePosition(const Value: Integer);
     procedure SetDelphiUnitName(const Value: String);
     procedure SetUsesType(const Value: TUsedUnitType);
-    procedure SetOrder(const Value: Integer);
     procedure SetFilename(const Value: String);
 
     procedure UpdatePosition(Offset: Integer);
@@ -57,7 +55,6 @@ type
     property Position: Integer read GetPosition write SetPosition;
     property InFilePosition: Integer read GetInFilePosition write SetInFilePosition;   // offset of the  <in '..\..\abc.pas'>   part
     property UsesType: TUsedUnitType read GetUsesType write SetUsesType;
-    property Order: Integer read GetOrder write SetOrder;
     property Filename: String read GetFilename write SetFilename;
   end;
 

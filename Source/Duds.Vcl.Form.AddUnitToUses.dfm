@@ -124,11 +124,11 @@ object frmAddNewUnit: TfrmAddNewUnit
           'This will insert the defined unit as a uses entry for every unit' +
           ' that currently uses the marked unit. '#13#10#13#10'The new unit will only' +
           ' be added if not already referenced. '#13#10'The new unit will be adde' +
-          'd directly after the marked unit name.'#13#10#13#10'E.g. Mark Unit "functi' +
-          'ons.misc". Call this dialog and type "functions.basic.text" into' +
-          ' the edit above. Hit ok. Every unit that currently uses "functio' +
-          'ns.misc" but not "functions.basic.text" will use "functions.basi' +
-          'c.text" afterwards.'
+          'd directly BEFORE the marked unit name. '#13#10#13#10'E.g. Mark Unit "func' +
+          'tions.misc". Call this dialog and type "functions.basic.text" in' +
+          'to the edit above. Every unit that currently uses "functions.mis' +
+          'c" but not "functions.basic.text" will use "functions.basic.text' +
+          '" afterwards.'
         Color = 14548991
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
@@ -139,7 +139,7 @@ object frmAddNewUnit: TfrmAddNewUnit
         ParentFont = False
         Transparent = True
         WordWrap = True
-        ExplicitWidth = 419
+        ExplicitWidth = 411
         ExplicitHeight = 117
       end
     end
