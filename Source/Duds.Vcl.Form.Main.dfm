@@ -3,7 +3,7 @@ object frmMain: TfrmMain
   Top = 0
   Caption = 'Delphi Unit Dependency Scanner'
   ClientHeight = 643
-  ClientWidth = 1119
+  ClientWidth = 1185
   Color = clBtnFace
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
@@ -21,8 +21,8 @@ object frmMain: TfrmMain
   object ActionToolBar1: TActionToolBar
     Left = 0
     Top = 0
-    Width = 1119
-    Height = 54
+    Width = 1185
+    Height = 26
     ActionManager = ActionManager1
     Caption = 'ActionToolBar1'
     Color = clMenuBar
@@ -37,32 +37,39 @@ object frmMain: TfrmMain
     Font.Style = []
     ParentBackground = True
     ParentFont = False
+    ParentShowHint = False
+    ShowHint = True
     Spacing = 0
+    ExplicitWidth = 1119
+    ExplicitHeight = 54
   end
   object pnlBackground: TPanel
     Left = 0
-    Top = 54
-    Width = 1119
-    Height = 589
+    Top = 26
+    Width = 1185
+    Height = 617
     Align = alClient
     BevelOuter = bvNone
     Caption = 'Click Scan to begin the Unit Dependecy Seach'
     TabOrder = 1
+    ExplicitTop = 54
+    ExplicitWidth = 1119
+    ExplicitHeight = 589
     object Splitter4: TSplitter
       Left = 0
-      Top = 567
-      Width = 1119
+      Top = 595
+      Width = 1185
       Height = 3
       Cursor = crVSplit
       Align = alBottom
-      ExplicitTop = 595
+      ExplicitWidth = 1119
     end
     object pnlMain: TPanel
       AlignWithMargins = True
       Left = 3
       Top = 3
-      Width = 1116
-      Height = 564
+      Width = 1182
+      Height = 592
       Margins.Right = 0
       Margins.Bottom = 0
       Align = alClient
@@ -76,29 +83,33 @@ object frmMain: TfrmMain
       ParentFont = False
       TabOrder = 0
       Visible = False
+      ExplicitWidth = 1116
+      ExplicitHeight = 564
       object Splitter1: TSplitter
         Left = 0
-        Top = 411
-        Width = 1116
+        Top = 439
+        Width = 1182
         Height = 3
         Cursor = crVSplit
         Align = alBottom
         ResizeStyle = rsUpdate
-        ExplicitTop = 439
+        ExplicitWidth = 1116
       end
       object Panel3: TPanel
         Left = 0
         Top = 0
-        Width = 1116
-        Height = 411
+        Width = 1182
+        Height = 439
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 0
+        ExplicitWidth = 1116
+        ExplicitHeight = 411
         object pcView: TPageControl
           Left = 0
           Top = 0
-          Width = 1116
-          Height = 411
+          Width = 1182
+          Height = 439
           ActivePage = tabList
           Align = alClient
           Font.Charset = ANSI_CHARSET
@@ -108,23 +119,27 @@ object frmMain: TfrmMain
           Font.Style = []
           ParentFont = False
           TabOrder = 0
+          ExplicitWidth = 1116
+          ExplicitHeight = 411
           object tabTree: TTabSheet
             Caption = 'Tree'
+            ExplicitWidth = 1108
+            ExplicitHeight = 381
             object Splitter2: TSplitter
               Left = 497
               Top = 0
-              Height = 381
+              Height = 409
               ResizeStyle = rsUpdate
-              ExplicitHeight = 409
             end
             object pnlTree: TPanel
               Left = 0
               Top = 0
               Width = 497
-              Height = 381
+              Height = 409
               Align = alLeft
               BevelOuter = bvNone
               TabOrder = 0
+              ExplicitHeight = 381
               object edtSearch: TEdit
                 AlignWithMargins = True
                 Left = 3
@@ -158,7 +173,7 @@ object frmMain: TfrmMain
                 Left = 3
                 Top = 29
                 Width = 494
-                Height = 349
+                Height = 377
                 Margins.Right = 0
                 Align = alClient
                 Colors.UnfocusedColor = clMedGray
@@ -180,6 +195,7 @@ object frmMain: TfrmMain
                 OnGetImageIndex = vtUnitsTreeGetImageIndex
                 OnGetNodeDataSize = vtUnitsTreeGetNodeDataSize
                 OnHeaderClick = vtCommonHeaderClick
+                ExplicitHeight = 349
                 Columns = <
                   item
                     Position = 0
@@ -235,34 +251,36 @@ object frmMain: TfrmMain
             object Panel5: TPanel
               Left = 500
               Top = 0
-              Width = 608
-              Height = 381
+              Width = 674
+              Height = 409
               Align = alClient
               Caption = 'Select a file to display its contents here.'
               TabOrder = 1
+              ExplicitWidth = 608
+              ExplicitHeight = 381
               object pcSource: TPageControl
                 AlignWithMargins = True
                 Left = 1
                 Top = 4
-                Width = 603
-                Height = 373
+                Width = 669
+                Height = 401
                 Margins.Left = 0
                 ActivePage = tabParentFile
                 Align = alClient
                 TabOrder = 0
                 Visible = False
+                ExplicitWidth = 603
+                ExplicitHeight = 373
                 object tabParentFile: TTabSheet
                   Caption = 'Parent File'
-                  ExplicitLeft = 0
-                  ExplicitTop = 0
-                  ExplicitWidth = 0
-                  ExplicitHeight = 0
+                  ExplicitWidth = 595
+                  ExplicitHeight = 343
                   object memParentFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
                     Top = 3
-                    Width = 592
-                    Height = 337
+                    Width = 658
+                    Height = 365
                     Margins.Left = 0
                     Align = alClient
                     Font.Charset = DEFAULT_CHARSET
@@ -288,21 +306,21 @@ object frmMain: TfrmMain
                     ReadOnly = True
                     OnChange = memParentFileChange
                     FontSmoothing = fsmNone
+                    ExplicitWidth = 592
+                    ExplicitHeight = 337
                   end
                 end
                 object tabSelectedFile: TTabSheet
                   Caption = 'Selected File'
                   ImageIndex = 1
-                  ExplicitLeft = 0
-                  ExplicitTop = 0
-                  ExplicitWidth = 0
-                  ExplicitHeight = 0
+                  ExplicitWidth = 595
+                  ExplicitHeight = 343
                   object memSelectedFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
                     Top = 3
-                    Width = 592
-                    Height = 337
+                    Width = 658
+                    Height = 365
                     Margins.Left = 0
                     Align = alClient
                     Font.Charset = DEFAULT_CHARSET
@@ -328,6 +346,8 @@ object frmMain: TfrmMain
                     ReadOnly = True
                     OnChange = memSelectedFileChange
                     FontSmoothing = fsmNone
+                    ExplicitWidth = 592
+                    ExplicitHeight = 337
                   end
                 end
               end
@@ -336,21 +356,23 @@ object frmMain: TfrmMain
           object tabList: TTabSheet
             Caption = 'List'
             ImageIndex = 1
+            ExplicitWidth = 1108
+            ExplicitHeight = 381
             object Splitter3: TSplitter
               Left = 497
               Top = 0
-              Height = 381
+              Height = 409
               ResizeStyle = rsUpdate
-              ExplicitHeight = 409
             end
             object pnlList: TPanel
               Left = 0
               Top = 0
               Width = 497
-              Height = 381
+              Height = 409
               Align = alLeft
               BevelOuter = bvNone
               TabOrder = 0
+              ExplicitHeight = 381
               object edtListSearch: TEdit
                 AlignWithMargins = True
                 Left = 3
@@ -382,7 +404,7 @@ object frmMain: TfrmMain
                 Left = 3
                 Top = 29
                 Width = 494
-                Height = 349
+                Height = 377
                 Margins.Right = 0
                 Align = alClient
                 Colors.UnfocusedColor = clMedGray
@@ -402,6 +424,7 @@ object frmMain: TfrmMain
                 OnPaintText = vtUnitsListPaintText
                 OnGetImageIndex = vtCommonGetImageIndex
                 OnHeaderClick = vtCommonHeaderClick
+                ExplicitHeight = 349
                 Columns = <
                   item
                     Position = 0
@@ -438,31 +461,33 @@ object frmMain: TfrmMain
             object Panel10: TPanel
               Left = 500
               Top = 0
-              Width = 608
-              Height = 381
+              Width = 674
+              Height = 409
               Align = alClient
               BevelOuter = bvNone
               Caption = 'Select a file to display it'#39's contents here.'
               TabOrder = 1
+              ExplicitWidth = 608
+              ExplicitHeight = 381
               object pcList: TPageControl
                 Left = 0
                 Top = 0
-                Width = 608
-                Height = 381
+                Width = 674
+                Height = 409
                 ActivePage = tabUsesList
                 Align = alClient
                 TabOrder = 0
+                ExplicitWidth = 608
+                ExplicitHeight = 381
                 object tabUsedBy: TTabSheet
                   Caption = 'Used By Units'
-                  ExplicitLeft = 0
-                  ExplicitTop = 0
-                  ExplicitWidth = 0
-                  ExplicitHeight = 0
+                  ExplicitWidth = 600
+                  ExplicitHeight = 351
                   object edtSearchUsedByList: TEdit
                     AlignWithMargins = True
                     Left = 0
                     Top = 0
-                    Width = 600
+                    Width = 666
                     Height = 23
                     Margins.Left = 0
                     Margins.Top = 0
@@ -484,12 +509,13 @@ object frmMain: TfrmMain
                     TabOrder = 1
                     TextHint = 'Search Used By Units List'
                     OnChange = edtSearchUsedByListEditChange
+                    ExplicitWidth = 600
                   end
                   object vtUsedByUnits: TVirtualStringTree
                     Left = 0
                     Top = 26
-                    Width = 600
-                    Height = 325
+                    Width = 666
+                    Height = 353
                     Margins.Right = 0
                     Align = alClient
                     Colors.UnfocusedColor = clMedGray
@@ -507,6 +533,8 @@ object frmMain: TfrmMain
                     OnPaintText = vtUnitsListPaintText
                     OnGetImageIndex = vtCommonGetImageIndex
                     OnHeaderClick = vtCommonHeaderClick
+                    ExplicitWidth = 600
+                    ExplicitHeight = 325
                     Columns = <
                       item
                         Position = 0
@@ -543,11 +571,13 @@ object frmMain: TfrmMain
                 object tabUsesList: TTabSheet
                   Caption = 'Uses Units'
                   ImageIndex = 2
+                  ExplicitWidth = 600
+                  ExplicitHeight = 351
                   object edtSearchUsesList: TEdit
                     AlignWithMargins = True
                     Left = 0
                     Top = 0
-                    Width = 600
+                    Width = 666
                     Height = 23
                     Margins.Left = 0
                     Margins.Top = 0
@@ -569,12 +599,13 @@ object frmMain: TfrmMain
                     TabOrder = 0
                     TextHint = 'Search Uses List'
                     OnChange = edtSearchUsesListEditChange
+                    ExplicitWidth = 600
                   end
                   object vtUsesUnits: TVirtualStringTree
                     Left = 0
                     Top = 26
-                    Width = 600
-                    Height = 325
+                    Width = 666
+                    Height = 353
                     Margins.Right = 0
                     Align = alClient
                     Colors.UnfocusedColor = clMedGray
@@ -592,6 +623,8 @@ object frmMain: TfrmMain
                     OnPaintText = vtUnitsListPaintText
                     OnGetImageIndex = vtCommonGetImageIndex
                     OnHeaderClick = vtCommonHeaderClick
+                    ExplicitWidth = 600
+                    ExplicitHeight = 325
                     Columns = <
                       item
                         Position = 0
@@ -628,16 +661,14 @@ object frmMain: TfrmMain
                 object tabSource: TTabSheet
                   Caption = 'Source'
                   ImageIndex = 1
-                  ExplicitLeft = 0
-                  ExplicitTop = 0
-                  ExplicitWidth = 0
-                  ExplicitHeight = 0
+                  ExplicitWidth = 600
+                  ExplicitHeight = 351
                   object memListFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
                     Top = 3
-                    Width = 597
-                    Height = 345
+                    Width = 663
+                    Height = 373
                     Margins.Left = 0
                     Align = alClient
                     Font.Charset = DEFAULT_CHARSET
@@ -663,6 +694,8 @@ object frmMain: TfrmMain
                     ReadOnly = True
                     OnChange = memListFileChange
                     FontSmoothing = fsmNone
+                    ExplicitWidth = 597
+                    ExplicitHeight = 345
                   end
                 end
               end
@@ -672,20 +705,23 @@ object frmMain: TfrmMain
       end
       object pnlLog: TPanel
         Left = 0
-        Top = 414
-        Width = 1116
+        Top = 442
+        Width = 1182
         Height = 150
         Align = alBottom
         BevelOuter = bvNone
         TabOrder = 1
+        ExplicitTop = 414
+        ExplicitWidth = 1116
         object Panel9: TPanel
-          Left = 792
+          Left = 858
           Top = 0
           Width = 324
           Height = 150
           Align = alRight
           BevelOuter = bvNone
           TabOrder = 1
+          ExplicitLeft = 792
           object vtStats: TVirtualStringTree
             AlignWithMargins = True
             Left = 2
@@ -717,7 +753,7 @@ object frmMain: TfrmMain
           AlignWithMargins = True
           Left = 0
           Top = 3
-          Width = 792
+          Width = 858
           Height = 144
           Margins.Left = 0
           Margins.Right = 0
@@ -732,23 +768,26 @@ object frmMain: TfrmMain
           TreeOptions.SelectionOptions = [toFullRowSelect, toRightClickSelect]
           OnGetText = vtLogGetText
           OnGetImageIndex = vtLogGetImageIndex
+          ExplicitWidth = 792
           Columns = <>
         end
       end
     end
     object PanelFooter: TPanel
       Left = 0
-      Top = 570
-      Width = 1119
+      Top = 598
+      Width = 1185
       Height = 19
       Align = alBottom
       BevelOuter = bvNone
       Caption = 'Panel'
       TabOrder = 1
+      ExplicitTop = 570
+      ExplicitWidth = 1119
       object RichEditUnitPath: TRichEdit
         Left = 0
         Top = 0
-        Width = 1119
+        Width = 1185
         Height = 19
         Align = alClient
         Lines.Strings = (
@@ -756,6 +795,7 @@ object frmMain: TfrmMain
         ReadOnly = True
         TabOrder = 0
         Zoom = 100
+        ExplicitWidth = 1119
       end
     end
   end
@@ -791,7 +831,6 @@ object frmMain: TfrmMain
           end
           item
             Action = actRename
-            Caption = 'R&ename'
             ImageIndex = 2
           end
           item
@@ -841,7 +880,6 @@ object frmMain: TfrmMain
           end
           item
             Action = actRename
-            Caption = '&Rename'
             ImageIndex = 2
           end
           item
@@ -881,19 +919,73 @@ object frmMain: TfrmMain
             Caption = '-'
           end
           item
-            Action = actSearchAndReplace
-            Caption = 'Se&arch and Replace'
-            ImageIndex = 9
+            Items = <
+              item
+                Action = actSearchAndReplace
+                ImageIndex = 9
+              end
+              item
+                Action = actRename
+                ImageIndex = 10
+              end
+              item
+                Caption = '-'
+                CommandStyle = csSeparator
+                CommandProperties.Width = -1
+                CommandProperties.Font.Charset = DEFAULT_CHARSET
+                CommandProperties.Font.Color = clWindowText
+                CommandProperties.Font.Height = -11
+                CommandProperties.Font.Name = 'Tahoma'
+                CommandProperties.Font.Style = []
+              end
+              item
+                Action = actApplyRenameList
+                ImageIndex = 10
+              end
+              item
+                Caption = '-'
+                CommandProperties.ButtonType = btSplit
+              end
+              item
+                Action = actAddUnitToUses
+                ImageIndex = 11
+              end
+              item
+                Caption = '-'
+                CommandProperties.ButtonType = btSplit
+              end
+              item
+                Action = actRemoveUnusedUnitsProcessPalOutput
+                Caption = 'R&emove unused units (step 1/2): process Pascal Analyzer output'
+              end
+              item
+                Action = actRemoveUnUsedUnits
+              end>
+            Action = actRefactoringsDropDown
+            Caption = '&Refactorings'
+            CommandProperties.ButtonType = btDropDown
           end
           item
-            Action = actRename
-            Caption = '&Rename'
-            ImageIndex = 10
-          end
-          item
-            Action = actApplyRenameList
-            Caption = 'A&pply multiple renames (defined in .csv)'
-            ImageIndex = 10
+            Items = <
+              item
+                Action = actSaveToXML
+                Caption = '&Save to XML'
+              end
+              item
+                Action = actSaveToGephiCSV
+                Caption = 'S&ave to Gephi CSV'
+              end
+              item
+                Action = actSaveToGraphML
+                Caption = 'Sa&ve to GraphML'
+              end
+              item
+                Action = actSaveCircularRefs
+                Caption = 'Sav&e circular reference'
+              end>
+            Action = actExportDropDown
+            Caption = 'E&xport'
+            CommandProperties.ButtonType = btDropDown
           end
           item
             Caption = '-'
@@ -922,33 +1014,10 @@ object frmMain: TfrmMain
           end
           item
             Caption = '-'
-          end
-          item
-            Action = actSaveToXML
-            Caption = 'Sa&ve to XML'
-          end
-          item
-            Caption = '-'
-          end
-          item
-            Action = actSaveToGephiCSV
-            Caption = 'Save t&o Gephi CSV'
-          end
-          item
-            Caption = '-'
-          end
-          item
-            Action = actSaveToGraphML
-            Caption = 'Save to &GraphML'
-          end
-          item
-            Caption = '-'
-          end
-          item
-            Action = ActionSaveCirRefs
-            Caption = 'Save c&ircular reference'
           end>
         ActionBar = ActionToolBar1
+      end
+      item
       end>
     Images = ImageList1
     OnUpdate = ActionManager1Update
@@ -968,6 +1037,10 @@ object frmMain: TfrmMain
       Visible = False
       OnExecute = actStopScanExecute
     end
+    object actRefactoringsDropDown: TAction
+      Category = 'Refactorings'
+      Caption = 'Refactorings'
+    end
     object actShowUnitsNotInPath: TAction
       AutoCheck = True
       Caption = 'Show Units not in Path'
@@ -979,17 +1052,28 @@ object frmMain: TfrmMain
       OnExecute = actSaveChangesExecute
     end
     object actRename: TAction
-      Caption = 'Rename'
+      Category = 'Refactorings'
+      Caption = 'Rename...'
       ImageIndex = 10
       OnExecute = actRenameExecute
     end
     object actApplyRenameList: TAction
-      Caption = 'Apply multiple renames (defined in .csv)'
+      Category = 'Refactorings'
+      Caption = 'Batch rename from .csv file...'
       ImageIndex = 10
       OnExecute = actApplyRenameListExecute
     end
+    object actSearchAndReplace: TAction
+      Category = 'Refactorings'
+      Caption = 'Search and Replace...'
+      ImageIndex = 9
+      OnExecute = actSearchAndReplaceExecute
+    end
     object actAddUnitToUses: TAction
-      Caption = 'Add unit to uses list in all files that currently use this unit.'
+      Category = 'Refactorings'
+      Caption = 
+        'Add unit to uses list in all files that currently use this unit.' +
+        '..'
       ImageIndex = 11
       OnExecute = actAddUnitToUsesExecute
     end
@@ -1037,30 +1121,43 @@ object frmMain: TfrmMain
       Caption = 'Close'
       OnExecute = actCloseProjectExecute
     end
-    object actSearchAndReplace: TAction
-      Caption = 'Search and Replace'
-      ImageIndex = 9
-      OnExecute = actSearchAndReplaceExecute
-    end
     object actShowFile: TAction
       Caption = 'Show file in Windows Explorer'
       OnExecute = actShowFileExecute
     end
+    object actExportDropDown: TAction
+      Category = 'Export'
+      Caption = 'Export'
+    end
     object actSaveToXML: TAction
+      Category = 'Export'
       Caption = 'Save to XML'
       OnExecute = actSaveToXMLExecute
     end
     object actSaveToGephiCSV: TAction
+      Category = 'Export'
       Caption = 'Save to Gephi CSV'
       OnExecute = actSaveToGephiCSVExecute
     end
     object actSaveToGraphML: TAction
+      Category = 'Export'
       Caption = 'Save to GraphML'
       OnExecute = actSaveToGraphMLExecute
     end
-    object ActionSaveCirRefs: TAction
+    object actSaveCircularRefs: TAction
+      Category = 'Export'
       Caption = 'Save circular reference'
-      OnExecute = ActionSaveCirRefsExecute
+      OnExecute = actSaveCircularRefsExecute
+    end
+    object actRemoveUnusedUnitsProcessPalOutput: TAction
+      Category = 'Refactorings'
+      Caption = 'Remove unused units (step 1/2): process Pascal Analyzer output'
+      OnExecute = actRemoveUnusedUnitsProcessPalOutputExecute
+    end
+    object actRemoveUnUsedUnits: TAction
+      Category = 'Refactorings'
+      Caption = 'Remove unused units (step 2/2): remove unused units'
+      OnExecute = actRemoveUnUsedUnitsExecute
     end
   end
   object popTree: TPopupMenu
@@ -1122,7 +1219,7 @@ object frmMain: TfrmMain
       Action = actSaveToGephiCSV
     end
     object Savecircularreference1: TMenuItem
-      Action = ActionSaveCirRefs
+      Action = actSaveCircularRefs
     end
   end
   object MainMenu1: TMainMenu

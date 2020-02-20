@@ -79,13 +79,14 @@ begin
   // Try the scopes
   if not Result then
   begin
-    for i := 0 to pred(UnitScopeNames.Count) do
-    begin
-      Result := FFiles.TryGetValue(UpperCase(UnitScopeNames[i]) + '.' + UpperDelphiUnitName, UnitFilename);
+    if Assigned(UnitScopeNames) then
+      for i := 0 to pred(UnitScopeNames.Count) do
+      begin
+        Result := FFiles.TryGetValue(UpperCase(UnitScopeNames[i]) + '.' + UpperDelphiUnitName, UnitFilename);
 
-      if Result then
-        Break;
-    end;
+        if Result then
+          Break;
+      end;
   end;
 end;
 

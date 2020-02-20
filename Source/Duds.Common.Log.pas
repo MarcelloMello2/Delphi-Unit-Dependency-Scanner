@@ -15,6 +15,8 @@ const
   LogDebug = 4;
 
 type
+  TLogProcedure = procedure(const Msg: String; const Severity: Integer = LogInfo) of object;
+
   TLogEntry = record
     Text: String;
     Severity: Integer;

@@ -65,6 +65,8 @@ uses
   Duds.Export.GraphML,
   Duds.Refactoring.RenameUnit,
   Duds.Refactoring.AddUnitToUses,
+  Duds.Refactoring.PascalAnalyzerUsesReportProcessor,
+  Duds.Refactoring.RemoveUnusedUnits,
 
   Duds.Vcl.HourGlass,
   Duds.Vcl.Utils,
@@ -185,7 +187,7 @@ type
     vtLog: TVirtualStringTree;
     SearchandReplace2: TMenuItem;
     N13: TMenuItem;
-    ActionSaveCirRefs: TAction;
+    actSaveCircularRefs: TAction;
     Savecircularreference1: TMenuItem;
     RichEditUnitPath: TRichEdit;
     PanelFooter: TPanel;
@@ -195,6 +197,10 @@ type
     Addunittouseslistinallfilesthatcurrentlyusethisunit1: TMenuItem;
     N14: TMenuItem;
     Addunittouseslistinallfilesthatcurrentlyusethisunit2: TMenuItem;
+    actRefactoringsDropDown: TAction;
+    actExportDropDown: TAction;
+    actRemoveUnusedUnitsProcessPalOutput: TAction;
+    actRemoveUnUsedUnits: TAction;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure vtUnitsTreeGetNodeDataSize(Sender: TBaseVirtualTree; var NodeDataSize: Integer);
@@ -270,9 +276,11 @@ type
       var Ghosted: Boolean; var ImageIndex: TImageIndex);
     procedure vtCommonGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
       Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
-    procedure ActionSaveCirRefsExecute(Sender: TObject);
+    procedure actSaveCircularRefsExecute(Sender: TObject);
     procedure actApplyRenameListExecute(Sender: TObject);
-    procedure actAddUnitToUsesExecute(Sender: TObject);    
+    procedure actAddUnitToUsesExecute(Sender: TObject);
+    procedure actRemoveUnUsedUnitsExecute(Sender: TObject);
+    procedure actRemoveUnusedUnitsProcessPalOutputExecute(Sender: TObject);
   private
     FModel: TDudsModel;
     FDependencyAnalyzer: TDudsDependencyAnalyzer;
@@ -1388,7 +1396,7 @@ begin
   Handled := TRUE;
 end;
 
-procedure TfrmMain.ActionSaveCirRefsExecute(Sender: TObject);
+procedure TfrmMain.actSaveCircularRefsExecute(Sender: TObject);
 var
   Node: PVirtualNode;
   LStrs: TStringList;
@@ -1454,7 +1462,7 @@ begin
   actSaveToXML.Enabled := not FBusy;
   actSaveToGephiCSV.Enabled := not FBusy;
   actSaveToGraphML.Enabled := not FBusy;
-  ActionSaveCirRefs.Enabled := not FBusy;
+  actSaveCircularRefs.Enabled := not FBusy;
 end;
 
 procedure TfrmMain.actLoadProjectExecute(Sender: TObject);
@@ -1641,6 +1649,35 @@ begin
       finally
         Free;
       end;
+  end;
+end;
+
+procedure TfrmMain.actRemoveUnusedUnitsProcessPalOutputExecute(Sender: TObject);
+begin
+  try
+    TPAUsesReportProcessor.ParseOutputFileAndWriteFiltered('./Uses.txt', './Unused.txt', './IgnoreUnits.txt');
+  except
+    on e: Exception do
+      Log(e.Message, LogError);
+  end;
+end;
+
+procedure TfrmMain.actRemoveUnUsedUnitsExecute(Sender: TObject);
+var
+  RemoveUnusedUnitsRefactoring: TRemoveUnusedUnitsRefactoring;
+begin
+  try
+    RemoveUnusedUnitsRefactoring := TRemoveUnusedUnitsRefactoring.Create;
+    try
+      RemoveUnusedUnitsRefactoring.Model := FModel;
+      RemoveUnusedUnitsRefactoring.OnLog := Self.Log;
+      RemoveUnusedUnitsRefactoring.DeleteAllUnitsDefinedInUnusedFile('.\Unused.txt');
+    finally
+      FreeAndNil(RemoveUnusedUnitsRefactoring);
+    end;
+  except
+    on e: Exception do
+      Log(e.Message, LogError);
   end;
 end;
 
