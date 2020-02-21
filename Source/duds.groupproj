@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{91841ADD-054C-44A6-BF95-96BB59D2D34C}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="duds.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="duds.test.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="duds">
+        <MSBuild Projects="duds.dproj"/>
+    </Target>
+    <Target Name="duds:Clean">
+        <MSBuild Projects="duds.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="duds:Make">
+        <MSBuild Projects="duds.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="duds_test">
+        <MSBuild Projects="duds.test.dproj"/>
+    </Target>
+    <Target Name="duds_test:Clean">
+        <MSBuild Projects="duds.test.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="duds_test:Make">
+        <MSBuild Projects="duds.test.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="duds;duds_test"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="duds:Clean;duds_test:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="duds:Make;duds_test:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
