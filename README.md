@@ -51,4 +51,4 @@ DUDS is built with Delphi 10.3.3. The following 3rd party libraries are required
 
 ## Usage
 
-Ready to use executable is located in `bin\Win32\Release\DependencyScanner.exe`.
+Ready to use executable is located in `bin\Win32\Release`.
