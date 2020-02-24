@@ -114,7 +114,7 @@ var
 begin
   InsertBeforeUsedUnit := nil;
   for UsedUnit in DelphiFile.UnitInfo.UsedUnits do
-    if UsedUnit.DelphiUnitName.Equals(InsertAtUsesUnitName) then
+    if UsedUnit.DelphiUnitName.ToLower.Equals(InsertAtUsesUnitName.ToLower) then
        InsertBeforeUsedUnit := UsedUnit;
 
   if InsertBeforeUsedUnit = nil then
