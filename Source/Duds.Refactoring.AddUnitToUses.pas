@@ -26,7 +26,7 @@ type
       InsertAtUsesUnitName, NewUnitName: String);
 
   public
-    procedure AddUnitToUses(DummyRun: Boolean; DelphiFile: TDelphiFile; NewUnitName: String);
+    procedure AddUnitToUses(DummyRun: Boolean; DelphiFile: TDelphiFile; NewUnitName: String; aRestrictToUnitNames: TStrings);
 
     property Model: TDudsModel read FModel write FModel;
 
@@ -36,12 +36,15 @@ implementation
 
 { TAddUnitToUsesRefactoring }
 
-procedure TAddUnitToUsesRefactoring.AddUnitToUses(DummyRun: Boolean; DelphiFile: TDelphiFile; NewUnitName: String);
+procedure TAddUnitToUsesRefactoring.AddUnitToUses(DummyRun: Boolean; DelphiFile: TDelphiFile; NewUnitName: String; aRestrictToUnitNames: TStrings);
 var
   ReferencedUnitName: string;
   UpdatedCount, AlreadyReferencedCount: Integer;
   CurrentDelphiFile: TDelphiFile;
   NewUnitDelphiFile: TDelphiFile;
+  AddOnlyInUnits:    TStringList;
+  i:                 Integer;
+  aUnit:             string;
 begin
   UpdatedCount := 0;
   AlreadyReferencedCount := 0;
@@ -67,29 +70,45 @@ begin
     TDudsLogger.GetInstance.Log('Unit <%s> was not part of the dependency model, adding it to the model now.', [NewUnitName]);
   end;
 
-  // Walk through all units
-  for CurrentDelphiFile in FModel.DelphiFileList do
-  begin
-    // Only update .pas files, not project files
-    if CurrentDelphiFile.UnitInfo.DelphiFileType = ftPAS then
+  AddOnlyInUnits := TStringList.Create;
+  try
+    // Operation restricted to list of unit names? => normalize list first
+    for i := 0 to aRestrictToUnitNames.Count -1 do
     begin
-      if FModel.IsUnitUsed(ReferencedUnitName, CurrentDelphiFile) then
-        if FModel.IsUnitUsed(NewUnitName, CurrentDelphiFile) then
-        begin
-          TDudsLogger.GetInstance.Log('Unit <%s> already references unit <%s>. No update needed.',
-            [CurrentDelphiFile.UnitInfo.DelphiUnitName, NewUnitName]);
-          Inc(AlreadyReferencedCount);
-        end
-        else
-        begin
-          TDudsLogger.GetInstance.Log('Adding unit <%s> to uses clause of unit <%s>.',
-            [NewUnitName, CurrentDelphiFile.UnitInfo.DelphiUnitName]);
-
-          AddUnitToUsesInFile(DummyRun, CurrentDelphiFile, ReferencedUnitName, NewUnitName);
-
-          Inc(UpdatedCount);
-        end;
+      aUnit := ChangeFileExt(ExtractFileName(aRestrictToUnitNames[i]), '');
+      aUnit := aUnit.Trim.ToLower;
+      if not aUnit.IsEmpty then
+        if AddOnlyInUnits.IndexOf(aUnit) = -1 then
+          AddOnlyInUnits.Add(aUnit);
     end;
+
+    // Walk through all units
+    for CurrentDelphiFile in FModel.DelphiFileList do
+    begin
+      // Only update .pas files, not project files
+      if CurrentDelphiFile.UnitInfo.DelphiFileType = ftPAS then
+      begin
+        if FModel.IsUnitUsed(ReferencedUnitName, CurrentDelphiFile) then
+          if (AddOnlyInUnits.Count = 0) or (AddOnlyInUnits.IndexOf(CurrentDelphiFile.UnitInfo.DelphiUnitName.ToLower) > -1)  then
+            if FModel.IsUnitUsed(NewUnitName, CurrentDelphiFile) then
+            begin
+              TDudsLogger.GetInstance.Log('Unit <%s> already references unit <%s>. No update needed.',
+                [CurrentDelphiFile.UnitInfo.DelphiUnitName, NewUnitName]);
+              Inc(AlreadyReferencedCount);
+            end
+            else
+            begin
+              TDudsLogger.GetInstance.Log('Adding unit <%s> to uses clause of unit <%s>.',
+                [NewUnitName, CurrentDelphiFile.UnitInfo.DelphiUnitName]);
+
+              AddUnitToUsesInFile(DummyRun, CurrentDelphiFile, ReferencedUnitName, NewUnitName);
+
+              Inc(UpdatedCount);
+            end;
+      end;
+    end;
+  finally
+    AddOnlyInUnits.Free;
   end;
 
   if AlreadyReferencedCount > 0 then

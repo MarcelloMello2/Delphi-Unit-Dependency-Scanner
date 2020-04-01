@@ -3,7 +3,7 @@ object frmAddNewUnit: TfrmAddNewUnit
   Top = 0
   ActiveControl = edtNewName
   Caption = 'Add uses to all units that currently use "xyz"'
-  ClientHeight = 276
+  ClientHeight = 783
   ClientWidth = 433
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -44,7 +44,7 @@ object frmAddNewUnit: TfrmAddNewUnit
     object edtNewName: TEdit
       Left = 8
       Top = 21
-      Width = 419
+      Width = 415
       Height = 21
       Anchors = [akLeft, akTop, akRight]
       TabOrder = 1
@@ -55,12 +55,14 @@ object frmAddNewUnit: TfrmAddNewUnit
   object pnlButtons: TPanel
     AlignWithMargins = True
     Left = 3
-    Top = 79
+    Top = 745
     Width = 427
     Height = 35
-    Align = alTop
+    Align = alBottom
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitLeft = 8
+    ExplicitTop = 759
     object btnOK: TButton
       Left = 142
       Top = 8
@@ -86,39 +88,34 @@ object frmAddNewUnit: TfrmAddNewUnit
   object infoRenameCSV: TPanel
     AlignWithMargins = True
     Left = 3
-    Top = 120
+    Top = 586
     Width = 427
     Height = 153
-    Align = alTop
+    Align = alBottom
     BevelOuter = bvNone
     Color = clGray
     ParentBackground = False
     TabOrder = 2
+    ExplicitLeft = -2
     object Panel5: TPanel
       AlignWithMargins = True
-      Left = 1
-      Top = 1
-      Width = 425
-      Height = 151
-      Margins.Left = 1
-      Margins.Top = 1
-      Margins.Right = 1
-      Margins.Bottom = 1
+      Left = 3
+      Top = 3
+      Width = 421
+      Height = 147
       Align = alClient
       BevelOuter = bvNone
       Color = 12910591
       ParentBackground = False
       TabOrder = 0
+      ExplicitTop = 4
+      ExplicitHeight = 151
       object Label2: TLabel
         AlignWithMargins = True
-        Left = 1
-        Top = 1
-        Width = 423
-        Height = 149
-        Margins.Left = 1
-        Margins.Top = 1
-        Margins.Right = 1
-        Margins.Bottom = 1
+        Left = 3
+        Top = 3
+        Width = 415
+        Height = 141
         Align = alClient
         Caption = 
           'This will insert the defined unit as a uses entry for every unit' +
@@ -142,6 +139,42 @@ object frmAddNewUnit: TfrmAddNewUnit
         ExplicitWidth = 411
         ExplicitHeight = 117
       end
+    end
+  end
+  object pnlOnlyForUnits: TPanel
+    AlignWithMargins = True
+    Left = 3
+    Top = 79
+    Width = 427
+    Height = 501
+    Align = alClient
+    BevelOuter = bvNone
+    TabOrder = 3
+    ExplicitTop = 279
+    ExplicitHeight = 194
+    object Label3: TLabel
+      Left = 8
+      Top = 7
+      Width = 266
+      Height = 39
+      Caption = 
+        'Restrict operation to units. One unit name a line. '#13#10'Names can c' +
+        'ontain ".pas" endings, they will be ignored.'#13#10'(if left empty, al' +
+        'l units will be processed)'
+    end
+    object mem_OnlyApplyToUnits: TMemo
+      AlignWithMargins = True
+      Left = 3
+      Top = 50
+      Width = 421
+      Height = 448
+      Margins.Top = 50
+      Align = alClient
+      TabOrder = 0
+      ExplicitLeft = 160
+      ExplicitTop = 88
+      ExplicitWidth = 185
+      ExplicitHeight = 89
     end
   end
 end

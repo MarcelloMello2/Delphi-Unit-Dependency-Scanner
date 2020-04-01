@@ -1633,7 +1633,7 @@ begin
             AddUnitToUsesRefactoring := TAddUnitToUsesRefactoring.Create;
             try
               AddUnitToUsesRefactoring.Model := FModel;
-              AddUnitToUsesRefactoring.AddUnitToUses(chkDummyRun.Checked, GetFocusedDelphiFile, edtNewName.Text);
+              AddUnitToUsesRefactoring.AddUnitToUses(chkDummyRun.Checked, GetFocusedDelphiFile, edtNewName.Text, mem_OnlyApplyToUnits.Lines);
 
               // the refactoring changed the model, so we need to rebuild the gui from the model
               FillGUIFromModel;

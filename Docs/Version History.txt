@@ -3,6 +3,7 @@ Easy-IP Delphi Unit Dependency Scanner
 
 v2.? (cfmaer)
 Added: Utilities to remove unused units based on reports from Pascal Analyzer
+Added: Ability to restrict the "add unit B to uses clauses of all units that already use unit A" operation to a list of units
 
 v2.2 (cfmaer)
 Fixed: Clear settings before loading a project

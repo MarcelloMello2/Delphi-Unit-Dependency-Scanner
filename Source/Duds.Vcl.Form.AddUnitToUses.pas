@@ -16,6 +16,9 @@ type
     btnOK: TButton;
     btnCancel: TButton;
     infoRenameCSV: TPanel;
+    pnlOnlyForUnits: TPanel;
+    Label3: TLabel;
+    mem_OnlyApplyToUnits: TMemo;
     Panel5: TPanel;
     Label2: TLabel;
     procedure edtNewNameChange(Sender: TObject);
