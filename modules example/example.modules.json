@@ -1,0 +1,40 @@
+{
+    "modules": [
+        {
+            "name": "delphi.rtl",
+            "contains": {
+                "paths": [
+                    "C:\\Program Files (x86)\\Embarcadero\\Studio\\20.0\\source\\rtl\\common",
+                    "C:\\Program Files (x86)\\Embarcadero\\Studio\\20.0\\source\\rtl\\sys",
+                    "C:\\Program Files (x86)\\Embarcadero\\Studio\\20.0\\source\\rtl\\win"
+                ]
+            }
+        },
+        {
+            "name": "delphi.vcl",
+            "contains": {
+                "paths": [
+                    "C:\\Program Files (x86)\\Embarcadero\\Studio\\20.0\\source\\vcl"
+                ]
+            }
+        },
+        {
+            "name": "core.common",
+            "contains": {
+                "units": [
+                    "MyCommonUnit",
+                    "anotherCommonUnit"
+                ]
+            }
+        },
+        {
+            "name": "core.ciphers",
+            "contains": {
+                "units": [
+                    "cipherUnit1",
+                    "cipherUnit2"
+                ]
+            }
+        }
+    ]
+}

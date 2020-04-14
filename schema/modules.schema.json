@@ -1,0 +1,51 @@
+
+{
+    "type": "object",
+    "required": ["modules"],
+    "properties": {
+        "modules": {
+            "description": "list of modules",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "description": "a module definition",
+                "required": ["name"],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "name of the module, must be unique"
+                    },
+                    "contains": {
+                        "type": "object",
+                        "description": "defines the units that form this module",
+                        "anyOf": [
+                            {"required": ["paths"]},
+                            {"required": ["units"]},
+                            {"required": ["paths", "units"]}
+                        ],
+                        "properties": {
+                            "paths": {
+                                "type": "array",
+                                "description": "array of paths that contain units of this module",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "minItems": 1
+                            },
+                            "units": {
+                                "type": "array",
+                                "description": "array of unit names that form this module",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "minItems": 1
+                            }
+                        }
+                    }
+                }
+
+            }
+        
+        }
+    }
+}

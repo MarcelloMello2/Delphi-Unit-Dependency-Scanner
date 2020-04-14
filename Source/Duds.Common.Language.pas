@@ -9,6 +9,8 @@ resourcestring
   StrScanningDSearchRootFiles = 'Scanning %d root files';
   StrScanningDSearchSearchPaths = 'Scanning %d search paths (expanded from %d defined paths)';
   StrDFilesFound = '%d matching file(s) found in the search paths';
+  StrModulesDefinitionLoaded = 'Modules definition loaded, found %d modules';
+  StrModulesIdentified = '%d out of %d ".pas" files could be mapped to modules';
   StrParsingFiles = 'Parsing files';
   StrTransferingToGUI = 'Transfering model data to GUI';
   StrDFilesWithATo = '%d used unit(s) found and a total of %s lines parsed';
@@ -43,6 +45,8 @@ resourcestring
   StrFileSRenamedTo = 'File "%s" renamed to "%s"';
   StrRootFileNotFound = 'Root file not found: "%s"';
   StrUnableToParseS = 'Unable to parse "%s": %s';
+  StrAmbigousUnitToModuleMapping = 'ambigous module definition: unit "%s" is defined to be part of module "%s" and module "%s"';
+  StrAmbigousPathToModuleMapping = 'ambigous module definition: path "%s" is defined to be part of module "%s" and module "%s"';
   StrVCLFormCount = 'VCL Form Count';
   StrFMXFormCount = 'FMX Form Count';
   StrStartBatchRename = 'Batch-Rename from CSV: Renaming unit "%s" to "%s"';

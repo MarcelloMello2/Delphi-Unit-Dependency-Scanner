@@ -58,7 +58,7 @@ begin
     [NewUnitName, ReferencedUnitName]);
 
   // Add the new unit to the model
-  NewUnitDelphiFile := FModel.FindParsedDelphiUnit(NewUnitName);
+  NewUnitDelphiFile := FModel.FindParsedDelphiUnit(NewUnitName, nil);
   if not Assigned(NewUnitDelphiFile) then
   begin
     if not DummyRun then
@@ -161,7 +161,7 @@ begin
     DelphiFile.UnitInfo.UsedUnits.Insert(InsertBeforeUsedUnitIndex, NewUsedUnit);
 
     // increase the used counter of the inserted unit
-    InsertedUnitDelphiFile := FModel.FindParsedDelphiUnit(NewUnitName);
+    InsertedUnitDelphiFile := FModel.FindParsedDelphiUnit(NewUnitName, nil);
     if not Assigned(InsertedUnitDelphiFile) then
       raise Exception.Create('this should not happen, the new unit should have been added to the model');
     InsertedUnitDelphiFile.UsedCount := InsertedUnitDelphiFile.UsedCount + 1;

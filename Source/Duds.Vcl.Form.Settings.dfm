@@ -24,13 +24,11 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
     Top = 3
     Width = 768
     Height = 415
-    ActivePage = tabSearchPaths
+    ActivePage = tabModules
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 730
     object tabRootFiles: TTabSheet
       Caption = 'Root Files'
-      ExplicitWidth = 722
       object Panel4: TPanel
         Left = 647
         Top = 0
@@ -39,7 +37,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitLeft = 609
         object btnAddFile: TButton
           AlignWithMargins = True
           Left = 3
@@ -87,7 +84,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
         Color = clGray
         ParentBackground = False
         TabOrder = 2
-        ExplicitWidth = 716
         object Panel14: TPanel
           AlignWithMargins = True
           Left = 1
@@ -103,7 +99,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
           Color = 12910591
           ParentBackground = False
           TabOrder = 0
-          ExplicitWidth = 714
           object lnkFTSInfo: TLabel
             AlignWithMargins = True
             Left = 1
@@ -131,8 +126,8 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
             ParentFont = False
             Transparent = True
             WordWrap = True
-            ExplicitWidth = 700
-            ExplicitHeight = 39
+            ExplicitWidth = 736
+            ExplicitHeight = 26
           end
         end
       end
@@ -155,13 +150,11 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
         WordWrap = False
         Zoom = 100
         OnChange = OnSettingChange
-        ExplicitWidth = 603
       end
     end
     object tabSearchPaths: TTabSheet
       Caption = 'Search Paths'
       ImageIndex = 1
-      ExplicitWidth = 722
       object Panel2: TPanel
         Left = 600
         Top = 0
@@ -180,7 +173,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
           Caption = 'Add Search Paths'
           TabOrder = 0
           OnClick = btnAddPathClick
-          ExplicitWidth = 107
         end
         object chkRecursive: TCheckBox
           AlignWithMargins = True
@@ -219,8 +211,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
         WordWrap = False
         Zoom = 100
         OnChange = OnSettingChange
-        ExplicitWidth = 603
-        ExplicitHeight = 381
       end
       object Panel3: TPanel
         AlignWithMargins = True
@@ -233,9 +223,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
         Color = clGray
         ParentBackground = False
         TabOrder = 2
-        ExplicitLeft = 6
-        ExplicitTop = 340
-        ExplicitWidth = 716
         object Panel5: TPanel
           AlignWithMargins = True
           Left = 1
@@ -251,7 +238,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
           Color = 12910591
           ParentBackground = False
           TabOrder = 0
-          ExplicitWidth = 714
           object Label1: TLabel
             AlignWithMargins = True
             Left = 1
@@ -283,10 +269,28 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
         end
       end
     end
+    object tabModules: TTabSheet
+      Caption = 'Modules'
+      ImageIndex = 5
+      ExplicitLeft = 0
+      ExplicitTop = 25
+      object edt_ModulesDefinitionFile: TLabeledEdit
+        Left = 136
+        Top = 17
+        Width = 585
+        Height = 21
+        EditLabel.Width = 121
+        EditLabel.Height = 13
+        EditLabel.Caption = 'Modules Definition File'
+        LabelPosition = lpLeft
+        LabelSpacing = 5
+        TabOrder = 0
+        OnChange = edt_ModulesDefinitionFileChange
+      end
+    end
     object tabUnitScopes: TTabSheet
       Caption = 'Unit Scope Names'
       ImageIndex = 4
-      ExplicitWidth = 722
       object memUnitScopeNames: TRichEdit
         AlignWithMargins = True
         Left = 3
@@ -326,13 +330,11 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
         WordWrap = False
         Zoom = 100
         OnChange = OnSettingChange
-        ExplicitWidth = 716
       end
     end
     object tabScan: TTabSheet
       Caption = 'Scan'
       ImageIndex = 3
-      ExplicitWidth = 722
       object chkLinkUnits: TCheckBox
         Left = 16
         Top = 16
@@ -358,7 +360,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
     object tabEnvironment: TTabSheet
       Caption = 'Environment'
       ImageIndex = 2
-      ExplicitWidth = 722
       object chkLoadLastProject: TCheckBox
         Left = 16
         Top = 16
@@ -379,7 +380,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitWidth = 736
     object lblStatus: TLabel
       AlignWithMargins = True
       Left = 3
@@ -410,7 +410,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
       ParentDoubleBuffered = False
       TabOrder = 0
       OnClick = btnOKClick
-      ExplicitLeft = 580
     end
     object btnCancel: TButton
       AlignWithMargins = True
@@ -424,7 +423,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
       Caption = '&Cancel'
       TabOrder = 1
       OnClick = btnCancelClick
-      ExplicitLeft = 658
     end
   end
   object OpenDialog1: TOpenDialog

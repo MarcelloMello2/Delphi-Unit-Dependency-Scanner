@@ -23,6 +23,7 @@ uses
   Duds.Refactoring.AddUnitToUses,
   Duds.Export.Gephi,
   Duds.Export.GraphML,
+  Duds.Modules.Classes,
   Duds.Refactoring.PascalAnalyzerUsesReportProcessor,
   Duds.Refactoring.RemoveUnusedUnits,
   Duds.Vcl.HourGlass,

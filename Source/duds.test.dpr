@@ -32,6 +32,8 @@ uses
   Duds.Refactoring.AddUnitToUses,
   Duds.Export.Gephi,
   Duds.Export.GraphML,
+  Duds.Modules.Classes,
+  Duds.Modules.Classes.test,
   Duds.Refactoring.PascalAnalyzerUsesReportProcessor,
   Duds.Refactoring.RemoveUnusedUnits,
   Duds.Refactoring.RemoveUnusedUnits.test;

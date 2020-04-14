@@ -91,6 +91,8 @@ type
     Panel3: TPanel;
     Panel5: TPanel;
     Label1: TLabel;
+    tabModules: TTabSheet;
+    edt_ModulesDefinitionFile: TLabeledEdit;
     procedure btnAddFileClick(Sender: TObject);
     procedure btnAddPathClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -100,6 +102,7 @@ type
     procedure btnScanForProjectsClick(Sender: TObject);
     procedure btnOKClick(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
+    procedure edt_ModulesDefinitionFileChange(Sender: TObject);
   private
     FEnvironmentSettings: TEnvironmentSettings;
     FProjectSettings: TProjectSettings;
@@ -275,6 +278,7 @@ begin
   memRootFiles.Lines.Assign(FProjectSettings.RootFiles);
   memSearchPaths.Lines.Assign(FProjectSettings.SearchPaths);
   memUnitScopeNames.Lines.Assign(FProjectSettings.UnitScopeNames);
+  edt_ModulesDefinitionFile.Text := FProjectSettings.ModulesDefinitionFile;
 end;
 
 procedure TfrmDependencyScannerSetting.GUIToSettings;
@@ -289,6 +293,7 @@ begin
   FProjectSettings.RootFiles.Assign(memRootFiles.Lines);
   FProjectSettings.SearchPaths.Assign(memSearchPaths.Lines);
   FProjectSettings.UnitScopeNames.Assign(memUnitScopeNames.Lines);
+  FProjectSettings.ModulesDefinitionFile := edt_ModulesDefinitionFile.Text;
 end;
 
 procedure TfrmDependencyScannerSetting.miWindowsPathsClick(Sender: TObject);
@@ -496,6 +501,12 @@ begin
         end;
     end;
   end;
+end;
+
+procedure TfrmDependencyScannerSetting.edt_ModulesDefinitionFileChange(Sender:
+    TObject);
+begin
+  FModified := TRUE;
 end;
 
 end.

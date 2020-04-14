@@ -122,12 +122,14 @@ begin
     if FScanDepth > FDeepestScanDepth then
       FDeepestScanDepth := FScanDepth;
 
-    DelphiFile := FModel.FindParsedDelphiUnit(Unitname);
+    // Did we already parse this file? (also try unit scopes, so that we e.g. find `System.Classes` when
+    // we search for `Classes` and already parsed `System.Classes` before
+    DelphiFile := FModel.FindParsedDelphiUnit(Unitname, FProjectSettings.UnitScopeNames);
 
     // File was not parsed already -> try to find it on disk and parse it
     if not Assigned(DelphiFile) then
     begin
-      // Do we have the file on disk?
+      // Do we have the file on disk? (also try unit scopes here)
       FoundFileInPaths := FModel.SearchUnitByNameWithScopes(Unitname, Filename, FProjectSettings.UnitScopeNames);
 
       // Parse the unit

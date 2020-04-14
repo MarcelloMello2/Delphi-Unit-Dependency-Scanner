@@ -36,7 +36,8 @@ uses
   Duds.Common.Files,
   Duds.Common.Types,
   Duds.Common.Interfaces,
-  Duds.Common.Parser.Pascal.Tokeniser;
+  Duds.Common.Parser.Pascal.Tokeniser,
+  Duds.Modules.Classes;
 
 type
   TUnitInfo = class(TInterfacedObject, IUnitInfo)
@@ -48,6 +49,7 @@ type
     FDelphiFileType: TDelphiFileType;
     FUsedUnits: TList<IUsedUnitInfo>;
     FPreviousUnitName: String;
+    fModule: TModule;
   private
     function GetDelphiUnitName: String;
     function GetDelphiFileType: TDelphiFileType;
@@ -56,6 +58,7 @@ type
     function GetDelphiUnitNamePosition: Integer;
     function GetUsedUnits: TList<IUsedUnitInfo>;
     function GetPreviousUnitName: String;
+    function GetModule: TModule;
 
     procedure SetDelphiUnitName(const Value: String);
     procedure SetDelphiFileType(const Value: TDelphiFileType);
@@ -63,6 +66,7 @@ type
     procedure SetLineCount(const Value: Integer);
     procedure SetDelphiUnitNamePosition(const Value: Integer);
     procedure SetPreviousUnitName(const Value: String);
+    procedure SetModule(const Value: TModule);
   public
     property DelphiUnitName: String read GetDelphiUnitName write SetDelphiUnitName;
     property Filename: String read GetFilename write SetFilename;
@@ -71,6 +75,7 @@ type
     property DelphiFileType: TDelphiFileType read GetDelphiFileType write SetDelphiFileType;
     property UsedUnits: TList<IUsedUnitInfo> read GetUsedUnits;
     property PreviousUnitName: String read GetPreviousUnitName write SetPreviousUnitName;
+    property Module: TModule read GetModule write SetModule;
   public
     constructor Create;
     destructor Destroy; override;
@@ -423,6 +428,11 @@ begin
   Result := FLineCount;
 end;
 
+function TUnitInfo.GetModule: TModule;
+begin
+  Result := fModule;
+end;
+
 function TUnitInfo.GetPreviousUnitName: String;
 begin
   Result := FPreviousUnitName;
@@ -456,6 +466,11 @@ end;
 procedure TUnitInfo.SetLineCount(const Value: Integer);
 begin
   FLineCount := Value;
+end;
+
+procedure TUnitInfo.SetModule(const Value: TModule);
+begin
+  fModule := Value;
 end;
 
 procedure TUnitInfo.SetPreviousUnitName(const Value: String);

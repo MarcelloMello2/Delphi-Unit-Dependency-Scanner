@@ -63,6 +63,7 @@ uses
   Duds.Scan.DependencyAnalyzer,
   Duds.Export.Gephi,
   Duds.Export.GraphML,
+  Duds.Modules.Classes,
   Duds.Refactoring.RenameUnit,
   Duds.Refactoring.AddUnitToUses,
   Duds.Refactoring.PascalAnalyzerUsesReportProcessor,
@@ -362,6 +363,8 @@ type
     procedure UpdateLogEntries;
     procedure ClearLog;
     procedure FixDPI;
+    function CompareTwoModulesTreeNodes(aDelphiFile1,
+      aDelphiFile2: TDelphiFile): Integer;
 
     property Modified: Boolean read FModified write SetModified;
   end;
@@ -843,6 +846,23 @@ begin
   end;
 end;
 
+function TfrmMain.CompareTwoModulesTreeNodes(aDelphiFile1, aDelphiFile2: TDelphiFile): Integer;
+var
+  aText1,
+  aText2: string;
+begin
+  aText1 := '';
+  aText2 := '';
+
+  if aDelphiFile1.UnitInfo.Module <> nil then
+    aText1 := aDelphiFile1.UnitInfo.Module.Name;
+
+  if aDelphiFile2.UnitInfo.Module <> nil then
+    aText2 := aDelphiFile2.UnitInfo.Module.Name;
+
+  Result := CompareStr(aText1, aText2);
+end;
+
 procedure TfrmMain.vtUnitsTreeCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
   var Result: Integer);
 var
@@ -877,6 +897,8 @@ begin
       Result := CompareBoolean(FTreeNodeObjects[GetID(Node1)].Link <> nil, FTreeNodeObjects[GetID(Node2)].Link <> nil);
     9:
       Result := CompareStr(NodeObject1.DelphiFile.UnitInfo.Filename, NodeObject2.DelphiFile.UnitInfo.Filename);
+    10:
+      Result := CompareTwoModulesTreeNodes(NodeObject1.DelphiFile, NodeObject2.DelphiFile);
   end;
 
 end;
@@ -1127,6 +1149,10 @@ begin
 
       9:
         CellText := UnitInfo.Filename;
+
+      10:
+        if Assigned(UnitInfo.Module) then
+          CellText := UnitInfo.Module.Name;
     end;
   end;
 end;
@@ -1187,6 +1213,8 @@ begin
         Result := CompareInteger(DelphiFile1.UnitInfo.UsedUnits.Count, DelphiFile2.UnitInfo.UsedUnits.Count);
       5:
         Result := CompareStr(DelphiFile1.UnitInfo.Filename, DelphiFile2.UnitInfo.Filename);
+      6:
+        Result := CompareTwoModulesTreeNodes(DelphiFile1, DelphiFile2);
     end;
   end;
 end;
@@ -1275,6 +1303,9 @@ begin
       CellText := IntToStr(DelphiFile.UnitInfo.UsedUnits.Count);
     5:
       CellText := UnitInfo.Filename;
+    6:
+      if Assigned(UnitInfo.Module) then
+        CellText := UnitInfo.Module.Name;
   end;
 end;
 
@@ -1813,7 +1844,7 @@ begin
           NewUnitName := Copy(aLine, semicolonPos + 1, Length(aLine));
 
           // "old name" Unit exists?
-          OldFile := FModel.FindParsedDelphiUnit(OldUnitName);
+          OldFile := FModel.FindParsedDelphiUnit(OldUnitName, nil);
           if not Assigned(OldFile) then
           begin
             Log(StrUnableToRenameS, [OldUnitName], LogError);
@@ -1821,7 +1852,7 @@ begin
           end;
 
           // "new name" unit does NOT exist already?
-          NewFile := FModel.FindParsedDelphiUnit(NewUnitName);
+          NewFile := FModel.FindParsedDelphiUnit(NewUnitName, nil);
           if Assigned(NewFile) then
           begin
             Log(StrUnableToRenameToNewName, [OldUnitName, NewUnitName], LogError);
@@ -2012,7 +2043,7 @@ procedure TfrmMain.FillGUIFromModel;
     UsedUnitInfo: IUsedUnitInfo;
     UnitWasAddedForTheFirstTime: Boolean;
   begin
-    DelphiFile := FModel.FindParsedDelphiUnit(UnitOrProjectFileName);
+    DelphiFile := FModel.FindParsedDelphiUnit(UnitOrProjectFileName, FProjectSettings.UnitScopeNames);
     if Assigned(DelphiFile) then
     begin
       NodeObject              := TNodeObject.Create;
@@ -2135,6 +2166,11 @@ end;
 procedure TfrmMain.actStartScanExecute(Sender: TObject);
 var
   FileScanner: TDudsFileScanner;
+  i: integer;
+  aModule: TModule;
+  aDelphiFile: TDelphiFile;
+  aUnitsTotal: integer;
+  aUnitsInModules: integer;
 begin
   if FProjectSettings.RootFiles.Count = 0 then
   begin
@@ -2162,7 +2198,14 @@ begin
       UpdateStats(TRUE);
       Refresh;
 
-      // step 1: scanning the disk for files (rootfiles & search paths)
+      // step 1: read modules definition (if defined)
+      if not FProjectSettings.ModulesDefinitionFile.IsEmpty then
+      begin
+        TModulesSerializer.ReadFromJsonFile(FProjectSettings.ModulesDefinitionFile, FModel.Modules);
+        Log(StrModulesDefinitionLoaded, [FModel.Modules.Count]);
+      end;
+
+      // step 2: scanning the disk for files (rootfiles & search paths)
       FileScanner := TDudsFileScanner.Create;
       try
         FileScanner.LoadFilesInSearchPaths(FModel, FProjectSettings);
@@ -2171,7 +2214,7 @@ begin
         FreeAndNil(FileScanner);
       end;
 
-      // step 2: recursively parsing the root files for all used units
+      // step 3: recursively parsing the root files for all used units
       if not FCancelled then
       begin
         FDependencyAnalyzer := TDudsDependencyAnalyzer.Create;
@@ -2194,7 +2237,28 @@ begin
         end;
       end;
 
-      // step 3: fill gui trees with data
+      // step 4: Identify modules for each .pas unit
+      //   at this point, all unit that were "seen" (by root files, search paths
+      //   or parsing units) are identified
+      FModel.Modules.ReBuildFastSearchList;
+      aUnitsTotal := 0;
+      aUnitsInModules := 0;
+      for i := 0 to pred(FModel.DelphiFileList.Count) do
+      begin
+        aDelphiFile := FModel.DelphiFileList[i];
+        if (aDelphiFile.UnitInfo.DelphiFileType = ftPAS) or (not aDelphiFile.InSearchPath) then  // files that are not in search path do not get a filetype but should be '.pas'...
+        begin
+          Inc(aUnitsTotal);
+          if FModel.Modules.FindModuleForUnit(aDelphiFile.UnitInfo, aModule) then
+          begin
+            aDelphiFile.UnitInfo.Module := aModule;
+            Inc(aUnitsInModules);
+          end;
+        end;
+      end;
+      Log(StrModulesIdentified, [aUnitsInModules, aUnitsTotal]);
+
+      // step 5: fill gui trees with data
       if not FCancelled then
         FillGUIFromModel;
     finally

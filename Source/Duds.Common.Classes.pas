@@ -101,6 +101,7 @@ type
     FSearchPaths: TStringList;
     FUnitScopeNames: TStringList;
     FLinkUnits: Boolean;
+    fModulesDefinitionFile: string;
   private
     procedure SetRootFiles(const Value: TStringList);
     procedure SetSearchPaths(const Value: TStringList);
@@ -116,6 +117,7 @@ type
     property SearchPaths: TStringList read FSearchPaths write SetSearchPaths;
     property UnitScopeNames: TStringList read FUnitScopeNames write SetUnitScopeNames;
     property LinkUnits: Boolean read FLinkUnits write FLinkUnits;
+    property ModulesDefinitionFile: string read fModulesDefinitionFile write fModulesDefinitionFile;
   end;
 
   TEnvironmentSettings = class(TBaseSettings)
@@ -241,6 +243,7 @@ begin
   IniFile.ReadStrings('UnitScopeNames', FUnitScopeNames);
 
   FLinkUnits := IniFile.ReadBool('Settings', 'LinkUnits', FLinkUnits);
+  fModulesDefinitionFile := IniFile.ReadString('Settings', 'ModulesDefinitionFile', fModulesDefinitionFile);
 end;
 
 procedure TProjectSettings.DoSaveToIniFile(const IniFile: TIniFile);
@@ -250,6 +253,7 @@ begin
   IniFile.WriteStrings('UnitScopeNames', FUnitScopeNames);
 
   IniFile.WriteBool('Settings', 'LinkUnits', FLinkUnits);
+  IniFile.WriteString('Settings', 'ModulesDefinitionFile', fModulesDefinitionFile);
 end;
 
 procedure TProjectSettings.SetRootFiles(const Value: TStringList);

@@ -5,11 +5,12 @@ interface
 uses
   System.Classes, System.SysUtils, System.Generics.Collections,
 
-  Duds.Common.Classes;
+  Duds.Common.Classes, Duds.Modules.Classes;
 
 type
   TDudsModel = class(TObject)
   private
+    fModules: TModulesList;
     FFiles: TDictionary<String, String>;
     FParsedDelphiRootFiles: TObjectList<TDelphiFile>;
     FParsedDelphiFiles: TObjectDictionary<String, TDelphiFile>;
@@ -26,8 +27,10 @@ type
       var UnitFilename: String;
       UnitScopeNames: TStringList): Boolean;
     function IsUnitUsed(const DelphiUnitName: String; DelphiFile: TDelphiFile): Boolean;
-    function FindParsedDelphiUnit(const DelphiUnitName: string): TDelphiFile;
+    function FindParsedDelphiUnit(const DelphiUnitName: string;
+                                  UnitScopeNames: TStringList): TDelphiFile;
 
+    property Modules: TModulesList read fModules;
     property Files: TDictionary<String, String> read FFiles;
     property ParsedDelphiRootFiles: TObjectList<TDelphiFile> read FParsedDelphiRootFiles;
     property ParsedDelphiFiles: TObjectDictionary<String, TDelphiFile> read FParsedDelphiFiles;
@@ -44,11 +47,13 @@ begin
   FParsedDelphiRootFiles.Clear;
   FParsedDelphiFiles.Clear;
   FDelphiFileList.Clear;
+  fModules.ClearAllLists;
 end;
 
 constructor TDudsModel.Create;
 begin
   inherited Create;
+  fModules               := TModulesList.Create;
   FFiles                 := TDictionary<String, String>.Create;
   FParsedDelphiRootFiles := TObjectList<TDelphiFile>.Create(FALSE);
   FParsedDelphiFiles     := TObjectDictionary<String, TDelphiFile>.Create([doOwnsValues]);
@@ -57,6 +62,7 @@ end;
 
 destructor TDudsModel.Destroy;
 begin
+  FreeAndNil(fModules);
   FreeAndNil(FFiles);
   FreeAndNil(FParsedDelphiRootFiles);
   FreeAndNil(FParsedDelphiFiles);
@@ -105,19 +111,45 @@ begin
     end;
 end;
 
-function TDudsModel.FindParsedDelphiUnit(const DelphiUnitName: string): TDelphiFile;
+function TDudsModel.FindParsedDelphiUnit(const DelphiUnitName: string; UnitScopeNames: TStringList): TDelphiFile;
+var
+  aFound: Boolean;
+  i: Integer;  
+  aUnitNameLookupKey: string;
 begin
-  FParsedDelphiFiles.TryGetValue(UpperCase(DelphiUnitName), Result);
+  aUnitNameLookupKey := UpperCase(DelphiUnitName);
+
+  aFound := FParsedDelphiFiles.TryGetValue(aUnitNameLookupKey, Result);
+
+  // Try the scopes
+  if not aFound then
+  begin
+    if Assigned(UnitScopeNames) then
+      for i := 0 to pred(UnitScopeNames.Count) do
+      begin
+        aFound := FParsedDelphiFiles.TryGetValue(UpperCase(UnitScopeNames[i]) + '.' + aUnitNameLookupKey, Result);
+
+        if aFound then
+          Break;
+      end;
+  end;
 end;
 
 function TDudsModel.CreateDelphiFile(const DelphiUnitName: String; IsRootFile: Boolean): TDelphiFile;
+var
+  aUnitNameLookupKey: string;
+  aDelphiFileAlreadyExisting: TDelphiFile;
 begin
   Result := TDelphiFile.Create;
 
   if DelphiUnitName.IsEmpty then
     raise Exception.Create('empty unit name not allowed - parser error?');
 
-  FParsedDelphiFiles.Add(UpperCase(DelphiUnitName), Result);
+  aUnitNameLookupKey := UpperCase(DelphiUnitName);
+  if FParsedDelphiFiles.TryGetValue(aUnitNameLookupKey, aDelphiFileAlreadyExisting) then
+    raise Exception.CreateFmt('file "%s" is already parsed, you cannot add it mulitple time - code error?', [DelphiUnitName]);
+    
+  FParsedDelphiFiles.Add(aUnitNameLookupKey, Result);
   FDelphiFileList.Add(Result);
 
   if IsRootFile then

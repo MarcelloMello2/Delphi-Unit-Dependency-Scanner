@@ -31,6 +31,7 @@ interface
 
 uses
   System.Classes, System.TypInfo, System.Generics.Collections,
+  System.SysUtils,
 
   Duds.Common.Types;
 
@@ -58,6 +59,29 @@ type
     property Filename: String read GetFilename write SetFilename;
   end;
 
+  TModule = class // simple pojo
+  private
+    fName: string;
+    fUnits: TStringList;
+    fPaths: TStringList;
+
+  protected
+    function GetName: string;
+    function GetUnits: TStringList;
+    function GetPaths: TStringList;
+    procedure SetName(const Value: string);
+    procedure SetUnits(const Value: TStringList);
+    procedure SetPaths(const Value: TStringList);
+
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    property Name: string read GetName write SetName;
+    property Paths: TStringList read GetPaths write SetPaths;
+    property Units: TStringList read GetUnits write SetUnits;
+  end;
+
   IUnitInfo = interface
   ['{F8DDA5FC-AF2B-4B35-A662-F15120502477}']
     function GetDelphiUnitName: String;
@@ -67,6 +91,7 @@ type
     function GetDelphiUnitNamePosition: Integer;
     function GetUsedUnits: TList<IUsedUnitInfo>;
     function GetPreviousUnitName: String;
+    function GetModule: TModule;
 
     procedure SetDelphiUnitName(const Value: String);
     procedure SetDelphiFileType(const Value: TDelphiFileType);
@@ -74,6 +99,7 @@ type
     procedure SetLineCount(const Value: Integer);
     procedure SetDelphiUnitNamePosition(const Value: Integer);
     procedure SetPreviousUnitName(const Value: String);
+    procedure SetModule(const Value: TModule);
 
     property DelphiUnitName: String read GetDelphiUnitName write SetDelphiUnitName;
     property Filename: String read GetFilename write SetFilename;
@@ -82,8 +108,55 @@ type
     property DelphiFileType: TDelphiFileType read GetDelphiFileType write SetDelphiFileType;
     property UsedUnits: TList<IUsedUnitInfo> read GetUsedUnits;
     property PreviousUnitName: String read GetPreviousUnitName write SetPreviousUnitName;
+    property Module: TModule read GetModule write SetModule;
   end;
 
 implementation
+
+{ TModule }
+
+constructor TModule.Create;
+begin
+  fUnits := TStringList.Create(TDuplicates.dupError, true, false);
+  fPaths := TStringList.Create(TDuplicates.dupError, true, false);
+end;
+
+destructor TModule.Destroy;
+begin
+  FreeAndNil(fUnits);
+  FreeAndNil(fPaths);
+
+  inherited;
+end;
+
+function TModule.GetName: string;
+begin
+  Result := fName;
+end;
+
+function TModule.GetUnits: TStringList;
+begin
+  Result := fUnits;
+end;
+
+function TModule.GetPaths: TStringList;
+begin
+  Result := fPaths;
+end;
+
+procedure TModule.SetName(const Value: string);
+begin
+  fName := Value;
+end;
+
+procedure TModule.SetUnits(const Value: TStringList);
+begin
+  fUnits := Value;
+end;
+
+procedure TModule.SetPaths(const Value: TStringList);
+begin
+  fPaths := Value;
+end;
 
 end.
