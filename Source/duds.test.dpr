@@ -36,6 +36,8 @@ uses
   Duds.Modules.Classes.test,
   Duds.Refactoring.FormatUsesHelper,
   Duds.Refactoring.FormatUsesHelper.test,
+  Duds.Refactoring.FormatUses,
+  Duds.Refactoring.FormatUses.test,
   Duds.Refactoring.PascalAnalyzerUsesReportProcessor,
   Duds.Refactoring.RemoveUnusedUnits,
   Duds.Refactoring.RemoveUnusedUnits.test;

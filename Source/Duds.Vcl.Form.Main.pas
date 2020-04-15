@@ -64,6 +64,7 @@ uses
   Duds.Export.Gephi,
   Duds.Export.GraphML,
   Duds.Modules.Classes,
+  Duds.Refactoring.FormatUses,
   Duds.Refactoring.RenameUnit,
   Duds.Refactoring.AddUnitToUses,
   Duds.Refactoring.PascalAnalyzerUsesReportProcessor,
@@ -202,6 +203,11 @@ type
     actExportDropDown: TAction;
     actRemoveUnusedUnitsProcessPalOutput: TAction;
     actRemoveUnUsedUnits: TAction;
+    actFormatUsesOfFile: TAction;
+    Refactorings1: TMenuItem;
+    Formatusesofthisfile1: TMenuItem;
+    Formatusesofthisfile2: TMenuItem;
+    N15: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure vtUnitsTreeGetNodeDataSize(Sender: TBaseVirtualTree; var NodeDataSize: Integer);
@@ -282,6 +288,7 @@ type
     procedure actAddUnitToUsesExecute(Sender: TObject);
     procedure actRemoveUnUsedUnitsExecute(Sender: TObject);
     procedure actRemoveUnusedUnitsProcessPalOutputExecute(Sender: TObject);
+    procedure actFormatUsesOfFileExecute(Sender: TObject);
   private
     FModel: TDudsModel;
     FDependencyAnalyzer: TDudsDependencyAnalyzer;
@@ -1683,6 +1690,26 @@ begin
   end;
 end;
 
+procedure TfrmMain.actFormatUsesOfFileExecute(Sender: TObject);
+var
+  aFormatUsesRefactoring : TFormatUsesRefactoring;
+begin
+  if GetFocusedDelphiFile <> nil then
+  begin
+      aFormatUsesRefactoring := TFormatUsesRefactoring.Create;
+      try
+        aFormatUsesRefactoring.Model    := FModel;
+        aFormatUsesRefactoring.OnLog    := Self.Log;
+        aFormatUsesRefactoring.DummyRun := false;
+
+        aFormatUsesRefactoring.FormatUsesInFile(GetFocusedDelphiFile.UnitInfo.DelphiUnitName);
+
+      finally
+        FreeAndNil(aFormatUsesRefactoring);
+      end;
+  end;
+end;
+
 procedure TfrmMain.actRemoveUnusedUnitsProcessPalOutputExecute(Sender: TObject);
 begin
   try
@@ -2488,8 +2515,7 @@ procedure TfrmMain.FixDPI;
   procedure ScaleVT(const VT: TVirtualStringTree);
   begin
     VT.DefaultNodeHeight := ScaleDimension(VT.DefaultNodeHeight, PixelsPerInch);
-    VT.Header.Height := ScaleDimension(VT.Header.Height, PixelsPerInch);
-    VT.Header.Font.Size := ScaleDimension(VT.Header.Font.Size, PixelsPerInch);
+    VT.Header.Height    := ScaleDimension(VT.Header.Height, PixelsPerInch);
   end;
 
 begin

@@ -25,6 +25,7 @@ uses
   Duds.Export.GraphML,
   Duds.Modules.Classes,
   Duds.Refactoring.FormatUsesHelper,
+  Duds.Refactoring.FormatUses,
   Duds.Refactoring.PascalAnalyzerUsesReportProcessor,
   Duds.Refactoring.RemoveUnusedUnits,
   Duds.Vcl.HourGlass,

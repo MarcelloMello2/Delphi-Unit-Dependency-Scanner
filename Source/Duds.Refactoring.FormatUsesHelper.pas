@@ -161,9 +161,18 @@ var
 begin
   Result := TStringList.Create;
 
-  for i := aLineOfUsesBegin + 1 to aSourceLines.Count - 1 do
+  for i := aLineOfUsesBegin to aSourceLines.Count - 1 do
   begin
     aCurrentUsesLine := Trim(aSourceLines[i]);
+
+    // in the first line, delete the 'uses' keyword
+    if i = aLineOfUsesBegin then
+      if aCurrentUsesLine.StartsWith(KEYWORD_USES, true) then
+      begin
+        aCurrentUsesLine := Trim(Copy(aCurrentUsesLine, Length(KEYWORD_USES) + 1, MaxInt));
+        if aCurrentUsesLine.IsEmpty then
+          Continue;
+      end;
 
     // line has SingleLineComment at the end -> strip it away, we don't support that
     aCurrentUsesLine := StripAwayTrailingSingleLineComment(aCurrentUsesLine);

@@ -52,11 +52,12 @@ object frmMain: TfrmMain
     TabOrder = 1
     object Splitter4: TSplitter
       Left = 0
-      Top = 595
+      Top = 589
       Width = 1185
       Height = 3
       Cursor = crVSplit
       Align = alBottom
+      ExplicitTop = 595
       ExplicitWidth = 1119
     end
     object pnlMain: TPanel
@@ -64,7 +65,7 @@ object frmMain: TfrmMain
       Left = 3
       Top = 3
       Width = 1182
-      Height = 592
+      Height = 586
       Margins.Right = 0
       Margins.Bottom = 0
       Align = alClient
@@ -78,29 +79,32 @@ object frmMain: TfrmMain
       ParentFont = False
       TabOrder = 0
       Visible = False
+      ExplicitHeight = 592
       object Splitter1: TSplitter
         Left = 0
-        Top = 439
+        Top = 433
         Width = 1182
         Height = 3
         Cursor = crVSplit
         Align = alBottom
         ResizeStyle = rsUpdate
+        ExplicitTop = 439
         ExplicitWidth = 1116
       end
       object Panel3: TPanel
         Left = 0
         Top = 0
         Width = 1182
-        Height = 439
+        Height = 433
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 0
+        ExplicitHeight = 439
         object pcView: TPageControl
           Left = 0
           Top = 0
           Width = 1182
-          Height = 439
+          Height = 433
           ActivePage = tabTree
           Align = alClient
           Font.Charset = ANSI_CHARSET
@@ -110,22 +114,26 @@ object frmMain: TfrmMain
           Font.Style = []
           ParentFont = False
           TabOrder = 0
+          ExplicitHeight = 439
           object tabTree: TTabSheet
             Caption = 'Tree'
+            ExplicitHeight = 409
             object Splitter2: TSplitter
               Left = 497
               Top = 0
-              Height = 409
+              Height = 403
               ResizeStyle = rsUpdate
+              ExplicitHeight = 409
             end
             object pnlTree: TPanel
               Left = 0
               Top = 0
               Width = 497
-              Height = 409
+              Height = 403
               Align = alLeft
               BevelOuter = bvNone
               TabOrder = 0
+              ExplicitHeight = 409
               object edtSearch: TEdit
                 AlignWithMargins = True
                 Left = 3
@@ -159,7 +167,7 @@ object frmMain: TfrmMain
                 Left = 3
                 Top = 29
                 Width = 494
-                Height = 377
+                Height = 371
                 Margins.Right = 0
                 Align = alClient
                 Colors.UnfocusedColor = clMedGray
@@ -181,7 +189,7 @@ object frmMain: TfrmMain
                 OnGetImageIndex = vtUnitsTreeGetImageIndex
                 OnGetNodeDataSize = vtUnitsTreeGetNodeDataSize
                 OnHeaderClick = vtCommonHeaderClick
-                ExplicitLeft = 115
+                ExplicitHeight = 377
                 Columns = <
                   item
                     Position = 0
@@ -243,29 +251,32 @@ object frmMain: TfrmMain
               Left = 500
               Top = 0
               Width = 674
-              Height = 409
+              Height = 403
               Align = alClient
               Caption = 'Select a file to display its contents here.'
               TabOrder = 1
+              ExplicitHeight = 409
               object pcSource: TPageControl
                 AlignWithMargins = True
                 Left = 1
                 Top = 4
                 Width = 669
-                Height = 401
+                Height = 395
                 Margins.Left = 0
                 ActivePage = tabParentFile
                 Align = alClient
                 TabOrder = 0
                 Visible = False
+                ExplicitHeight = 401
                 object tabParentFile: TTabSheet
                   Caption = 'Parent File'
+                  ExplicitHeight = 371
                   object memParentFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
                     Top = 3
                     Width = 658
-                    Height = 365
+                    Height = 359
                     Margins.Left = 0
                     Align = alClient
                     Font.Charset = DEFAULT_CHARSET
@@ -291,17 +302,19 @@ object frmMain: TfrmMain
                     ReadOnly = True
                     OnChange = memParentFileChange
                     FontSmoothing = fsmNone
+                    ExplicitHeight = 365
                   end
                 end
                 object tabSelectedFile: TTabSheet
                   Caption = 'Selected File'
                   ImageIndex = 1
+                  ExplicitHeight = 371
                   object memSelectedFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
                     Top = 3
                     Width = 658
-                    Height = 365
+                    Height = 359
                     Margins.Left = 0
                     Align = alClient
                     Font.Charset = DEFAULT_CHARSET
@@ -327,6 +340,7 @@ object frmMain: TfrmMain
                     ReadOnly = True
                     OnChange = memSelectedFileChange
                     FontSmoothing = fsmNone
+                    ExplicitHeight = 365
                   end
                 end
               end
@@ -335,20 +349,23 @@ object frmMain: TfrmMain
           object tabList: TTabSheet
             Caption = 'List'
             ImageIndex = 1
+            ExplicitHeight = 409
             object Splitter3: TSplitter
               Left = 497
               Top = 0
-              Height = 409
+              Height = 403
               ResizeStyle = rsUpdate
+              ExplicitHeight = 409
             end
             object pnlList: TPanel
               Left = 0
               Top = 0
               Width = 497
-              Height = 409
+              Height = 403
               Align = alLeft
               BevelOuter = bvNone
               TabOrder = 0
+              ExplicitHeight = 409
               object edtListSearch: TEdit
                 AlignWithMargins = True
                 Left = 3
@@ -380,7 +397,7 @@ object frmMain: TfrmMain
                 Left = 3
                 Top = 29
                 Width = 494
-                Height = 377
+                Height = 371
                 Margins.Right = 0
                 Align = alClient
                 Colors.UnfocusedColor = clMedGray
@@ -400,6 +417,7 @@ object frmMain: TfrmMain
                 OnPaintText = vtUnitsListPaintText
                 OnGetImageIndex = vtCommonGetImageIndex
                 OnHeaderClick = vtCommonHeaderClick
+                ExplicitHeight = 377
                 Columns = <
                   item
                     Position = 0
@@ -442,21 +460,24 @@ object frmMain: TfrmMain
               Left = 500
               Top = 0
               Width = 674
-              Height = 409
+              Height = 403
               Align = alClient
               BevelOuter = bvNone
               Caption = 'Select a file to display it'#39's contents here.'
               TabOrder = 1
+              ExplicitHeight = 409
               object pcList: TPageControl
                 Left = 0
                 Top = 0
                 Width = 674
-                Height = 409
+                Height = 403
                 ActivePage = tabUsesList
                 Align = alClient
                 TabOrder = 0
+                ExplicitHeight = 409
                 object tabUsedBy: TTabSheet
                   Caption = 'Used By Units'
+                  ExplicitHeight = 379
                   object edtSearchUsedByList: TEdit
                     AlignWithMargins = True
                     Left = 0
@@ -488,7 +509,7 @@ object frmMain: TfrmMain
                     Left = 0
                     Top = 26
                     Width = 666
-                    Height = 353
+                    Height = 347
                     Margins.Right = 0
                     Align = alClient
                     Colors.UnfocusedColor = clMedGray
@@ -506,6 +527,7 @@ object frmMain: TfrmMain
                     OnPaintText = vtUnitsListPaintText
                     OnGetImageIndex = vtCommonGetImageIndex
                     OnHeaderClick = vtCommonHeaderClick
+                    ExplicitHeight = 353
                     Columns = <
                       item
                         Position = 0
@@ -547,6 +569,7 @@ object frmMain: TfrmMain
                 object tabUsesList: TTabSheet
                   Caption = 'Uses Units'
                   ImageIndex = 2
+                  ExplicitHeight = 379
                   object edtSearchUsesList: TEdit
                     AlignWithMargins = True
                     Left = 0
@@ -578,7 +601,7 @@ object frmMain: TfrmMain
                     Left = 0
                     Top = 26
                     Width = 666
-                    Height = 353
+                    Height = 347
                     Margins.Right = 0
                     Align = alClient
                     Colors.UnfocusedColor = clMedGray
@@ -596,6 +619,7 @@ object frmMain: TfrmMain
                     OnPaintText = vtUnitsListPaintText
                     OnGetImageIndex = vtCommonGetImageIndex
                     OnHeaderClick = vtCommonHeaderClick
+                    ExplicitHeight = 353
                     Columns = <
                       item
                         Position = 0
@@ -637,12 +661,13 @@ object frmMain: TfrmMain
                 object tabSource: TTabSheet
                   Caption = 'Source'
                   ImageIndex = 1
+                  ExplicitHeight = 379
                   object memListFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
                     Top = 3
                     Width = 663
-                    Height = 373
+                    Height = 367
                     Margins.Left = 0
                     Align = alClient
                     Font.Charset = DEFAULT_CHARSET
@@ -668,6 +693,7 @@ object frmMain: TfrmMain
                     ReadOnly = True
                     OnChange = memListFileChange
                     FontSmoothing = fsmNone
+                    ExplicitHeight = 373
                   end
                 end
               end
@@ -677,12 +703,13 @@ object frmMain: TfrmMain
       end
       object pnlLog: TPanel
         Left = 0
-        Top = 442
+        Top = 436
         Width = 1182
         Height = 150
         Align = alBottom
         BevelOuter = bvNone
         TabOrder = 1
+        ExplicitTop = 442
         object Panel9: TPanel
           Left = 858
           Top = 0
@@ -743,9 +770,9 @@ object frmMain: TfrmMain
     end
     object PanelFooter: TPanel
       Left = 0
-      Top = 598
+      Top = 592
       Width = 1185
-      Height = 19
+      Height = 25
       Align = alBottom
       BevelOuter = bvNone
       Caption = 'Panel'
@@ -754,13 +781,14 @@ object frmMain: TfrmMain
         Left = 0
         Top = 0
         Width = 1185
-        Height = 19
+        Height = 25
         Align = alClient
         Lines.Strings = (
           'RichEditUnitPath')
         ReadOnly = True
         TabOrder = 0
         Zoom = 100
+        ExplicitHeight = 19
       end
     end
   end
@@ -927,6 +955,14 @@ object frmMain: TfrmMain
               item
                 Caption = '-'
                 CommandProperties.ButtonType = btSplit
+              end
+              item
+                Action = actFormatUsesOfFile
+                Caption = '&Format uses of this file'
+                ShortCut = 24646
+              end
+              item
+                Caption = '-'
               end
               item
                 Action = actRemoveUnusedUnitsProcessPalOutput
@@ -1124,6 +1160,12 @@ object frmMain: TfrmMain
       Caption = 'Save circular reference'
       OnExecute = actSaveCircularRefsExecute
     end
+    object actFormatUsesOfFile: TAction
+      Category = 'Refactorings'
+      Caption = 'Format uses of this file'
+      ShortCut = 24646
+      OnExecute = actFormatUsesOfFileExecute
+    end
     object actRemoveUnusedUnitsProcessPalOutput: TAction
       Category = 'Refactorings'
       Caption = 'Remove unused units (step 1/2): process Pascal Analyzer output'
@@ -1146,6 +1188,12 @@ object frmMain: TfrmMain
     object SearchandReplace1: TMenuItem
       Action = actSearchAndReplace
       ShortCut = 16466
+    end
+    object N15: TMenuItem
+      Caption = '-'
+    end
+    object Formatusesofthisfile2: TMenuItem
+      Action = actFormatUsesOfFile
     end
     object N11: TMenuItem
       Caption = '-'
@@ -1244,6 +1292,12 @@ object frmMain: TfrmMain
     end
     object Edit1: TMenuItem
       Caption = 'Edit'
+      object SaveChanges1: TMenuItem
+        Action = actSaveChanges
+      end
+    end
+    object Refactorings1: TMenuItem
+      Caption = 'Refactorings'
       object SearchandReplace2: TMenuItem
         Action = actSearchAndReplace
       end
@@ -1262,8 +1316,8 @@ object frmMain: TfrmMain
       object N7: TMenuItem
         Caption = '-'
       end
-      object SaveChanges1: TMenuItem
-        Action = actSaveChanges
+      object Formatusesofthisfile1: TMenuItem
+        Action = actFormatUsesOfFile
       end
     end
     object Scan1: TMenuItem
