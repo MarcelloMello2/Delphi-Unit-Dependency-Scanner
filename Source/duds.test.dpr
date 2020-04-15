@@ -34,6 +34,8 @@ uses
   Duds.Export.GraphML,
   Duds.Modules.Classes,
   Duds.Modules.Classes.test,
+  Duds.Refactoring.FormatUsesHelper,
+  Duds.Refactoring.FormatUsesHelper.test,
   Duds.Refactoring.PascalAnalyzerUsesReportProcessor,
   Duds.Refactoring.RemoveUnusedUnits,
   Duds.Refactoring.RemoveUnusedUnits.test;

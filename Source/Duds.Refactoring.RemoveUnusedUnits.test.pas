@@ -32,9 +32,6 @@ type
     procedure TearDown;
 
     [Test]
-    procedure TestFindUsesLine;
-
-    [Test]
     procedure TestUsesListReplacement_SingleLineCommentAfterEndOfList;
 
     [Test]
@@ -177,39 +174,6 @@ begin
      'function Foo...'
 
  , ['UnitToRemove']);
-end;
-
-procedure TDudsRefactoringRemoveUnusedUnitsTest.TestFindUsesLine;
-var
-  aCode: string;
-  aInputCodeStrings: TStringList;
-  aLine: Integer;
-begin
-
-  aCode :=
-     'implementation' + sLineBreak +
-                        sLineBreak +
-     ' // just a comment, should not be touched' + sLineBreak +
-     ' // uses UnitOne, UnitThree'               + sLineBreak +
-                                                   sLineBreak +
-     'uses'           + sLineBreak +
-     '  UnitOne, UnitTwo, '       + sLineBreak +
-     '  // a comment in between ' + sLineBreak +
-     '  UnitThree;              ' + sLineBreak +
-
-     'function Foo...';
-
-  aInputCodeStrings    := TStringList.Create;
-  try
-    aInputCodeStrings.Text := aCode;
-
-    aLine := FRefactoring.FindUsesLine(aInputCodeStrings);
-    Assert.AreEqual(5, aLine);
-
-
-  finally
-    FreeAndNil(aInputCodeStrings);
-  end;
 end;
 
 procedure TDudsRefactoringRemoveUnusedUnitsTest.TestUsesListReplacement_NoUsesLeft;

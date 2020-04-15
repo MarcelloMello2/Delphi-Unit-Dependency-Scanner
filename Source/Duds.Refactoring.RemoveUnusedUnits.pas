@@ -34,19 +34,11 @@ uses
   Duds.Common.Log,
   Duds.Common.Interfaces,
   Duds.Common.Refactoring,
+  Duds.Refactoring.FormatUsesHelper,
   Duds.Common.Parser.Pascal,
   Duds.Scan.Model;
 
 type
-  UsesListElementType = (
-    etUnknown,
-    etBEGIN,
-    etUnit,
-    etCompilerDirectiveStart,
-    etCompilerDirectiveEnd,
-    etSingleLineComment,
-    etEND);
-
   TRemoveUnitsList = TObjectDictionary<String, TStringList>;
 
 type
@@ -55,62 +47,24 @@ type
     FModel: TDudsModel;
     FOnLog: TLogProcedure;
     FDummyRun: Boolean;
+
+    fFormatUsesHelper: TFormatUsesHelper;
     
     FUnitsProcessedSuccessfullyCount: Integer;
     FUsesRemovedCount: Integer;
     FUnitsProcessedFailureCount: Integer;    
 
-  private const
-    KEYWORD_USES            = 'USES';
-    CHAR_SEMICOLON          = ';';
-    INDENT_OF_ONE           = ' ';
-    INDENT_OF_TWO           = '  ';
-    UNIT_SEPERATOR          = ',';
-    SPACE_BETWEEN_UNITS     = INDENT_OF_ONE;
-    COMPILERDIRECTIVE_START = '{$';
-    MAX_LINE_LENGTH         = 80;
-
   private
-
     procedure Log(const Msg: String; const Severity: Integer = LogInfo); overload;
     procedure Log(const Msg: String; const Args: array of const; const Severity: Integer); overload;
-    
 
     procedure LoadWorkListFromInputFile(aWorklist: TRemoveUnitsList; const aPath: string);
-    function IsBeginOfNewPasFile(const aLine: string): boolean;
 
-    procedure RemoveUnitsFromPasFile(
-      const aCurrentPasFileName:       string;
-      const aUnitsToRemove: TStringList);
-    procedure InsertNewUsesList(
-      const aSource, aCleanedUsesOnly: TStringList;
-      const aLineNumberOfUses:         integer);
-    function IsCompilerDirective(const aCandidate: string): boolean;
-    function IsCompilerDirectiveEnd(const aCandidate: string): boolean;
-    function IsSingleLineComment(const aCandidate: string): boolean;
-    function IsLastLineOfUses(const aCurrentUsesLine: string): boolean;
-    procedure RemoveOldUsesList(
-      const aSource:           TStringList;
-      const aLineNumberOfUses: integer);
+    procedure RemoveUnitsFromPasFile(const aCurrentPasFileName: string; const aUnitsToRemove: TStringList);
     function RemoveUnitsFromUsesElements(const aOriginalUsesList, aUnitsToRemove: TStringList): TStringList;
 
-
   protected
-    function FindUsesLine(
-      const aSource: TStringList;
-      const aStart:  integer = 0): integer;
-    function StripAwayTrailingSingleLineComment(const aLine: string): string;
-    function ExtractUsesAndSplitIntoSingleElements(
-      const aSourceLines: TStringList;
-      const aLineOfUsesBegin:       integer): TStringList;
-    procedure ReplaceUsesByCleanedUses(
-      const aSource, aCleanedUsesOnly: TStringList;
-      const aLineNumberOfUses:         integer);
-    function GetElementType(const Element: string): UsesListElementType;
-    function UsesListToFormattedText(const CleanedUses: TStringList): string;
-
-    procedure RemoveUnitsFromSource(const aSourceLines,
-      aUnitsToRemove: TStringList);
+    procedure RemoveUnitsFromSource(const aSourceLines, aUnitsToRemove: TStringList);
 
   public
     constructor Create();
@@ -118,9 +72,9 @@ type
 
     procedure DeleteAllUnitsDefinedInUnusedFile(const aPath: string);
 
-    property Model: TDudsModel read FModel write FModel;
-    property DummyRun: Boolean read FDummyRun write FDummyRun;
-    property OnLog: TLogProcedure read FOnLog write FOnLog;
+    property Model: TDudsModel    read FModel    write FModel;
+    property DummyRun: Boolean    read FDummyRun write FDummyRun;
+    property OnLog: TLogProcedure read FOnLog    write FOnLog;
   end;
 
 implementation
@@ -139,6 +93,12 @@ begin
 end;
 
 procedure TRemoveUnusedUnitsRefactoring.LoadWorkListFromInputFile(aWorklist: TRemoveUnitsList; const aPath: string);
+
+  function IsBeginOfNewPasFile(const aLine: string): boolean;
+  begin
+    Result := AnsiEndsStr('.PAS', UpperCase(aLine));
+  end;
+
 var
   aCurrentLine:        string;
   aTrimmedLine:  string;
@@ -198,32 +158,32 @@ begin
     aUses.Free;
 end;
 
-function TRemoveUnusedUnitsRefactoring.IsBeginOfNewPasFile(const aLine: string): boolean;
-begin
-  Result := AnsiEndsStr('.PAS', UpperCase(aLine));
-end;
-
 procedure TRemoveUnusedUnitsRefactoring.RemoveUnitsFromSource(
   const aSourceLines:   TStringList;
   const aUnitsToRemove: TStringList);
 var
   aLineNumberOfUses:  integer;
-  aUsesSourceOnly:          TStringList;
+  aUsesSourceOnly:    TStringList;
   aCleanedUsesOnly:   TStringList;
 begin
   aLineNumberOfUses := 0;
   while aLineNumberOfUses >= 0 do // interface & implementation uses
   begin
-    aLineNumberOfUses := FindUsesLine(aSourceLines, aLineNumberOfUses + 1);
+    aLineNumberOfUses := fFormatUsesHelper.FindUsesLine(aSourceLines, aLineNumberOfUses + 1);
     if aLineNumberOfUses >= 0 then
     begin
-      aUsesSourceOnly := ExtractUsesAndSplitIntoSingleElements(aSourceLines, aLineNumberOfUses);
+
+      aUsesSourceOnly := fFormatUsesHelper.ExtractUsesAndSplitIntoSingleElements(aSourceLines, aLineNumberOfUses);
       try
+        fFormatUsesHelper.RemoveUsesList(aSourceLines, aLineNumberOfUses);
+
         aCleanedUsesOnly := RemoveUnitsFromUsesElements(aUsesSourceOnly, aUnitsToRemove);
-        ReplaceUsesByCleanedUses(aSourceLines, aCleanedUsesOnly, aLineNumberOfUses);
+
+        fFormatUsesHelper.InsertUsesList(aSourceLines, aCleanedUsesOnly, aLineNumberOfUses);
       finally
         aUsesSourceOnly.Free;
       end;
+
     end;
   end;
 end;
@@ -259,112 +219,6 @@ begin
   end;
 end;
 
-function TRemoveUnusedUnitsRefactoring.FindUsesLine(
-  const aSource: TStringList;
-  const aStart:  integer = 0): integer;
-var
-  aLineNumber:  integer;
-  aLine:        string;
-  aPos:         integer;
-  aLength:      integer;
-  aSpaceBefore: boolean;
-  aSpaceAfter:  boolean;
-begin
-  Result  := -1;
-  aLength := Length(KEYWORD_USES);
-
-  for aLineNumber := aStart to aSource.Count - 1 do
-  begin
-    aLine := aSource[aLineNumber];
-    if not IsSingleLineComment(aLine) then
-    begin
-      aLine := StripAwayTrailingSingleLineComment(aLine);
-      aPos  := Pos(KEYWORD_USES, aLine.ToUpper);
-      if aPos > 0 then
-      begin
-        aSpaceBefore := (aPos = 1) or (aLine[aPos - 1] in [' ', #9, #13, #10]);
-        aSpaceAfter  := (aPos + aLength > Length(aLine)) or (aLine[aPos + aLength] in [' ', #9, #13, #10]);
-        if aSpaceBefore and aSpaceAfter then
-        begin
-          Result := aLineNumber;
-          break;
-        end;
-      end;
-    end;
-  end;
-end;
-
-function TRemoveUnusedUnitsRefactoring.IsLastLineOfUses(const aCurrentUsesLine: string): boolean;
-begin
-  Result := AnsiEndsStr(CHAR_SEMICOLON, StripAwayTrailingSingleLineComment(aCurrentUsesLine).TrimRight);
-end;
-
-function TRemoveUnusedUnitsRefactoring.StripAwayTrailingSingleLineComment(const aLine: string): string;
-var
-  aPosOfCommentBegin: Integer;
-begin
-  if aLine.IsEmpty then
-    Result := ''
-  else
-  begin
-    aPosOfCommentBegin := Pos('//', aLine.TrimLeft);
-    if aPosOfCommentBegin > 1 then // only strip, of there is content before the comment
-      Result := aLine.Split(['/', '/'])[0].TrimRight
-    else
-      Result := aLine;
-  end;
-end;
-
-
-function TRemoveUnusedUnitsRefactoring.ExtractUsesAndSplitIntoSingleElements(
-  const aSourceLines: TStringList;
-  const aLineOfUsesBegin: integer): TStringList;
-var
-  i:                 integer;
-  aCurrentUsesLine:  string;
-  aIsLastLineOfUses: boolean;
-  aSplittedUsesLine: TStringList;
-  j:                 integer;
-  aUsedUnit:         string;
-begin
-  Result := TStringList.Create;
-
-  for i := aLineOfUsesBegin + 1 to aSourceLines.Count - 1 do
-  begin
-    aCurrentUsesLine := Trim(aSourceLines[i]);
-
-    // line has SingleLineComment at the end -> strip it away, we don't support that
-    aCurrentUsesLine := StripAwayTrailingSingleLineComment(aCurrentUsesLine);
-
-    aIsLastLineOfUses := IsLastLineOfUses(aCurrentUsesLine);
-    if aIsLastLineOfUses then
-      aCurrentUsesLine := StringReplace(aCurrentUsesLine, CHAR_SEMICOLON, '', [rfReplaceAll]);
-
-    if IsSingleLineComment(aCurrentUsesLine) then
-      Result.Add(aCurrentUsesLine)
-    else begin
-      aSplittedUsesLine := TStringList.Create();
-      try
-        aSplittedUsesLine.Delimiter       := ',';
-        aSplittedUsesLine.StrictDelimiter := True;
-        aSplittedUsesLine.DelimitedText   := aCurrentUsesLine;
-
-        for j := 0 to aSplittedUsesLine.Count - 1 do
-        begin
-          aUsedUnit := Trim(aSplittedUsesLine[j]);
-          if (aUsedUnit <> '') then
-            Result.Add(aUsedUnit);
-        end;
-      finally
-        aSplittedUsesLine.Free;
-      end;
-    end;
-
-    if aIsLastLineOfUses then
-      break;
-  end;
-end;
-
 function TRemoveUnusedUnitsRefactoring.RemoveUnitsFromUsesElements(const aOriginalUsesList, aUnitsToRemove: TStringList): TStringList;
 var
   i:     integer;
@@ -386,7 +240,7 @@ begin
   // Clean the uses elements list
   // -> eliminate single line comments when nothing follows after the last comment
   for i := Pred(Result.Count) downto 0 do
-    if GetElementType(Result[i]) = etSingleLineComment then
+    if fFormatUsesHelper.GetElementType(Result[i]) = etSingleLineComment then
        Result.Delete(i)
     else
        break;
@@ -395,7 +249,7 @@ begin
   LastProcessedType := etUnknown;
   for i := Pred(Result.Count) downto 0 do
   begin
-    CurrentlyProcessingType := GetElementType(Result[i]);
+    CurrentlyProcessingType := fFormatUsesHelper.GetElementType(Result[i]);
     if (CurrentlyProcessingType = etSingleLineComment) and (LastProcessedType = etSingleLineComment) then
       Result.Delete(i);
     LastProcessedType := CurrentlyProcessingType;
@@ -404,66 +258,11 @@ begin
   // clean list from potential comments, compiler directives etc. - if there are no units left
   aUnitCount := 0;
   for aLine in Result do
-    if GetElementType(aLine) = etUnit then
+    if fFormatUsesHelper.GetElementType(aLine) = etUnit then
       Inc(aUnitCount);
 
   if aUnitCount = 0 then
     Result.Clear;
-end;
-
-procedure TRemoveUnusedUnitsRefactoring.ReplaceUsesByCleanedUses(
-  const aSource, aCleanedUsesOnly: TStringList;
-  const aLineNumberOfUses:         integer);
-begin
-  RemoveOldUsesList(aSource, aLineNumberOfUses);
-  InsertNewUsesList(aSource, aCleanedUsesOnly, aLineNumberOfUses);
-end;
-
-procedure TRemoveUnusedUnitsRefactoring.RemoveOldUsesList(
-  const aSource:           TStringList;
-  const aLineNumberOfUses: integer);
-var
-  aIsLastLineOfUses: boolean;
-begin
-  while True do
-  begin
-    aIsLastLineOfUses := IsLastLineOfUses(aSource[aLineNumberOfUses]);
-    aSource.Delete(aLineNumberOfUses);
-
-    if aIsLastLineOfUses then
-      break;
-  end;
-end;
-
-procedure TRemoveUnusedUnitsRefactoring.InsertNewUsesList(
-  const aSource, aCleanedUsesOnly: TStringList;
-  const aLineNumberOfUses:         integer);
-var
-  aFirstLineAfterUsesKeyword: integer;
-  aCompactUses:               string;
-begin
-  aCompactUses := UsesListToFormattedText(aCleanedUsesOnly);
-  if aCompactUses <> '' then
-  begin
-    aFirstLineAfterUsesKeyword := aLineNumberOfUses + 1;
-    aSource.Insert(aLineNumberOfUses, 'uses');
-    aSource.Insert(aFirstLineAfterUsesKeyword, aCompactUses);
-  end;
-end;
-
-function TRemoveUnusedUnitsRefactoring.IsCompilerDirective(const aCandidate: string): boolean;
-begin
-  Result := AnsiStartsText('{$', aCandidate.TrimLeft);
-end;
-
-function TRemoveUnusedUnitsRefactoring.IsCompilerDirectiveEnd(const aCandidate: string): boolean;
-begin
-  Result := AnsiStartsText('{$ENDIF}', aCandidate.TrimLeft);
-end;
-
-function TRemoveUnusedUnitsRefactoring.IsSingleLineComment(const aCandidate: string): boolean;
-begin
-  Result := AnsiStartsText('//', aCandidate.TrimLeft);
 end;
 
 constructor TRemoveUnusedUnitsRefactoring.Create();
@@ -471,225 +270,14 @@ begin
   FUnitsProcessedSuccessfullyCount := 0;
   FUsesRemovedCount               := 0;
   FUnitsProcessedFailureCount     := 0;
+
+  fFormatUsesHelper := TFormatUsesHelper.Create;
 end;
 
 destructor TRemoveUnusedUnitsRefactoring.Destroy();
 begin
+  fFormatUsesHelper.Free;
   inherited;
-end;
-
-function TRemoveUnusedUnitsRefactoring.GetElementType(const Element: string): UsesListElementType;
-begin
-  if IsCompilerDirective(Element) then
-  begin
-     if IsCompilerDirectiveEnd(Element) then
-       Result := etCompilerDirectiveEnd
-     else
-       Result := etCompilerDirectiveStart;
-  end
-  else
-    if IsSingleLineComment(Element) then
-       Result := etSingleLineComment
-    else
-       Result := etUnit;
-end;
-
-function TRemoveUnusedUnitsRefactoring.UsesListToFormattedText(const CleanedUses: TStringList): string;
-var
-  AfterFirstUnit: Boolean;
-  UnitWithoutCompilerSwitchIsBefore: Boolean;
-  LastInsertedUnitHasSeparator: Boolean;
-  CurrentCompilerSwitchLevel: Integer;
-
-  function CalcCurrentLineLength(aCompleteText: String): Integer;
-  var
-    aPosOfLastLineBreak: integer;
-    aLastLine: string;
-  begin
-     aPosOfLastLineBreak := LastDelimiter(sLineBreak, aCompleteText);
-     aLastLine           := Copy(aCompleteText, aPosOfLastLineBreak + 1, MaxInt);
-     Result              := Length(aLastLine);
-  end;
-
-  procedure HandleElementChange(LastType, CurrentType: UsesListElementType; CurrentElement: string);
-  var
-    Buf: String;
-    aCurrentLineLength: Integer;
-  begin
-    Buf := '';
-
-    if CurrentType = etSingleLineComment then
-      raise Exception.Create('that should not happen');
-
-    case CurrentType of
-      etCompilerDirectiveStart: Inc(CurrentCompilerSwitchLevel);
-      etCompilerDirectiveEnd:   Dec(CurrentCompilerSwitchLevel);
-    end;
-
-    case LastType of
-      etBEGIN:
-        case CurrentType of
-          etUnit:              Buf := INDENT_OF_TWO;
-        end;
-
-      etUnit:
-        case CurrentType of
-          etUnit:
-                                   begin
-                                     Buf := UNIT_SEPERATOR;
-                                     LastInsertedUnitHasSeparator := true;
-                                     aCurrentLineLength := CalcCurrentLineLength(Result);
-                                     if aCurrentLineLength + Length(CurrentElement) > MAX_LINE_LENGTH then
-                                       Buf := Buf + sLineBreak + INDENT_OF_TWO
-                                     else
-                                       Buf := Buf + SPACE_BETWEEN_UNITS;
-                                   end;
-          etCompilerDirectiveStart:
-                                   begin
-                                     LastInsertedUnitHasSeparator := false;
-                                     Buf := Buf + sLineBreak;
-                                   end;
-          etCompilerDirectiveEnd:
-                                   begin
-                                     if not UnitWithoutCompilerSwitchIsBefore then
-                                     begin
-                                       Buf := Buf + UNIT_SEPERATOR;
-                                       LastInsertedUnitHasSeparator := true;
-                                     end
-                                     else
-                                       LastInsertedUnitHasSeparator := false;
-                                     Buf := Buf + sLineBreak;
-                                   end;
-
-          etEND:                   Buf := '';
-        end;
-
-
-      etCompilerDirectiveStart:
-        case CurrentType of
-          etUnit:                   begin
-                                      Buf := sLineBreak + INDENT_OF_TWO;
-                                      if AfterFirstUnit then
-                                         Buf := Buf + UNIT_SEPERATOR + SPACE_BETWEEN_UNITS;
-                                    end;
-          etCompilerDirectiveStart: Buf := sLineBreak;
-          etCompilerDirectiveEnd:   Buf := sLineBreak;
-          etEND:                    Buf := sLineBreak + INDENT_OF_TWO;
-        end;
-
-      etCompilerDirectiveEnd:
-        case CurrentType of
-          etUnit:                   begin
-                                      Buf := sLineBreak + INDENT_OF_TWO;
-                                      if AfterFirstUnit and not LastInsertedUnitHasSeparator then
-                                         Buf := Buf + UNIT_SEPERATOR + SPACE_BETWEEN_UNITS;
-                                    end;
-          etCompilerDirectiveStart: Buf := sLineBreak;
-          etCompilerDirectiveEnd:   Buf := sLineBreak;
-          etEND:                    Buf := sLineBreak + INDENT_OF_TWO;
-        end;
-
-      etSingleLineComment:
-        case CurrentType of
-          etUnit:                   Buf := sLineBreak + INDENT_OF_TWO;
-          etCompilerDirectiveStart: Buf := sLineBreak;
-          etCompilerDirectiveEnd:   Buf := sLineBreak;
-          etEND:                    Buf := sLineBreak + INDENT_OF_TWO;
-        end;
-
-    end;
-    Result := Result + Buf;
-  end;
-
-  procedure HandleCurrentElement(CurrentType: UsesListElementType; CurrentElement: string);
-  var
-    Buf: String;
-  begin
-    case CurrentType of
-      etUnit:                   begin
-                                  Buf := CurrentElement;
-                                  AfterFirstUnit := true;
-                                  if CurrentCompilerSwitchLevel = 0 then
-                                    UnitWithoutCompilerSwitchIsBefore := true;
-                                end;
-      etCompilerDirectiveStart: Buf := CurrentElement;
-      etCompilerDirectiveEnd:   Buf := CurrentElement;
-      etSingleLineComment:      Buf := CurrentElement;
-      etEND:                    Buf := CHAR_SEMICOLON;
-    end;
-    Result := Result + Buf;
-  end;
-
-  function CalcNextNonSingleLineCommentAhead(aUsesList: TStringList; aCurrentPosition: Integer): UsesListElementType;
-  var
-    i: Integer;
-  begin
-    Result := etEnd;
-    for i := aCurrentPosition to Pred(aUsesList.Count) do
-      if GetElementType(aUsesList[i]) <> etSingleLineComment then
-      begin
-        Result := GetElementType(aUsesList[i]);
-        break;
-      end;
-  end;
-
-var
-  CurrentElement: string;
-  CurrentType: UsesListElementType;
-  NextNonCommentElementAhead: UsesListElementType;
-  LastType: UsesListElementType;
-  i: Integer;
-begin
-  Result := '';
-  if CleanedUses.Count = 0 then
-    exit;
-
-  AfterFirstUnit               := false;
-  UnitWithoutCompilerSwitchIsBefore := false;
-  LastInsertedUnitHasSeparator := false;
-  LastType                     := etBEGIN;
-  CurrentCompilerSwitchLevel   := 0;
-
-  // build the unit list text from the elements list
-  i := 0;
-  while i <= Pred(CleanedUses.Count) do
-  begin
-    CurrentElement             := CleanedUses[i];
-    CurrentType                := GetElementType(CurrentElement);
-
-    if CurrentType = etSingleLineComment then
-    begin
-      NextNonCommentElementAhead := CalcNextNonSingleLineCommentAhead(CleanedUses, i);
-      if LastType <> etBEGIN then
-      begin
-        HandleElementChange(LastType, NextNonCommentElementAhead, '');
-        Result := Result.TrimRight;
-      end;
-
-      case LastType of
-        etBEGIN:
-          Result := Result + INDENT_OF_TWO;
-        etUnit:
-          Result := Result + sLineBreak + sLineBreak + INDENT_OF_TWO;
-        etCompilerDirectiveStart:
-          Result := Result + sLineBreak + INDENT_OF_TWO;
-        etCompilerDirectiveEnd:
-          Result := Result + sLineBreak + INDENT_OF_TWO;
-      end;
-
-    end
-    else
-      HandleElementChange(LastType, CurrentType, CurrentElement);
-
-    HandleCurrentElement(CurrentType, CurrentElement);
-
-    LastType := CurrentType;
-    Inc(i);
-  end;
-
-  CurrentType := etEND;
-  HandleElementChange(LastType, CurrentType, '');
-  HandleCurrentElement(CurrentType, CurrentElement);
 end;
 
 procedure TRemoveUnusedUnitsRefactoring.DeleteAllUnitsDefinedInUnusedFile(const aPath: string);
