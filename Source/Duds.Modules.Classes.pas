@@ -4,7 +4,7 @@ interface
 
 uses
   System.Classes, System.SysUtils, System.Generics.Collections,
-  System.JSON, IOUtils,
+  System.JSON, IOUtils, Contnrs,
 
   Duds.Common.Interfaces,
   Duds.Common.Language,
@@ -12,18 +12,25 @@ uses
 
 type
   // key in this dictionary is the modules name (must be unique)
-  TModulesList = class(TObjectDictionary<String, TModule>)
+  TModulesList = class
   private
+    fDictionary: TObjectDictionary<String, TModule>;               // this dictionary owns the TModule instances!
     fUnitsToModulesSearchlist: TObjectDictionary<string, TModule>;
     fPathsToModulesSearchlist: TObjectDictionary<string, TModule>;
+    fOrderedModules: TObjectList<TModule>;
 
   public
     constructor Create;
     destructor Destroy; override;
 
+    procedure AddModule(Module: TModule);
+
     procedure ClearAllLists;
     procedure ReBuildFastSearchList;
     function FindModuleForUnit(UnitInfo: IUnitInfo; out Module: TModule): Boolean;
+
+    property Dictionary: TObjectDictionary<String, TModule> read fDictionary;
+    property OrderedModules: TObjectList<TModule> read fOrderedModules;
 
   end;
 
@@ -54,7 +61,7 @@ var
 begin
   if not Assigned(aModulesList) then
     raise Exception.Create('aModulesList must be assigned');
-  if aModulesList.Count > 0 then
+  if aModulesList.Dictionary.Count > 0 then
     raise Exception.Create('aModulesList must be empty');
 
 
@@ -82,7 +89,7 @@ begin
              aNewModule.Units.Add(aUnitsArray.Items[j].Value.ToLower);
       end;
 
-      aModulesList.Add(aNewModule.Name, aNewModule);
+      aModulesList.AddModule(aNewModule);
     end;
   finally
     aJSONObject.Free;
@@ -100,16 +107,25 @@ end;
 
 { TModulesList }
 
+procedure TModulesList.AddModule(Module: TModule);
+begin
+  fDictionary.Add(Module.Name, Module);
+  fOrderedModules.Add(Module);
+end;
+
 procedure TModulesList.ClearAllLists;
 begin
   fUnitsToModulesSearchlist.Clear;
   fPathsToModulesSearchlist.Clear;
-  Clear;
+  fOrderedModules.Clear;
+  fDictionary.Clear;
 end;
 
 constructor TModulesList.Create;
 begin
-  inherited Create([doOwnsValues]);
+  fDictionary     := TObjectDictionary<String, TModule>.Create([doOwnsValues]);
+
+  fOrderedModules := TObjectList<TModule>.Create(false);
 
   fUnitsToModulesSearchlist := TObjectDictionary<string, TModule>.Create;
   fPathsToModulesSearchlist := TObjectDictionary<string, TModule>.Create;
@@ -119,6 +135,8 @@ destructor TModulesList.Destroy;
 begin
   fUnitsToModulesSearchlist.Free;
   fPathsToModulesSearchlist.Free;
+  fOrderedModules.Free;
+  fDictionary.Free;
   inherited;
 end;
 
@@ -131,7 +149,7 @@ var
 begin
   // gather all units from all modules
   fUnitsToModulesSearchlist.Clear;
-  for aModule in Values do
+  for aModule in fOrderedModules do
     for currentUnit in aModule.Units do
     begin
       if fUnitsToModulesSearchlist.TryGetValue(currentUnit, aAlreadyInModule) then
@@ -142,7 +160,7 @@ begin
 
   // gather all paths from all modules
   fPathsToModulesSearchlist.Clear;
-  for aModule in Values do
+  for aModule in fOrderedModules do
     for currentPath in aModule.Paths do
     begin
       if not currentPath.IsEmpty then

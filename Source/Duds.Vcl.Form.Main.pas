@@ -1702,6 +1702,7 @@ begin
         aFormatUsesRefactoring.Model    := FModel;
         aFormatUsesRefactoring.OnLog    := Self.Log;
         aFormatUsesRefactoring.DummyRun := false;
+        aFormatUsesRefactoring.ProjectSettings := FProjectSettings;
 
         aFormatUsesRefactoring.FormatUsesInFile(GetFocusedDelphiFile.UnitInfo.DelphiUnitName);
 
@@ -2228,7 +2229,7 @@ begin
       if not FProjectSettings.ModulesDefinitionFile.IsEmpty then
       begin
         TModulesSerializer.ReadFromJsonFile(FProjectSettings.ModulesDefinitionFile, FModel.Modules);
-        Log(StrModulesDefinitionLoaded, [FModel.Modules.Count]);
+        Log(StrModulesDefinitionLoaded, [FModel.Modules.Dictionary.Count]);
       end;
 
       // step 2: scanning the disk for files (rootfiles & search paths)

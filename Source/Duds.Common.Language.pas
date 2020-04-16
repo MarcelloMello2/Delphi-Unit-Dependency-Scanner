@@ -47,6 +47,8 @@ resourcestring
   StrUnableToParseS = 'Unable to parse "%s": %s';
   StrAmbigousUnitToModuleMapping = 'ambigous module definition: unit "%s" is defined to be part of module "%s" and module "%s"';
   StrAmbigousPathToModuleMapping = 'ambigous module definition: path "%s" is defined to be part of module "%s" and module "%s"';
+  StrUsesFormattingNotAvailWithCompilerSwitches = 'grouping by modules is not available when uses list contains compiler swithces';
+  StrUsesFormattingNotAvailUnknownModules = 'grouping by modules is not available due to missing module mappings for units: %s';
   StrVCLFormCount = 'VCL Form Count';
   StrFMXFormCount = 'FMX Form Count';
   StrStartBatchRename = 'Batch-Rename from CSV: Renaming unit "%s" to "%s"';

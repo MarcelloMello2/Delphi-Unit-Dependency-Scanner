@@ -44,15 +44,18 @@ type
     FModel: TDudsModel;
     FOnLog: TLogProcedure;
     FDummyRun: Boolean;
+    fProjectSettings: TProjectSettings;
 
     fFormatUsesHelper: TFormatUsesHelper;
 
   private
+
     procedure Log(const Msg: String; const Severity: Integer = LogInfo); overload;
     procedure Log(const Msg: String; const Args: array of const; const Severity: Integer); overload;
+    procedure GroupUsesByModules(aUsesList: TUsesList);
 
   protected
-    procedure FormatUsesInSource(const aSourceLines: TStringList);
+    procedure FormatUsesInSource(const aSourceLines: TStringList; UseModulesForGrouping: boolean);
 
   public
     constructor Create();
@@ -63,6 +66,7 @@ type
     property Model: TDudsModel    read FModel    write FModel;
     property DummyRun: Boolean    read FDummyRun write FDummyRun;
     property OnLog: TLogProcedure read FOnLog    write FOnLog;
+    property ProjectSettings: TProjectSettings read fProjectSettings write fProjectSettings;
   end;
 
 
@@ -91,13 +95,141 @@ end;
 procedure TFormatUsesRefactoring.Log(const Msg: String; const Args: array of const; const Severity: Integer);
 begin
   Log(Format(Msg, Args), Severity);
+end;                                 
+
+procedure TFormatUsesRefactoring.GroupUsesByModules(aUsesList: TUsesList);
+var
+  aUsesElement: TUsesElement;
+  aUsesListBuf: TUsesList;
+  aCurrentModuleName: string;
+  aLastModuleName: string;  
+  i: integer;
+  aDelphiFile: TDelphiFile;
+  Module: TModule;
+  UnitsWithUnknownModules: string;
+  aUnitScopes: TStringList;
+const
+  cUnknownModule = 'unknown module';
+begin
+  // pre-checks
+  if aUsesList.ContainsCompilerSwitches then
+    if Assigned(FOnLog) then
+    begin
+      Log(StrUsesFormattingNotAvailWithCompilerSwitches, LogWarning);
+      exit;
+    end
+    else
+      raise Exception.Create(StrUsesFormattingNotAvailWithCompilerSwitches);
+
+  // identify modules for each unit
+  for aUsesElement in aUsesList do
+    if aUsesElement.ElementType = etUnit then
+    begin
+      aUnitScopes := nil;
+      if fProjectSettings <> nil then
+        aUnitScopes := fProjectSettings.UnitScopeNames;
+      aDelphiFile := fModel.FindParsedDelphiUnit(aUsesElement.TextValue, aUnitScopes);
+      if aDelphiFile = nil then
+         raise Exception.CreateFmt('could not find a parsed delphi file for uses list element "%s"', [aUsesElement.TextValue]);
+
+      aUsesElement.Module := aDelphiFile.UnitInfo.Module;
+    end;
+
+  // any unknown modules?
+  UnitsWithUnknownModules := '';
+  for aUsesElement in aUsesList do
+    if aUsesElement.ElementType = etUnit then
+      if aUsesElement.Module = nil then
+        AddToken(UnitsWithUnknownModules, aUsesElement.TextValue);
+  if not UnitsWithUnknownModules.IsEmpty then
+    if Assigned(FOnLog) then
+    begin
+      Log(StrUsesFormattingNotAvailUnknownModules, [UnitsWithUnknownModules], LogWarning);
+      exit;
+    end
+    else
+      raise Exception.CreateFmt(StrUsesFormattingNotAvailUnknownModules, [UnitsWithUnknownModules]);
+
+  // step 1: delete all existing single line comments headers, we will produce new ones
+  for i:= Pred(aUsesList.Count) downto 0 do
+  begin  
+    aUsesElement := aUsesList[i];
+    if aUsesElement.ElementType = etSingleLineHeaderComment then
+      aUsesList.Delete(i);
+  end;
+
+  // security self-check: there should be only units in the list now
+  for aUsesElement in aUsesList do
+    if aUsesElement.ElementType <> etUnit then
+       raise Exception.Create('there should be only units in the list here - algorithm expects that');
+
+  // step 2: order uses by modules - the order is derived from the json file
+  aUsesListBuf := TUsesList.Create;
+  try
+    // 2.1 copy to a buffer list
+    for aUsesElement in aUsesList do
+      aUsesListBuf.Add(TUsesElement.Create(aUsesElement));
+
+    // 2.2 iterate all known modules and insert all units from the buffer list into the orginal list
+    aUsesList.Clear;
+    for Module in FModel.Modules.OrderedModules  do
+    begin
+      i := 0;
+      while i < aUsesListBuf.Count do
+      begin
+        if aUsesListBuf[i].Module = Module then
+        begin
+          aUsesList.Add(TUsesElement.Create(aUsesListBuf[i]));
+          aUsesListBuf.Delete(i);
+        end else
+          Inc(i);
+      end;
+    end;
+
+    // security self-check: buffer must be empty now
+    if aUsesListBuf.Count > 0 then
+      raise Exception.Create('not all uses elements were transferred to the new list - internal error!');
+
+  finally
+    aUsesListBuf.Free;
+  end;
+
+  // step 3: insert module group headers
+  aLastModuleName := '';
+  i := 0;
+  while i < aUsesList.Count do
+  begin
+    aUsesElement       := aUsesList[i];
+       
+    aDelphiFile := fModel.FindParsedDelphiUnit(aUsesElement.TextValue, nil); // TOOD: use scopes here!
+    if aDelphiFile = nil then
+       raise Exception.CreateFmt('could not find a parsed delphi file for uses list element "%s"', [aUsesElement.TextValue]);    
+
+    aCurrentModuleName := cUnknownModule;
+    if Assigned(aDelphiFile.UnitInfo.Module) then
+      aCurrentModuleName :=   aDelphiFile.UnitInfo.Module.Name; // TODO: specify explizit "group comment" property in the modules definition?
+         
+    if aCurrentModuleName <> aLastModuleName then
+    begin
+       aUsesList.Insert(i, TUsesElement.Create(etSingleLineHeaderComment, '// ' + aCurrentModuleName));
+       Inc(i);
+       aLastModuleName := aCurrentModuleName;
+    end;
+
+    Inc(i);
+  end;
+
 end;
 
-procedure TFormatUsesRefactoring.FormatUsesInSource(const aSourceLines: TStringList);
+procedure TFormatUsesRefactoring.FormatUsesInSource(const aSourceLines: TStringList; UseModulesForGrouping: boolean);
 var
   aLineNumberOfUses:  integer;
   aUsesList:          TUsesList;
+  aUsesFormatted:     string;
 begin
+  if UseModulesForGrouping and not Assigned(FModel) then  
+    raise Exception.Create('formatting can not use grouping when there is no model provided');
+
   aLineNumberOfUses := 0;
   while aLineNumberOfUses >= 0 do // interface & implementation uses
   begin
@@ -107,7 +239,13 @@ begin
       aUsesList := fFormatUsesHelper.ExtractUsesFromSourceAndBuildUsesList(aSourceLines, aLineNumberOfUses);
       try
         fFormatUsesHelper.RemoveUsesListFromSource(aSourceLines, aLineNumberOfUses);
-        fFormatUsesHelper.InsertUsesListIntoSource(aSourceLines, aUsesList, aLineNumberOfUses);
+
+        if UseModulesForGrouping then
+          GroupUsesByModules(aUsesList);
+        
+        aUsesFormatted := fFormatUsesHelper.UsesListToFormattedText(aUsesList);
+        
+        fFormatUsesHelper.InsertUsesListIntoSource(aSourceLines, aUsesFormatted, aLineNumberOfUses);
       finally
         aUsesList.Free;
       end;
@@ -131,7 +269,7 @@ begin
       Log('Formatting uses of file "%s"', [aDelphiUnitName], LogInfo);
 
       aSourceLines.LoadFromFile(aFullPath);
-      FormatUsesInSource(aSourceLines);
+      FormatUsesInSource(aSourceLines, true);
       if not FDummyRun then
       begin
         aSourceLines.SaveToFile(aFullPath);

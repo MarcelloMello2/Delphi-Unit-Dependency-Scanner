@@ -49,7 +49,7 @@ type
   [TestFixture]
   TBaseFormatUsesRefactoringTest = class(TObject)
   private
-    procedure FormatAndCheckResult(aInputCode, aExpectedCode: string);
+    procedure FormatAndCheckResult(aInputCode, aExpectedCode: string; UseModulesForGrouping: Boolean = false; Model: TDudsModel = nil);
 
   end;
 
@@ -73,6 +73,8 @@ type
     procedure LoadMockDelphiFiles;
     procedure LoadMockModulesDefinition;
 
+    procedure FormatAndCheckResult_GroupByModules(aInputCode, aExpectedCode: string);
+
   public
     [Setup]
     procedure Setup;
@@ -80,26 +82,34 @@ type
     [TearDown]
     procedure TearDown;
 
-    [test]
+    [Test]
     procedure OneUsesWithoutComment;
+
+    [Test]
+    procedure MultipleModulesMixed;
 
   end;
 
 { TBaseFormatUsesRefactoringTest }
 
-procedure TBaseFormatUsesRefactoringTest.FormatAndCheckResult(aInputCode, aExpectedCode: string);
+procedure TBaseFormatUsesRefactoringTest.FormatAndCheckResult(aInputCode, aExpectedCode: string; UseModulesForGrouping: Boolean = false; Model: TDudsModel = nil);
 var
   aSourceLines: TStringList;
   aExpectedCodeStrings: TStringList;
   aRefactoring : TFormatUsesRefactoringHack;
 begin
-  aRefactoring := TFormatUsesRefactoringHack.Create;
+  if UseModulesForGrouping and (Model = nil) then
+    raise Exception.Create('wrong usage - pass a model when using "UseModulesForGrouping"');
+
+
+  aRefactoring       := TFormatUsesRefactoringHack.Create;
+  aRefactoring.Model := Model;
   aSourceLines := TStringList.Create;
   aExpectedCodeStrings := TStringList.Create;
   try
     aSourceLines.Text := aInputCode;
     aExpectedCodeStrings.Text := aExpectedCode;
-    aRefactoring.FormatUsesInSource(aSourceLines);
+    aRefactoring.FormatUsesInSource(aSourceLines, UseModulesForGrouping);
     Assert.AreEqual(aExpectedCodeStrings.Text, aSourceLines.Text);
   finally
     FreeAndNil(aSourceLines);
@@ -231,6 +241,12 @@ begin
   end;
 end;
 
+procedure TFormatUsesRefactoringTestWithModel.FormatAndCheckResult_GroupByModules(
+  aInputCode, aExpectedCode: string);
+begin
+  FormatAndCheckResult(aInputCode, aExpectedCode, true, fModel);
+end;
+
 procedure TFormatUsesRefactoringTestWithModel.LoadMockDelphiFiles;
 
   procedure AddDelphiFile(DelphiUnitname: string);
@@ -259,11 +275,11 @@ end;
 
 procedure TFormatUsesRefactoringTestWithModel.OneUsesWithoutComment;
 begin
-  FormatAndCheckResult(
+  FormatAndCheckResult_GroupByModules(
 
      'unit demo'         + sLineBreak +
      'interface'         + sLineBreak +
-     'uses '             + sLineBreak +
+     'uses'              + sLineBreak +
      '  SysUtils;'       + sLineBreak +
      'implementation'    + sLineBreak +
      'end.'
@@ -271,7 +287,7 @@ begin
 
      'unit demo'         + sLineBreak +
      'interface'         + sLineBreak +
-     'uses '             + sLineBreak +
+     'uses'              + sLineBreak +
      '  // delphi.rtl'   + sLineBreak + // <- this module header should be inserted
      '  SysUtils;'       + sLineBreak +
      'implementation'    + sLineBreak +
@@ -279,7 +295,33 @@ begin
   )
 end;
 
+procedure TFormatUsesRefactoringTestWithModel.MultipleModulesMixed;
+begin
+  FormatAndCheckResult_GroupByModules(
 
+     'unit demo'         + sLineBreak +
+     'interface'         + sLineBreak +
+     'uses'              + sLineBreak +
+     '  myArrayUtils, Classes, cipherUtils2, SysUtils, cipherUtils1, myTextUtils;' + sLineBreak +     // <- units from different module, order is mixed
+     'implementation'    + sLineBreak +
+     'end.'
+ ,
+
+     'unit demo'         + sLineBreak +
+     'interface'         + sLineBreak +
+     'uses'              + sLineBreak +
+     '  // delphi.rtl'                + sLineBreak + // <- this module header should be inserted
+     '  Classes, SysUtils,'           + sLineBreak + //    <- original order shall be preserved!
+                                        sLineBreak +
+     '  // 3rdParty.ciphers'          + sLineBreak + // <- this module header should be inserted
+     '  cipherUtils2, cipherUtils1,'  + sLineBreak + //    <- original order shall be preserved!
+                                        sLineBreak +
+     '  // core.common'               + sLineBreak + // <- this module header should be inserted
+     '  myArrayUtils, myTextUtils;'   + sLineBreak + //    <- original order shall be preserved!
+     'implementation'                 + sLineBreak +
+     'end.'
+  )
+end;
 
 initialization
 

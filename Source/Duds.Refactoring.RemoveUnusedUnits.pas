@@ -167,6 +167,7 @@ var
   aLineNumberOfUses:  integer;
   aUsesList: TUsesList;
   aCleanedUsesList: TUsesList;
+  aCleandUsesFormatted: string;
 begin
   aLineNumberOfUses := 0;
   while aLineNumberOfUses >= 0 do // interface & implementation uses
@@ -179,9 +180,10 @@ begin
       try
         fFormatUsesHelper.RemoveUsesListFromSource(aSourceLines, aLineNumberOfUses);
 
-        aCleanedUsesList := RemoveUnitsFromUsesElements(aUsesList, aUnitsToRemove);
+        aCleanedUsesList     := RemoveUnitsFromUsesElements(aUsesList, aUnitsToRemove);
+        aCleandUsesFormatted := fFormatUsesHelper.UsesListToFormattedText(aCleanedUsesList);
 
-        fFormatUsesHelper.InsertUsesListIntoSource(aSourceLines, aCleanedUsesList, aLineNumberOfUses);
+        fFormatUsesHelper.InsertUsesListIntoSource(aSourceLines, aCleandUsesFormatted, aLineNumberOfUses);
       finally
         aUsesList.Free;
       end;
@@ -243,7 +245,7 @@ begin
   // Clean the uses elements list
   // -> eliminate single line comments when nothing follows after the last comment
   for i := Pred(Result.Count) downto 0 do
-    if Result[i].ElementType = etSingleLineComment then
+    if Result[i].ElementType = etSingleLineHeaderComment then
        Result.Delete(i)
     else
        break;
@@ -253,7 +255,7 @@ begin
   for i := Pred(Result.Count) downto 0 do
   begin
     CurrentlyProcessingType := Result[i].ElementType;
-    if (CurrentlyProcessingType = etSingleLineComment) and (LastProcessedType = etSingleLineComment) then
+    if (CurrentlyProcessingType = etSingleLineHeaderComment) and (LastProcessedType = etSingleLineHeaderComment) then
       Result.Delete(i);
     LastProcessedType := CurrentlyProcessingType;
   end;

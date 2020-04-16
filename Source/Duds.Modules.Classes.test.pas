@@ -47,9 +47,9 @@ begin
   aModulesList := TModulesList.Create;
   try
     TModulesSerializer.ReadFromJson(json, aModulesList);
-    Assert.AreEqual(1, aModulesList.Count, 'modules in list');
+    Assert.AreEqual(1, aModulesList.Dictionary.Count, 'modules in list');
 
-    aModulesList.TryGetValue('delphi.rtl', aModule);
+    aModulesList.Dictionary.TryGetValue('delphi.rtl', aModule);
     Assert.IsNotNull(aModule, 'module ''delphi.rtl'' not found');
 
     // check name

@@ -45,22 +45,30 @@ type
     etUnit,
     etCompilerDirectiveStart,
     etCompilerDirectiveEnd,
-    etSingleLineComment,
+    etSingleLineHeaderComment, // a single line comment that stand in a separate line
     etEND);
 
   TUsesElement = class
   private
     fElementType: TUsesElementType;
     fTextValue: string;
+    fModule: TModule;
+
   public
     constructor Create(ElementType: TUsesElementType; TextValue: string); overload;
     constructor Create(CopyFrom: TUsesElement); overload;
 
     property ElementType: TUsesElementType read fElementType write fElementType;
     property TextValue: string             read fTextValue   write fTextValue;
+
+    property Module: TModule               read fModule     write fModule;        // in order to reference a module of the Model.ModulesList
   end;
 
-  TUsesList = TObjectList<TUsesElement>;
+  TUsesList = class(TObjectList<TUsesElement>)
+  public
+    function ContainsCompilerSwitches: Boolean;
+
+  end;
 
   // this class has no state, all methods are independent
   TFormatUsesHelper = class(TObject)
@@ -84,12 +92,9 @@ type
     function StripAwayTrailingSingleLineComment(const aLine: string): string;
 
 
-    function UsesListToFormattedText(const UsesList: TUsesList): string;
-
     function GetElementType(const Element: string): TUsesElementType;
 
   public
-
 
     function FindUsesLineInSource(
       const aSource: TStringList;
@@ -103,9 +108,11 @@ type
       const aSource:           TStringList;
       const aLineNumberOfUses: integer);
 
+    function UsesListToFormattedText(const UsesList: TUsesList): string;
+
     procedure InsertUsesListIntoSource(
       const aSource: TStringList;
-      const aUsesList: TUsesList;
+      const aUses: string;
       const aLineNumberOfUses:         integer);
 
   end;
@@ -124,6 +131,19 @@ constructor TUsesElement.Create(CopyFrom: TUsesElement);
 begin
   fElementType := CopyFrom.ElementType;
   fTextValue   := CopyFrom.TextValue;
+  fModule      := CopyFrom.Module;
+end;
+
+{ TUsesList }
+
+function TUsesList.ContainsCompilerSwitches: Boolean;
+var
+  aUsesElement: TUsesElement;
+begin
+  Result := false;
+  for aUsesElement in Self do
+    if (aUsesElement.ElementType = etCompilerDirectiveStart) or (aUsesElement.ElementType = etCompilerDirectiveEnd) then
+      Exit(true);
 end;
 
 { TFormatUsesHelper }
@@ -220,7 +240,7 @@ begin
       aCurrentUsesLine := StringReplace(aCurrentUsesLine, CHAR_SEMICOLON, '', [rfReplaceAll]);
 
     if IsSingleLineComment(aCurrentUsesLine) then
-      Result.Add(TUsesElement.Create(etSingleLineComment, aCurrentUsesLine))
+      Result.Add(TUsesElement.Create(etSingleLineHeaderComment, aCurrentUsesLine))
     else begin
       aSplittedUsesLine := TStringList.Create();
       try
@@ -262,18 +282,13 @@ end;
 
 procedure TFormatUsesHelper.InsertUsesListIntoSource(
   const aSource: TStringList;
-  const aUsesList: TUsesList;
-  const aLineNumberOfUses:         integer);
-var
-  aFirstLineAfterUsesKeyword: integer;
-  aCompactUses:               string;
+  const aUses: string;
+  const aLineNumberOfUses: integer);
 begin
-  aCompactUses := UsesListToFormattedText(aUsesList);
-  if aCompactUses <> '' then
+  if aUses <> '' then
   begin
-    aFirstLineAfterUsesKeyword := aLineNumberOfUses + 1;
     aSource.Insert(aLineNumberOfUses, 'uses');
-    aSource.Insert(aFirstLineAfterUsesKeyword, aCompactUses);
+    aSource.Insert(aLineNumberOfUses + 1, aUses);
   end;
 end;
 
@@ -303,7 +318,7 @@ begin
   end
   else
     if IsSingleLineComment(Element) then
-       Result := etSingleLineComment
+       Result := etSingleLineHeaderComment
     else
        Result := etUnit;
 end;
@@ -332,7 +347,7 @@ var
   begin
     Buf := '';
 
-    if CurrentType = etSingleLineComment then
+    if CurrentType = etSingleLineHeaderComment then
       raise Exception.Create('that should not happen');
 
     case CurrentType of
@@ -403,7 +418,7 @@ var
           etEND:                    Buf := sLineBreak + INDENT_OF_TWO;
         end;
 
-      etSingleLineComment:
+      etSingleLineHeaderComment:
         case CurrentType of
           etUnit:                   Buf := sLineBreak + INDENT_OF_TWO;
           etCompilerDirectiveStart: Buf := sLineBreak;
@@ -428,7 +443,7 @@ var
                                 end;
       etCompilerDirectiveStart: Buf := CurrentElement;
       etCompilerDirectiveEnd:   Buf := CurrentElement;
-      etSingleLineComment:      Buf := CurrentElement;
+      etSingleLineHeaderComment:      Buf := CurrentElement;
       etEND:                    Buf := CHAR_SEMICOLON;
     end;
     Result := Result + Buf;
@@ -440,7 +455,7 @@ var
   begin
     Result := etEnd;
     for i := aCurrentPosition to Pred(aUsesList.Count) do
-      if aUsesList[i].ElementType <> etSingleLineComment then
+      if aUsesList[i].ElementType <> etSingleLineHeaderComment then
       begin
         Result := aUsesList[i].ElementType;
         break;
@@ -471,7 +486,7 @@ begin
     CurrentElement             := UsesList[i].TextValue;
     CurrentType                := UsesList[i].ElementType;
 
-    if CurrentType = etSingleLineComment then
+    if CurrentType = etSingleLineHeaderComment then
     begin
       NextNonCommentElementAhead := CalcNextNonSingleLineCommentAhead(UsesList, i);
       if LastType <> etBEGIN then
@@ -505,6 +520,8 @@ begin
   HandleElementChange(LastType, CurrentType, '');
   HandleCurrentElement(CurrentType, CurrentElement);
 end;
+
+
 
 end.
 

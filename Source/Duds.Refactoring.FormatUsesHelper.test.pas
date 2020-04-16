@@ -37,7 +37,9 @@ type
   [TestFixture]
   TFormatUsesHelperTest = class(TObject)
   private
-    FRefactoring : TFormatUsesHelper;
+    FFormatHelper : TFormatUsesHelper;
+    procedure BuildUsesListAndCheckList(aCode: string; ExpectedElementTypes: array of TUsesElementType; ExpectedValues: array of string);
+
 
   public
     [Setup]
@@ -47,21 +49,33 @@ type
     procedure TearDown;
 
     [Test]
-    procedure TestFindUsesLine;
+    procedure FindUsesLine;
+
+    [Test]
+    procedure BuildUsesList_TwoUsesOnly;
+
+    [Test]
+    procedure BuildUsesList_WithSingleLineComments;
+
+    [Test]
+    procedure BuildUsesList_WithSingleLineCommentAfterUnit;
+
+    [Test]
+    procedure BuildUsesList_WithSimpleCompilerDirective;
 
   end;
 
 procedure TFormatUsesHelperTest.Setup;
 begin
-  FRefactoring := TFormatUsesHelper.Create;
+  FFormatHelper := TFormatUsesHelper.Create;
 end;
 
 procedure TFormatUsesHelperTest.TearDown;
 begin
-  FreeAndNil(FRefactoring);
+  FreeAndNil(FFormatHelper);
 end;
 
-procedure TFormatUsesHelperTest.TestFindUsesLine;
+procedure TFormatUsesHelperTest.FindUsesLine;
 var
   aCode: string;
   aInputCodeStrings: TStringList;
@@ -85,13 +99,124 @@ begin
   try
     aInputCodeStrings.Text := aCode;
 
-    aLine := FRefactoring.FindUsesLineInSource(aInputCodeStrings);
+    aLine := FFormatHelper.FindUsesLineInSource(aInputCodeStrings);
     Assert.AreEqual(5, aLine);
   finally
     FreeAndNil(aInputCodeStrings);
   end;
 end;
 
+procedure TFormatUsesHelperTest.BuildUsesListAndCheckList(aCode: string; ExpectedElementTypes: array of TUsesElementType; ExpectedValues: array of string);
+var
+  aLine: integer;
+  aUsesList: TUsesList;
+  aCodeStrings: TStringList;
+  I: Integer;
+  aUsesElement: TUsesElement;
+begin
+  aCodeStrings    := TStringList.Create;
+  try
+    aCodeStrings.Text := aCode;
+
+    aLine    := FFormatHelper.FindUsesLineInSource(aCodeStrings);
+    aUsesList := FFormatHelper.ExtractUsesFromSourceAndBuildUsesList(aCodeStrings, aLine);
+    try
+      Assert.AreEqual(Length(ExpectedElementTypes), Length(ExpectedValues), 'wrong test usage - both array should have the same length');
+
+      Assert.AreEqual(Length(ExpectedElementTypes), aUsesList.Count, 'length of uses list');
+
+      for i := 0 to pred(aUsesList.Count) do
+      begin
+        aUsesElement := aUsesList[i];
+        Assert.AreEqual(ExpectedElementTypes[i], aUsesElement.ElementType,         'wrong element type');
+        Assert.AreEqual(ExpectedValues[i],       aUsesElement.TextValue,    false, 'wrong text value of element');
+      end;
+
+    finally
+      aUsesList.Free;
+    end;
+  finally
+    FreeAndNil(aCodeStrings);
+  end;
+end;
+
+procedure TFormatUsesHelperTest.BuildUsesList_TwoUsesOnly;
+begin
+  BuildUsesListAndCheckList(
+
+    'unit demo'            + sLineBreak +
+    'interface'            + sLineBreak +
+    'uses '                + sLineBreak +
+    '  SysUtils, Classes;' + sLineBreak +
+    'implementation'       + sLineBreak +
+    'end.',
+
+    [etUnit, etUnit],
+
+    ['SysUtils', 'Classes']
+
+    )
+end;
+
+procedure TFormatUsesHelperTest.BuildUsesList_WithSingleLineComments;
+begin
+  BuildUsesListAndCheckList(
+
+    'unit demo'            + sLineBreak +
+    'interface'            + sLineBreak +
+    'uses '                + sLineBreak +
+    '  // MyComment'       + sLineBreak +  // <- this should be put into the list
+    '  SysUtils;'          + sLineBreak +
+    'implementation'       + sLineBreak +
+    'end.',
+
+    [etSingleLineHeaderComment, etUnit],
+
+    ['// MyComment', 'SysUtils']
+
+    )
+end;
+
+procedure TFormatUsesHelperTest.BuildUsesList_WithSingleLineCommentAfterUnit;
+begin
+  BuildUsesListAndCheckList(
+
+    'unit demo'                           + sLineBreak +
+    'interface'                           + sLineBreak +
+    'uses '                               + sLineBreak +
+    '  SysUtils // MyCommentAfterTheUnit' + sLineBreak +   // <- this should be deleted since it does not stand alone
+    '  // MyHeaderCommentAtTheEnd'        + sLineBreak +   // <- this should be kept
+    ';'                                   + sLineBreak +
+    'implementation'                      + sLineBreak +
+    'end.',
+
+    [etUnit, etSingleLineHeaderComment],
+
+    ['SysUtils', '// MyHeaderCommentAtTheEnd']
+
+    )
+end;
+
+procedure TFormatUsesHelperTest.BuildUsesList_WithSimpleCompilerDirective;
+begin
+  BuildUsesListAndCheckList(
+
+    'unit demo'                           + sLineBreak +
+    'interface'                           + sLineBreak +
+    'uses '                               + sLineBreak +
+    '  {$IFDEF MYSWITCH}'                 + sLineBreak +
+    '  SysUtils'                          + sLineBreak +
+    '  {$ENDIF}'                          + sLineBreak +
+    '  , Classes;'                        + sLineBreak +
+    'implementation'                      + sLineBreak +
+    'end.',
+
+    [etCompilerDirectiveStart, etUnit, etCompilerDirectiveEnd, etUnit],
+
+    ['{$IFDEF MYSWITCH}', 'SysUtils', '{$ENDIF}', 'Classes']
+
+    )
+end;
 
 initialization
   TDUnitX.RegisterTestFixture(TFormatUsesHelperTest);
