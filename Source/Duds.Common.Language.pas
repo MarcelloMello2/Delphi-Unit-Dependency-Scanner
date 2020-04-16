@@ -49,6 +49,7 @@ resourcestring
   StrAmbigousPathToModuleMapping = 'ambigous module definition: path "%s" is defined to be part of module "%s" and module "%s"';
   StrUsesFormattingNotAvailWithCompilerSwitches = 'grouping by modules is not available when uses list contains compiler swithces';
   StrUsesFormattingNotAvailUnknownModules = 'grouping by modules is not available due to missing module mappings for units: %s';
+  StrUsesFormattingUnknownModulesWarning = 'uses list contains units with unknown modules: %s';
   StrVCLFormCount = 'VCL Form Count';
   StrFMXFormCount = 'FMX Form Count';
   StrStartBatchRename = 'Batch-Rename from CSV: Renaming unit "%s" to "%s"';

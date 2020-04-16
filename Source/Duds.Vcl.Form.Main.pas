@@ -715,7 +715,9 @@ begin
       DelphiFile := FModel.DelphiFileList[GetID(Node)];
 
       InSearchPathOrShowAll := DelphiFile.InSearchPath or (not DelphiFile.InSearchPath and actShowUnitsNotInPath.Checked);
-      UnitMatchesSearchTerm := ((LowerSearchText = '') or ((pos(LowerSearchText, LowerCase(DelphiFile.UnitInfo.DelphiUnitName)) <> 0)));
+      UnitMatchesSearchTerm := (LowerSearchText = '')
+                               or ((pos(LowerSearchText, LowerCase(DelphiFile.UnitInfo.DelphiUnitName)) <> 0))
+                               or ((DelphiFile.UnitInfo.Module <> nil) and (Pos(LowerSearchText, LowerCase(DelphiFile.UnitInfo.Module.Name)) > 0));
 
       VT.IsVisible[Node] :=  UnitMatchesSearchTerm and InSearchPathOrShowAll;
 
@@ -1381,9 +1383,17 @@ begin
 end;
 
 function TfrmMain.IsSearchHitNode(Node: PVirtualNode): Boolean;
+var
+  aUnitInfo: IUnitInfo;
 begin
-  Result := (Node <> nil) and
-    (pos(FSearchText, LowerCase(FTreeNodeObjects[GetID(Node)].DelphiFile.UnitInfo.DelphiUnitName)) > 0);
+  Result := false;
+
+  if Assigned(Node) then
+  begin
+    aUnitInfo := FTreeNodeObjects[GetID(Node)].DelphiFile.UnitInfo;
+    Result :=    (Pos(FSearchText, LowerCase(aUnitInfo.DelphiUnitName)) > 0)
+              or ((aUnitInfo.Module <> nil) and (Pos(FSearchText, LowerCase(aUnitInfo.Module.Name)) > 0));
+  end;
 end;
 
 procedure TfrmMain.actCloseProjectExecute(Sender: TObject);
@@ -1703,6 +1713,7 @@ begin
         aFormatUsesRefactoring.OnLog    := Self.Log;
         aFormatUsesRefactoring.DummyRun := false;
         aFormatUsesRefactoring.ProjectSettings := FProjectSettings;
+        aFormatUsesRefactoring.AllowModuleGroupingWithUnknownModules := true;
 
         aFormatUsesRefactoring.FormatUsesInFile(GetFocusedDelphiFile.UnitInfo.DelphiUnitName);
 

@@ -47,6 +47,7 @@ type
     fProjectSettings: TProjectSettings;
 
     fFormatUsesHelper: TFormatUsesHelper;
+    fAllowModuleGroupingWithUnknownModules: Boolean;
 
   private
 
@@ -67,6 +68,8 @@ type
     property DummyRun: Boolean    read FDummyRun write FDummyRun;
     property OnLog: TLogProcedure read FOnLog    write FOnLog;
     property ProjectSettings: TProjectSettings read fProjectSettings write fProjectSettings;
+
+    property AllowModuleGroupingWithUnknownModules: Boolean read fAllowModuleGroupingWithUnknownModules write fAllowModuleGroupingWithUnknownModules;
   end;
 
 
@@ -78,6 +81,7 @@ constructor TFormatUsesRefactoring.Create;
 begin
 
   fFormatUsesHelper := TFormatUsesHelper.Create;
+  fAllowModuleGroupingWithUnknownModules := false;
 end;
 
 destructor TFormatUsesRefactoring.Destroy();
@@ -89,7 +93,7 @@ end;
 procedure TFormatUsesRefactoring.Log(const Msg: String; const Severity: Integer);
 begin
   if Assigned(FOnLog) then
-    FOnLog('Removing unused units: ' + Msg, Severity);
+    FOnLog('Formatting uses: ' + Msg, Severity);
 end;
 
 procedure TFormatUsesRefactoring.Log(const Msg: String; const Args: array of const; const Severity: Integer);
@@ -142,13 +146,16 @@ begin
       if aUsesElement.Module = nil then
         AddToken(UnitsWithUnknownModules, aUsesElement.TextValue);
   if not UnitsWithUnknownModules.IsEmpty then
-    if Assigned(FOnLog) then
-    begin
-      Log(StrUsesFormattingNotAvailUnknownModules, [UnitsWithUnknownModules], LogWarning);
-      exit;
-    end
+    if fAllowModuleGroupingWithUnknownModules then
+      Log(StrUsesFormattingUnknownModulesWarning, [UnitsWithUnknownModules], LogWarning)
     else
-      raise Exception.CreateFmt(StrUsesFormattingNotAvailUnknownModules, [UnitsWithUnknownModules]);
+      if Assigned(FOnLog) then
+      begin
+        Log(StrUsesFormattingNotAvailUnknownModules, [UnitsWithUnknownModules], LogWarning);
+        exit;
+      end
+      else
+        raise Exception.CreateFmt(StrUsesFormattingNotAvailUnknownModules, [UnitsWithUnknownModules]);
 
   // step 1: delete all existing single line comments headers, we will produce new ones
   for i:= Pred(aUsesList.Count) downto 0 do
@@ -186,9 +193,15 @@ begin
       end;
     end;
 
-    // security self-check: buffer must be empty now
-    if aUsesListBuf.Count > 0 then
-      raise Exception.Create('not all uses elements were transferred to the new list - internal error!');
+    // 2.3 take over left-over units, must be due to "unknown module"
+    if fAllowModuleGroupingWithUnknownModules then
+    begin
+      for aUsesElement in aUsesListBuf do
+        aUsesList.Add(TUsesElement.Create(aUsesElement));
+    end else
+      // security self-check: buffer must be empty now
+      if aUsesListBuf.Count > 0 then
+        raise Exception.Create('not all uses elements were transferred to the new list - internal error!');
 
   finally
     aUsesListBuf.Free;
