@@ -64,6 +64,7 @@ uses
   Duds.Export.Gephi,
   Duds.Export.GraphML,
   Duds.Modules.Classes,
+  Duds.Modules.Analyzer,
   Duds.Refactoring.FormatUses,
   Duds.Refactoring.RenameUnit,
   Duds.Refactoring.AddUnitToUses,
@@ -2193,9 +2194,7 @@ end;
 procedure TfrmMain.actStartScanExecute(Sender: TObject);
 var
   FileScanner: TDudsFileScanner;
-  i: integer;
-  aModule: TModule;
-  aDelphiFile: TDelphiFile;
+
   aUnitsTotal: integer;
   aUnitsInModules: integer;
 begin
@@ -2267,22 +2266,7 @@ begin
       // step 4: Identify modules for each .pas unit
       //   at this point, all unit that were "seen" (by root files, search paths
       //   or parsing units) are identified
-      FModel.Modules.ReBuildFastSearchList;
-      aUnitsTotal := 0;
-      aUnitsInModules := 0;
-      for i := 0 to pred(FModel.DelphiFileList.Count) do
-      begin
-        aDelphiFile := FModel.DelphiFileList[i];
-        if (aDelphiFile.UnitInfo.DelphiFileType = ftPAS) or (not aDelphiFile.InSearchPath) then  // files that are not in search path do not get a filetype but should be '.pas'...
-        begin
-          Inc(aUnitsTotal);
-          if FModel.Modules.FindModuleForUnit(aDelphiFile.UnitInfo, aModule) then
-          begin
-            aDelphiFile.UnitInfo.Module := aModule;
-            Inc(aUnitsInModules);
-          end;
-        end;
-      end;
+      TModulesAnalyzer.MapUnitsToModules(FModel, aUnitsTotal, aUnitsInModules);
       Log(StrModulesIdentified, [aUnitsInModules, aUnitsTotal]);
 
       // step 5: fill gui trees with data

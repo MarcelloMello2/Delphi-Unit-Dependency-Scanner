@@ -39,7 +39,7 @@ uses
 
 
 type
-  UsesListElementType = (
+  TUsesElementType = (
     etUnknown,
     etBEGIN,
     etUnit,
@@ -47,6 +47,20 @@ type
     etCompilerDirectiveEnd,
     etSingleLineComment,
     etEND);
+
+  TUsesElement = class
+  private
+    fElementType: TUsesElementType;
+    fTextValue: string;
+  public
+    constructor Create(ElementType: TUsesElementType; TextValue: string); overload;
+    constructor Create(CopyFrom: TUsesElement); overload;
+
+    property ElementType: TUsesElementType read fElementType write fElementType;
+    property TextValue: string             read fTextValue   write fTextValue;
+  end;
+
+  TUsesList = TObjectList<TUsesElement>;
 
   // this class has no state, all methods are independent
   TFormatUsesHelper = class(TObject)
@@ -70,29 +84,51 @@ type
     function StripAwayTrailingSingleLineComment(const aLine: string): string;
 
 
-    function UsesListToFormattedText(const CleanedUses: TStringList): string;
+    function UsesListToFormattedText(const UsesList: TUsesList): string;
+
+    function GetElementType(const Element: string): TUsesElementType;
 
   public
-    function GetElementType(const Element: string): UsesListElementType;
 
-    function FindUsesLine(
+
+    function FindUsesLineInSource(
       const aSource: TStringList;
       const aStart:  integer = 0): integer;
-    function ExtractUsesAndSplitIntoSingleElements(
+
+    function ExtractUsesFromSourceAndBuildUsesList(
       const aSourceLines: TStringList;
-      const aLineOfUsesBegin:       integer): TStringList;
-    procedure RemoveUsesList(
+      const aLineOfUsesBegin:  integer): TUsesList;
+
+    procedure RemoveUsesListFromSource(
       const aSource:           TStringList;
       const aLineNumberOfUses: integer);
-    procedure InsertUsesList(
-      const aSource, aCleanedUsesOnly: TStringList;
+
+    procedure InsertUsesListIntoSource(
+      const aSource: TStringList;
+      const aUsesList: TUsesList;
       const aLineNumberOfUses:         integer);
 
   end;
 
 implementation
 
-function TFormatUsesHelper.FindUsesLine(
+{ TUsesElement }
+
+constructor TUsesElement.Create(ElementType: TUsesElementType; TextValue: string);
+begin
+  fElementType := ElementType;
+  fTextValue   := TextValue;
+end;
+
+constructor TUsesElement.Create(CopyFrom: TUsesElement);
+begin
+  fElementType := CopyFrom.ElementType;
+  fTextValue   := CopyFrom.TextValue;
+end;
+
+{ TFormatUsesHelper }
+
+function TFormatUsesHelper.FindUsesLineInSource(
   const aSource: TStringList;
   const aStart:  integer = 0): integer;
 var
@@ -148,9 +184,9 @@ begin
   end;
 end;
 
-function TFormatUsesHelper.ExtractUsesAndSplitIntoSingleElements(
+function TFormatUsesHelper.ExtractUsesFromSourceAndBuildUsesList(
   const aSourceLines: TStringList;
-  const aLineOfUsesBegin: integer): TStringList;
+  const aLineOfUsesBegin: integer): TUsesList;
 var
   i:                 integer;
   aCurrentUsesLine:  string;
@@ -159,7 +195,8 @@ var
   j:                 integer;
   aUsedUnit:         string;
 begin
-  Result := TStringList.Create;
+  Result := TUsesList.Create;
+
 
   for i := aLineOfUsesBegin to aSourceLines.Count - 1 do
   begin
@@ -174,7 +211,8 @@ begin
           Continue;
       end;
 
-    // line has SingleLineComment at the end -> strip it away, we don't support that
+    // line has SingleLineComment at the end -> strip it away, we don't support that. Only {} comments are supported for "annotations".
+    // Why? Because SingleLineComment are considered as "module group headers"
     aCurrentUsesLine := StripAwayTrailingSingleLineComment(aCurrentUsesLine);
 
     aIsLastLineOfUses := IsLastLineOfUses(aCurrentUsesLine);
@@ -182,7 +220,7 @@ begin
       aCurrentUsesLine := StringReplace(aCurrentUsesLine, CHAR_SEMICOLON, '', [rfReplaceAll]);
 
     if IsSingleLineComment(aCurrentUsesLine) then
-      Result.Add(aCurrentUsesLine)
+      Result.Add(TUsesElement.Create(etSingleLineComment, aCurrentUsesLine))
     else begin
       aSplittedUsesLine := TStringList.Create();
       try
@@ -194,7 +232,7 @@ begin
         begin
           aUsedUnit := Trim(aSplittedUsesLine[j]);
           if (aUsedUnit <> '') then
-            Result.Add(aUsedUnit);
+            Result.Add(TUsesElement.Create(GetElementType(aUsedUnit), aUsedUnit));    // TODO: detect {}-style comments
         end;
       finally
         aSplittedUsesLine.Free;
@@ -206,7 +244,7 @@ begin
   end;
 end;
 
-procedure TFormatUsesHelper.RemoveUsesList(
+procedure TFormatUsesHelper.RemoveUsesListFromSource(
   const aSource:           TStringList;
   const aLineNumberOfUses: integer);
 var
@@ -222,14 +260,15 @@ begin
   end;
 end;
 
-procedure TFormatUsesHelper.InsertUsesList(
-  const aSource, aCleanedUsesOnly: TStringList;
+procedure TFormatUsesHelper.InsertUsesListIntoSource(
+  const aSource: TStringList;
+  const aUsesList: TUsesList;
   const aLineNumberOfUses:         integer);
 var
   aFirstLineAfterUsesKeyword: integer;
   aCompactUses:               string;
 begin
-  aCompactUses := UsesListToFormattedText(aCleanedUsesOnly);
+  aCompactUses := UsesListToFormattedText(aUsesList);
   if aCompactUses <> '' then
   begin
     aFirstLineAfterUsesKeyword := aLineNumberOfUses + 1;
@@ -253,7 +292,7 @@ begin
   Result := AnsiStartsText('//', aCandidate.TrimLeft);
 end;
 
-function TFormatUsesHelper.GetElementType(const Element: string): UsesListElementType;
+function TFormatUsesHelper.GetElementType(const Element: string): TUsesElementType;
 begin
   if IsCompilerDirective(Element) then
   begin
@@ -269,7 +308,7 @@ begin
        Result := etUnit;
 end;
 
-function TFormatUsesHelper.UsesListToFormattedText(const CleanedUses: TStringList): string;
+function TFormatUsesHelper.UsesListToFormattedText(const UsesList: TUsesList): string;
 var
   AfterFirstUnit: Boolean;
   UnitWithoutCompilerSwitchIsBefore: Boolean;
@@ -286,7 +325,7 @@ var
      Result              := Length(aLastLine);
   end;
 
-  procedure HandleElementChange(LastType, CurrentType: UsesListElementType; CurrentElement: string);
+  procedure HandleElementChange(LastType, CurrentType: TUsesElementType; CurrentElement: string);
   var
     Buf: String;
     aCurrentLineLength: Integer;
@@ -376,7 +415,7 @@ var
     Result := Result + Buf;
   end;
 
-  procedure HandleCurrentElement(CurrentType: UsesListElementType; CurrentElement: string);
+  procedure HandleCurrentElement(CurrentType: TUsesElementType; CurrentElement: string);
   var
     Buf: String;
   begin
@@ -395,28 +434,28 @@ var
     Result := Result + Buf;
   end;
 
-  function CalcNextNonSingleLineCommentAhead(aUsesList: TStringList; aCurrentPosition: Integer): UsesListElementType;
+  function CalcNextNonSingleLineCommentAhead(aUsesList: TUsesList; aCurrentPosition: Integer): TUsesElementType;
   var
     i: Integer;
   begin
     Result := etEnd;
     for i := aCurrentPosition to Pred(aUsesList.Count) do
-      if GetElementType(aUsesList[i]) <> etSingleLineComment then
+      if aUsesList[i].ElementType <> etSingleLineComment then
       begin
-        Result := GetElementType(aUsesList[i]);
+        Result := aUsesList[i].ElementType;
         break;
       end;
   end;
 
 var
   CurrentElement: string;
-  CurrentType: UsesListElementType;
-  NextNonCommentElementAhead: UsesListElementType;
-  LastType: UsesListElementType;
+  CurrentType: TUsesElementType;
+  NextNonCommentElementAhead: TUsesElementType;
+  LastType: TUsesElementType;
   i: Integer;
 begin
   Result := '';
-  if CleanedUses.Count = 0 then
+  if UsesList.Count = 0 then
     exit;
 
   AfterFirstUnit               := false;
@@ -427,14 +466,14 @@ begin
 
   // build the unit list text from the elements list
   i := 0;
-  while i <= Pred(CleanedUses.Count) do
+  while i <= Pred(UsesList.Count) do
   begin
-    CurrentElement             := CleanedUses[i];
-    CurrentType                := GetElementType(CurrentElement);
+    CurrentElement             := UsesList[i].TextValue;
+    CurrentType                := UsesList[i].ElementType;
 
     if CurrentType = etSingleLineComment then
     begin
-      NextNonCommentElementAhead := CalcNextNonSingleLineCommentAhead(CleanedUses, i);
+      NextNonCommentElementAhead := CalcNextNonSingleLineCommentAhead(UsesList, i);
       if LastType <> etBEGIN then
       begin
         HandleElementChange(LastType, NextNonCommentElementAhead, '');

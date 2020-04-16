@@ -85,7 +85,7 @@ begin
   try
     aInputCodeStrings.Text := aCode;
 
-    aLine := FRefactoring.FindUsesLine(aInputCodeStrings);
+    aLine := FRefactoring.FindUsesLineInSource(aInputCodeStrings);
     Assert.AreEqual(5, aLine);
   finally
     FreeAndNil(aInputCodeStrings);

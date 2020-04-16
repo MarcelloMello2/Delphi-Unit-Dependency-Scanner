@@ -61,7 +61,9 @@ type
     procedure LoadWorkListFromInputFile(aWorklist: TRemoveUnitsList; const aPath: string);
 
     procedure RemoveUnitsFromPasFile(const aCurrentPasFileName: string; const aUnitsToRemove: TStringList);
-    function RemoveUnitsFromUsesElements(const aOriginalUsesList, aUnitsToRemove: TStringList): TStringList;
+    function RemoveUnitsFromUsesElements(
+      aOriginalUsesList: TUsesList;
+      aUnitsToRemove: TStringList): TUsesList;
 
   protected
     procedure RemoveUnitsFromSource(const aSourceLines, aUnitsToRemove: TStringList);
@@ -163,25 +165,25 @@ procedure TRemoveUnusedUnitsRefactoring.RemoveUnitsFromSource(
   const aUnitsToRemove: TStringList);
 var
   aLineNumberOfUses:  integer;
-  aUsesSourceOnly:    TStringList;
-  aCleanedUsesOnly:   TStringList;
+  aUsesList: TUsesList;
+  aCleanedUsesList: TUsesList;
 begin
   aLineNumberOfUses := 0;
   while aLineNumberOfUses >= 0 do // interface & implementation uses
   begin
-    aLineNumberOfUses := fFormatUsesHelper.FindUsesLine(aSourceLines, aLineNumberOfUses + 1);
+    aLineNumberOfUses := fFormatUsesHelper.FindUsesLineInSource(aSourceLines, aLineNumberOfUses + 1);
     if aLineNumberOfUses >= 0 then
     begin
 
-      aUsesSourceOnly := fFormatUsesHelper.ExtractUsesAndSplitIntoSingleElements(aSourceLines, aLineNumberOfUses);
+      aUsesList := fFormatUsesHelper.ExtractUsesFromSourceAndBuildUsesList(aSourceLines, aLineNumberOfUses);
       try
-        fFormatUsesHelper.RemoveUsesList(aSourceLines, aLineNumberOfUses);
+        fFormatUsesHelper.RemoveUsesListFromSource(aSourceLines, aLineNumberOfUses);
 
-        aCleanedUsesOnly := RemoveUnitsFromUsesElements(aUsesSourceOnly, aUnitsToRemove);
+        aCleanedUsesList := RemoveUnitsFromUsesElements(aUsesList, aUnitsToRemove);
 
-        fFormatUsesHelper.InsertUsesList(aSourceLines, aCleanedUsesOnly, aLineNumberOfUses);
+        fFormatUsesHelper.InsertUsesListIntoSource(aSourceLines, aCleanedUsesList, aLineNumberOfUses);
       finally
-        aUsesSourceOnly.Free;
+        aUsesList.Free;
       end;
 
     end;
@@ -219,20 +221,21 @@ begin
   end;
 end;
 
-function TRemoveUnusedUnitsRefactoring.RemoveUnitsFromUsesElements(const aOriginalUsesList, aUnitsToRemove: TStringList): TStringList;
+function TRemoveUnusedUnitsRefactoring.RemoveUnitsFromUsesElements(aOriginalUsesList: TUsesList; aUnitsToRemove: TStringList): TUsesList;
 var
   i:     integer;
-  aLine: string;
+  aUsesElement: TUsesElement;
   aUnitCount: Integer;
   LastProcessedType,
-  CurrentlyProcessingType: UsesListElementType;
+  CurrentlyProcessingType: TUsesElementType;
 begin
-  Result := TStringList.Create();
+  Result := TUsesList.Create();
 
-  for aLine in aOriginalUsesList do
+  // filter out units that should be removed
+  for aUsesElement in aOriginalUsesList do
   begin
-    if aUnitsToRemove.IndexOf(aLine) < 0 then
-      Result.Add(aLine)
+    if (aUsesElement.ElementType <> etUnit) or (aUnitsToRemove.IndexOf(aUsesElement.TextValue) < 0) then
+      Result.Add(TUsesElement.Create(aUsesElement))
     else
       Inc(FUsesRemovedCount);  
   end;
@@ -240,7 +243,7 @@ begin
   // Clean the uses elements list
   // -> eliminate single line comments when nothing follows after the last comment
   for i := Pred(Result.Count) downto 0 do
-    if fFormatUsesHelper.GetElementType(Result[i]) = etSingleLineComment then
+    if Result[i].ElementType = etSingleLineComment then
        Result.Delete(i)
     else
        break;
@@ -249,7 +252,7 @@ begin
   LastProcessedType := etUnknown;
   for i := Pred(Result.Count) downto 0 do
   begin
-    CurrentlyProcessingType := fFormatUsesHelper.GetElementType(Result[i]);
+    CurrentlyProcessingType := Result[i].ElementType;
     if (CurrentlyProcessingType = etSingleLineComment) and (LastProcessedType = etSingleLineComment) then
       Result.Delete(i);
     LastProcessedType := CurrentlyProcessingType;
@@ -257,8 +260,8 @@ begin
 
   // clean list from potential comments, compiler directives etc. - if there are no units left
   aUnitCount := 0;
-  for aLine in Result do
-    if fFormatUsesHelper.GetElementType(aLine) = etUnit then
+  for aUsesElement in Result do
+    if aUsesElement.ElementType = etUnit then
       Inc(aUnitCount);
 
   if aUnitCount = 0 then

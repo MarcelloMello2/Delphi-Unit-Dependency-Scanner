@@ -24,6 +24,7 @@ uses
   Duds.Export.Gephi,
   Duds.Export.GraphML,
   Duds.Modules.Classes,
+  Duds.Modules.Analyzer,
   Duds.Refactoring.FormatUsesHelper,
   Duds.Refactoring.FormatUses,
   Duds.Refactoring.PascalAnalyzerUsesReportProcessor,

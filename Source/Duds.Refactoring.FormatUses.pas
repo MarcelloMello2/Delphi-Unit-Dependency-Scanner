@@ -96,20 +96,20 @@ end;
 procedure TFormatUsesRefactoring.FormatUsesInSource(const aSourceLines: TStringList);
 var
   aLineNumberOfUses:  integer;
-  aUsesSourceOnly:    TStringList;
+  aUsesList:          TUsesList;
 begin
   aLineNumberOfUses := 0;
   while aLineNumberOfUses >= 0 do // interface & implementation uses
   begin
-    aLineNumberOfUses := fFormatUsesHelper.FindUsesLine(aSourceLines, aLineNumberOfUses + 1);
+    aLineNumberOfUses := fFormatUsesHelper.FindUsesLineInSource(aSourceLines, aLineNumberOfUses + 1);
     if aLineNumberOfUses >= 0 then
     begin
-      aUsesSourceOnly := fFormatUsesHelper.ExtractUsesAndSplitIntoSingleElements(aSourceLines, aLineNumberOfUses);
+      aUsesList := fFormatUsesHelper.ExtractUsesFromSourceAndBuildUsesList(aSourceLines, aLineNumberOfUses);
       try
-        fFormatUsesHelper.RemoveUsesList(aSourceLines, aLineNumberOfUses);
-        fFormatUsesHelper.InsertUsesList(aSourceLines, aUsesSourceOnly, aLineNumberOfUses);
+        fFormatUsesHelper.RemoveUsesListFromSource(aSourceLines, aLineNumberOfUses);
+        fFormatUsesHelper.InsertUsesListIntoSource(aSourceLines, aUsesList, aLineNumberOfUses);
       finally
-        aUsesSourceOnly.Free;
+        aUsesList.Free;
       end;
     end;
   end;

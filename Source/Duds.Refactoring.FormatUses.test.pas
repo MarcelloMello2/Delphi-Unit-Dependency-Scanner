@@ -25,10 +25,17 @@ interface
 
 uses
   System.Classes, System.SysUtils, System.StrUtils, System.Generics.Collections,
+  System.JSON,
 
   DUnitX.TestFramework,
   DUnitX.Assert,
-  
+  Duds.Scan.Model,
+  Duds.Common.Classes,
+  Duds.Modules.Classes,
+  Duds.Modules.Analyzer,
+  Duds.Common.Parser.Pascal,
+  Duds.Common.Types,
+
   Duds.Refactoring.FormatUses;
 
 implementation
@@ -38,12 +45,33 @@ type
   end;
 
 type
-  [TestFixture]
-  TFormatUsesRefactoringTest = class(TObject)
-  private
-    FRefactoring : TFormatUsesRefactoringHack;
 
+  [TestFixture]
+  TBaseFormatUsesRefactoringTest = class(TObject)
+  private
     procedure FormatAndCheckResult(aInputCode, aExpectedCode: string);
+
+  end;
+
+  [TestFixture]
+  TFormatUsesRefactoringTestWithoutModel = class(TBaseFormatUsesRefactoringTest)
+  public
+
+    [test]
+    procedure OneUsesWithNewLine;
+
+    [test]
+    procedure OneUsesWithoutNewLine;
+
+  end;
+
+  [TestFixture]
+  TFormatUsesRefactoringTestWithModel = class(TBaseFormatUsesRefactoringTest)
+  private
+    FModel: TDudsModel;
+
+    procedure LoadMockDelphiFiles;
+    procedure LoadMockModulesDefinition;
 
   public
     [Setup]
@@ -52,45 +80,39 @@ type
     [TearDown]
     procedure TearDown;
 
-    [Test]
-    procedure OneUsesWithNewLine;
-
-    [Test]
-    procedure OneUsesWithoutNewLine;
+    [test]
+    procedure OneUsesWithoutComment;
 
   end;
 
-procedure TFormatUsesRefactoringTest.Setup;
-begin
-  FRefactoring := TFormatUsesRefactoringHack.Create;
-end;
+{ TBaseFormatUsesRefactoringTest }
 
-procedure TFormatUsesRefactoringTest.TearDown;
-begin
-  FreeAndNil(FRefactoring);
-end;
-
-procedure TFormatUsesRefactoringTest.FormatAndCheckResult(aInputCode, aExpectedCode: string);
+procedure TBaseFormatUsesRefactoringTest.FormatAndCheckResult(aInputCode, aExpectedCode: string);
 var
   aSourceLines: TStringList;
   aExpectedCodeStrings: TStringList;
+  aRefactoring : TFormatUsesRefactoringHack;
 begin
-  aSourceLines    := TStringList.Create;
+  aRefactoring := TFormatUsesRefactoringHack.Create;
+  aSourceLines := TStringList.Create;
   aExpectedCodeStrings := TStringList.Create;
   try
-    aSourceLines.Text         := aInputCode;
+    aSourceLines.Text := aInputCode;
     aExpectedCodeStrings.Text := aExpectedCode;
-    FRefactoring.FormatUsesInSource(aSourceLines);
+    aRefactoring.FormatUsesInSource(aSourceLines);
     Assert.AreEqual(aExpectedCodeStrings.Text, aSourceLines.Text);
   finally
     FreeAndNil(aSourceLines);
     FreeAndNil(aExpectedCodeStrings);
+    FreeAndNil(aRefactoring);
   end;
 end;
 
-procedure TFormatUsesRefactoringTest.OneUsesWithNewLine;
+{ TFormatUsesRefactoringTestWithoutModel }
+
+procedure TFormatUsesRefactoringTestWithoutModel.OneUsesWithNewLine;
 begin
- FormatAndCheckResult(
+  FormatAndCheckResult(
 
      'unit demo'         + sLineBreak +
      'interface'         + sLineBreak +
@@ -109,10 +131,9 @@ begin
   )
 end;
 
-
-procedure TFormatUsesRefactoringTest.OneUsesWithoutNewLine;
+procedure TFormatUsesRefactoringTestWithoutModel.OneUsesWithoutNewLine;
 begin
- FormatAndCheckResult(
+  FormatAndCheckResult(
 
      'unit demo'         + sLineBreak +
      'interface'         + sLineBreak +
@@ -130,7 +151,139 @@ begin
   )
 end;
 
+{ TFormatUsesRefactoringTestWithModel }
+
+procedure TFormatUsesRefactoringTestWithModel.Setup;
+var
+  aUnitsTotal, aUnitsInModules: integer;
+begin
+  FModel := TDudsModel.Create;
+
+  LoadMockModulesDefinition;
+  LoadMockDelphiFiles;
+  TModulesAnalyzer.MapUnitsToModules(FModel, aUnitsTotal, aUnitsInModules);
+end;
+
+procedure TFormatUsesRefactoringTestWithModel.TearDown;
+begin
+
+  FreeAndNil(FModel);
+end;
+
+const
+  cDelphiRtl_ModuleName    = 'delphi.rtl';
+  cDelphiRtl_Unit_SysUtils = 'SysUtils';
+  cDelphiRtl_Unit_Classes  = 'Classes';
+
+  c3rdParty_Ciphers_ModuleName  = '3rdParty.ciphers';
+  c3rdParty_Ciphers_Unit1       = 'cipherUtils1';
+  c3rdParty_Ciphers_Unit2       = 'cipherUtils2';
+
+  cCoreCommon_Module     = 'core.common';
+  cCoreCommon_Unit_Text  = 'myTextUtils';
+  cCoreCommon_Unit_Array = 'myArrayUtils';
+
+  cAllUnits : array[0..5] of string =
+    (cDelphiRtl_Unit_SysUtils, cDelphiRtl_Unit_Classes,
+     c3rdParty_Ciphers_Unit1, c3rdParty_Ciphers_Unit2,
+     cCoreCommon_Unit_Text, cCoreCommon_Unit_Array);
+
+procedure TFormatUsesRefactoringTestWithModel.LoadMockModulesDefinition;
+
+  procedure AddModuleToJson(modules: TJsonArray; cModuleName: string; Units: array of string);
+  var
+    module: TjsonObject;
+    moduleContains: TJSONObject;
+    moduleUnits: TJsonArray;
+    i: integer;
+  begin
+    module := TJsonObject.Create;
+    module.AddPair('name', cModuleName);
+
+    moduleContains := TJSONObject.Create;
+
+    moduleUnits := TJSonArray.Create;
+    for i := 0 to Length(Units) - 1 do
+      moduleUnits.Add(Units[i]);
+
+    moduleContains.AddPair('units', moduleUnits);
+    module.AddPair('contains', moduleContains);
+
+    modules.add(module);
+  end;
+
+var
+  jsonObj: TJsonObject;
+  modules: TJsonArray;
+begin
+  jsonObj := TJSONObject.Create;
+  try
+    modules := TJsonArray.Create;
+    jsonObj.AddPair('modules', modules);
+
+    AddModuleToJson(modules, cDelphiRtl_ModuleName,        [cDelphiRtl_Unit_SysUtils, cDelphiRtl_Unit_Classes]);
+    AddModuleToJson(modules, c3rdParty_Ciphers_ModuleName, [c3rdParty_Ciphers_Unit1, c3rdParty_Ciphers_Unit2]);
+    AddModuleToJson(modules, cCoreCommon_Module,           [cCoreCommon_Unit_Text, cCoreCommon_Unit_Array]);
+
+    TModulesSerializer.ReadFromJson(jsonObj.ToJSON, FModel.Modules);
+  finally
+    jsonObj.Free;
+  end;
+end;
+
+procedure TFormatUsesRefactoringTestWithModel.LoadMockDelphiFiles;
+
+  procedure AddDelphiFile(DelphiUnitname: string);
+  var
+    aDelphiFile: TDelphiFile;
+    aUnitInfo: TUnitInfo;
+  begin
+    aUnitInfo                        := TUnitInfo.Create;
+    aUnitInfo.Filename               := ''; // no filename under real conditions mean => unit not found in search path
+    aUnitInfo.LineCount              := 0;
+    aUnitInfo.DelphiFileType         := ftPAS;
+    aUnitInfo.DelphiUnitName         := DelphiUnitname;
+    aUnitInfo.DelphiUnitNamePosition := 0;
+
+    aDelphiFile              := FModel.CreateDelphiFile(aUnitInfo.DelphiUnitName, false);
+    aDelphiFile.UnitInfo     := aUnitInfo;
+    aDelphiFile.InSearchPath := not aUnitInfo.Filename.IsEmpty;
+  end;
+
+var
+  i: integer;
+begin
+  for I := 0 to Length(cAllUnits) - 1 do
+    AddDelphiFile(cAllUnits[i]);
+end;
+
+procedure TFormatUsesRefactoringTestWithModel.OneUsesWithoutComment;
+begin
+  FormatAndCheckResult(
+
+     'unit demo'         + sLineBreak +
+     'interface'         + sLineBreak +
+     'uses '             + sLineBreak +
+     '  SysUtils;'       + sLineBreak +
+     'implementation'    + sLineBreak +
+     'end.'
+ ,
+
+     'unit demo'         + sLineBreak +
+     'interface'         + sLineBreak +
+     'uses '             + sLineBreak +
+     '  // delphi.rtl'   + sLineBreak + // <- this module header should be inserted
+     '  SysUtils;'       + sLineBreak +
+     'implementation'    + sLineBreak +
+     'end.'
+  )
+end;
+
+
+
 initialization
-  TDUnitX.RegisterTestFixture(TFormatUsesRefactoringTest);
+
+TDUnitX.RegisterTestFixture(TFormatUsesRefactoringTestWithoutModel);
+TDUnitX.RegisterTestFixture(TFormatUsesRefactoringTestWithModel);
 
 end.

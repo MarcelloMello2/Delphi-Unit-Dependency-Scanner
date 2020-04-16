@@ -34,6 +34,7 @@ uses
   Duds.Export.GraphML,
   Duds.Modules.Classes,
   Duds.Modules.Classes.test,
+  Duds.Modules.Analyzer,
   Duds.Refactoring.FormatUsesHelper,
   Duds.Refactoring.FormatUsesHelper.test,
   Duds.Refactoring.FormatUses,
