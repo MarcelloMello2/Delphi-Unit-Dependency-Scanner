@@ -1,7 +1,8 @@
-
 {
     "type": "object",
-    "required": ["modules"],
+    "required": [
+        "modules"
+    ],
     "properties": {
         "modules": {
             "description": "list of modules",
@@ -9,19 +10,61 @@
             "items": {
                 "type": "object",
                 "description": "a module definition",
-                "required": ["name"],
+                "required": [
+                    "name",
+                    "origin"
+                ],
                 "properties": {
                     "name": {
                         "type": "string",
                         "description": "name of the module, must be unique"
                     },
+                    "origin": {
+                        "type": "string",
+                        "description": "where does the code in this module come from?",
+                        "enum": [
+                            "delphi",
+                            "3rdParty",
+                            "own"
+                        ]
+                    },
+                    "usage": {
+                        "type": "string",
+                        "description": "is this module used for production or testing purpose?",
+                        "enum": [
+                            "production",
+                            "test"
+                        ]
+                    },
+                    "dependencies": {
+                        "type": "array",
+                        "description": "list of modules, that are needed to compile this module",
+                        "items": {
+                            "type": "string",
+                            "description": "name of a module"
+                        },
+                        "minItems": 1
+                    },
                     "contains": {
                         "type": "object",
                         "description": "defines the units that form this module",
                         "anyOf": [
-                            {"required": ["paths"]},
-                            {"required": ["units"]},
-                            {"required": ["paths", "units"]}
+                            {
+                                "required": [
+                                    "paths"
+                                ]
+                            },
+                            {
+                                "required": [
+                                    "units"
+                                ]
+                            },
+                            {
+                                "required": [
+                                    "paths",
+                                    "units"
+                                ]
+                            }
                         ],
                         "properties": {
                             "paths": {
@@ -43,9 +86,7 @@
                         }
                     }
                 }
-
             }
-        
         }
     }
 }

@@ -25,6 +25,8 @@ uses
   Duds.Export.GraphML,
   Duds.Modules.Classes,
   Duds.Modules.Analyzer,
+  Duds.Modules.Export.CSV,
+  Duds.Modules.Export.GraphML,
   Duds.Refactoring.FormatUsesHelper,
   Duds.Refactoring.FormatUses,
   Duds.Refactoring.PascalAnalyzerUsesReportProcessor,

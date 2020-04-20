@@ -59,11 +59,31 @@ type
     property Filename: String read GetFilename write SetFilename;
   end;
 
+  TModuleAnalysisData = class // simple pojo
+  private
+    FLinesOfCode: Integer;
+    FNumberOfFiles: Integer;
+    FNumberOfFilesNotInPath: Integer;
+
+  public
+    procedure Clear;
+
+    property LinesOfCode: Integer read FLinesOfCode write FLinesOfCode;
+    property NumberOfFiles: Integer read FNumberOfFiles write FNumberOfFiles;
+    property NumberOfFilesNotInPath: Integer read FNumberOfFilesNotInPath write FNumberOfFilesNotInPath;
+
+  end;
+
   TModule = class // simple pojo
   private
+    fID: Integer;
     fName: string;
     fUnits: TStringList;
     fPaths: TStringList;
+    fOrigin: TModuleOrigin;
+    fUsage: TModuleUsage;
+    fDependencies: TObjectList<TModule>;
+    fAnalysisData: TModuleAnalysisData;
 
   protected
     function GetName: string;
@@ -77,9 +97,15 @@ type
     constructor Create;
     destructor Destroy; override;
 
+    property ID: Integer read fID write fID;
     property Name: string read GetName write SetName;
+    property Origin: TModuleOrigin read fOrigin write fOrigin;
+    property Usage: TModuleUsage read fUsage write fUsage;
+    property Dependencies: TObjectList<TModule> read fDependencies write fDependencies;
     property Paths: TStringList read GetPaths write SetPaths;
     property Units: TStringList read GetUnits write SetUnits;
+
+    property AnalysisData: TModuleAnalysisData read fAnalysisData write fAnalysisData;
   end;
 
   IUnitInfo = interface
@@ -117,15 +143,18 @@ implementation
 
 constructor TModule.Create;
 begin
+  fDependencies := TObjectList<TModule>.Create(false);
   fUnits := TStringList.Create(TDuplicates.dupError, true, false);
   fPaths := TStringList.Create(TDuplicates.dupError, true, false);
+  fAnalysisData := TModuleAnalysisData.Create;
 end;
 
 destructor TModule.Destroy;
 begin
   FreeAndNil(fUnits);
   FreeAndNil(fPaths);
-
+  FreeAndNil(fDependencies);
+  FreeAndNil(fAnalysisData);
   inherited;
 end;
 
@@ -157,6 +186,15 @@ end;
 procedure TModule.SetPaths(const Value: TStringList);
 begin
   fPaths := Value;
+end;
+
+{ TModuleAnalysisData }
+
+procedure TModuleAnalysisData.Clear;
+begin
+  FLinesOfCode   := 0;
+  FNumberOfFiles := 0;
+  FNumberOfFilesNotInPath := 0;
 end;
 
 end.

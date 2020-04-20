@@ -2,6 +2,7 @@
     "modules": [
         {
             "name": "delphi.rtl",
+            "origin": "delphi",
             "contains": {
                 "paths": [
                     "C:\\Program Files (x86)\\Embarcadero\\Studio\\20.0\\source\\rtl\\common",
@@ -12,6 +13,7 @@
         },
         {
             "name": "delphi.vcl",
+            "origin": "delphi",
             "contains": {
                 "paths": [
                     "C:\\Program Files (x86)\\Embarcadero\\Studio\\20.0\\source\\vcl"
@@ -19,7 +21,20 @@
             }
         },
         {
+            "name": "3rdParty.printing",
+            "origin": "3rdParty",
+            "contains": {
+                "paths": [
+                    "C:\\path\\to\\my\\3rdParty\\printing\\library"
+                ]
+            }
+        },
+        {
             "name": "core.common",
+            "origin": "own",
+            "dependencies": [
+                "delphi.rtl"
+            ],
             "contains": {
                 "units": [
                     "MyCommonUnit",
@@ -28,13 +43,35 @@
             }
         },
         {
+            "name": "core.common.test",
+            "origin": "own",
+            "usage": "test",
+            "dependencies": [
+                "core.common"
+            ]
+        },        
+        {
             "name": "core.ciphers",
+            "origin": "own",
+            "dependencies": [
+                "core.common"
+            ],
             "contains": {
                 "units": [
                     "cipherUnit1",
                     "cipherUnit2"
                 ]
             }
+        },
+        {
+            "name": "myProduct",
+            "origin": "own",
+            "dependencies": [
+                "delphi.vcl",
+                "3rdParty.printing",
+                "core.common",
+                "core.ciphers"
+            ]
         }
     ]
 }

@@ -6,6 +6,7 @@ uses
   System.Classes, System.SysUtils, System.Generics.Collections,
   System.JSON, IOUtils, Contnrs,
 
+  Duds.Common.Types,
   Duds.Common.Interfaces,
   Duds.Common.Language,
   Duds.Common.Log;
@@ -27,6 +28,7 @@ type
 
     procedure ClearAllLists;
     procedure ReBuildFastSearchList;
+    procedure ClearModulesAnalysisData;
     function FindModuleForUnit(UnitInfo: IUnitInfo; out Module: TModule): Boolean;
 
     property Dictionary: TObjectDictionary<String, TModule> read fDictionary;
@@ -36,6 +38,10 @@ type
 
   TModulesSerializer = class
   public
+    const
+    cModuleOriginJSONEnumValues : array[TModuleOrigin] of string = ('undefined', 'delphi', '3rdParty', 'own');
+    cModuleUsageJSONEnumValues  : array[TModuleUsage] of string = ('undefined', 'production', 'test');
+
     class procedure ReadFromJsonFile(aPathToFile: string; aModulesList: TModulesList);
     class procedure ReadFromJson(aContent: string; aModulesList: TModulesList);
 
@@ -46,18 +52,56 @@ implementation
 
 { TModulesSerializer }
 
+
+
 class procedure TModulesSerializer.ReadFromJson(aContent: string;
   aModulesList: TModulesList);
+
+  function GetModuleOriginEnum(value: string): TModuleOrigin;
+  var
+    i : integer;
+    origin: TModuleOrigin;
+  begin
+    Result := moUndefined;
+    for origin := Low(TModuleOrigin) to High(TModuleOrigin) do
+      if cModuleOriginJSONEnumValues[origin] = value then
+      begin
+        Result := origin;
+        break;
+      end;
+  end;
+
+  function GetModuleUsageEnum(value: string): TModuleUsage;
+  var
+    i : integer;
+    usage: TModuleUsage;
+  begin
+    Result := muUndefined;
+    for usage := Low(TModuleUsage) to High(TModuleUsage) do
+      if cModuleUsageJSONEnumValues[usage] = value then
+      begin
+        Result := usage;
+        break;
+      end;
+  end;
+
 var
   aJSONObject: TJSONObject;
   aModules: TJSONArray;
   aModule, aContains: TJsonObject;
   aModuleName: string;
+  aModuleOriginString: string;
+  aModuleOrigin: TModuleOrigin;
   i, j: Integer;
 
   aNewModule: TModule;
   aPathsArray: TJsonArray;
   aUnitsArray: TJsonArray;
+  aDependenciesArray: TJsonArray;
+  aDependencyModuleName: string;
+  aReferencedModule: TModule;
+  aModuleUsageString: string;
+  aModuleUsage: TModuleUsage;
 begin
   if not Assigned(aModulesList) then
     raise Exception.Create('aModulesList must be assigned');
@@ -75,9 +119,36 @@ begin
       aModule := aModules.Items[i] as TJsonObject;
       aModuleName := aModule.GetValue('name').AsType<string>;
 
-      aNewModule := TModule.Create;
-      aNewModule.Name := aModuleName;
+      // module origin (delphi, 3rdParty, own code)
+      aModuleOrigin := TModuleOrigin.moUndefined;
+      if aModule.TryGetValue<string>('origin', aModuleOriginString) then
+        aModuleOrigin := GetModuleOriginEnum(aModuleOriginString);
 
+      // module usage (production or test code)
+      aModuleUsage := muUndefined;
+      if aModule.TryGetValue<string>('usage', aModuleUsageString) then
+        aModuleUsage := GetModuleUsageEnum(aModuleUsageString);
+
+      aNewModule        := TModule.Create;
+      aNewModule.Name   := aModuleName;
+      aNewModule.Origin := aModuleOrigin;
+      aNewModule.Usage  := aModuleUsage;
+
+      // read "dependencies" definition
+      if aModule.TryGetValue<TJsonArray>('dependencies', aDependenciesArray) then
+      begin
+        for j := 0 to aDependenciesArray.Count - 1 do
+        begin
+          aDependencyModuleName := aDependenciesArray.Items[j].Value;
+          if aModulesList.Dictionary.TryGetValue(aDependencyModuleName, aReferencedModule) then
+            aNewModule.Dependencies.Add(aReferencedModule)
+          else
+            raise Exception.CreateFmt('Module "%s" references module "%s" as dependency. Reference could not be resolved, module not found. ' +
+                                      'Module must be defined before in order the be able to reference it.', [aNewModule.Name, aDependencyModuleName]);
+        end;
+      end;
+
+      // read "contains" definition
       if aModule.TryGetValue<TJsonObject>('contains', aContains) then
       begin
          if aContains.TryGetValue<TJSONArray>('paths', aPathsArray) then
@@ -111,6 +182,7 @@ procedure TModulesList.AddModule(Module: TModule);
 begin
   fDictionary.Add(Module.Name, Module);
   fOrderedModules.Add(Module);
+  Module.ID := fOrderedModules.Count; // save unique id in TModule for easy usage in e.g. export to graphml
 end;
 
 procedure TModulesList.ClearAllLists;
@@ -120,6 +192,8 @@ begin
   fOrderedModules.Clear;
   fDictionary.Clear;
 end;
+
+
 
 constructor TModulesList.Create;
 begin
@@ -138,6 +212,14 @@ begin
   fOrderedModules.Free;
   fDictionary.Free;
   inherited;
+end;
+
+procedure TModulesList.ClearModulesAnalysisData;
+var
+  aModule: TModule;
+begin
+  for aModule in fOrderedModules do
+    aModule.AnalysisData.Clear;
 end;
 
 procedure TModulesList.ReBuildFastSearchList;

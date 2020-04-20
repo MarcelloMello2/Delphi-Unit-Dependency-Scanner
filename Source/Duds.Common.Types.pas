@@ -30,6 +30,19 @@ unit Duds.Common.Types;
 interface
 
 type
+  TModuleOrigin = (
+    moUndefined,
+    moDelphi,
+    mo3rdParty,
+    moOwn
+  );
+
+  TModuleUsage = (
+    muUndefined,
+    muProduction,
+    muTest
+  );
+
   TRenameType = (
     rtRename,
     rtSearchAndReplace

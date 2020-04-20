@@ -79,7 +79,6 @@ object frmMain: TfrmMain
       ParentFont = False
       TabOrder = 0
       Visible = False
-      ExplicitHeight = 592
       object Splitter1: TSplitter
         Left = 0
         Top = 433
@@ -99,13 +98,12 @@ object frmMain: TfrmMain
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitHeight = 439
         object pcView: TPageControl
           Left = 0
           Top = 0
           Width = 1182
           Height = 433
-          ActivePage = tabTree
+          ActivePage = Modules
           Align = alClient
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -114,10 +112,8 @@ object frmMain: TfrmMain
           Font.Style = []
           ParentFont = False
           TabOrder = 0
-          ExplicitHeight = 439
           object tabTree: TTabSheet
-            Caption = 'Tree'
-            ExplicitHeight = 409
+            Caption = 'Units Tree'
             object Splitter2: TSplitter
               Left = 497
               Top = 0
@@ -133,7 +129,6 @@ object frmMain: TfrmMain
               Align = alLeft
               BevelOuter = bvNone
               TabOrder = 0
-              ExplicitHeight = 409
               object edtSearch: TEdit
                 AlignWithMargins = True
                 Left = 3
@@ -189,7 +184,6 @@ object frmMain: TfrmMain
                 OnGetImageIndex = vtUnitsTreeGetImageIndex
                 OnGetNodeDataSize = vtUnitsTreeGetNodeDataSize
                 OnHeaderClick = vtCommonHeaderClick
-                ExplicitHeight = 377
                 Columns = <
                   item
                     Position = 0
@@ -255,7 +249,6 @@ object frmMain: TfrmMain
               Align = alClient
               Caption = 'Select a file to display its contents here.'
               TabOrder = 1
-              ExplicitHeight = 409
               object pcSource: TPageControl
                 AlignWithMargins = True
                 Left = 1
@@ -267,10 +260,8 @@ object frmMain: TfrmMain
                 Align = alClient
                 TabOrder = 0
                 Visible = False
-                ExplicitHeight = 401
                 object tabParentFile: TTabSheet
                   Caption = 'Parent File'
-                  ExplicitHeight = 371
                   object memParentFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
@@ -302,13 +293,11 @@ object frmMain: TfrmMain
                     ReadOnly = True
                     OnChange = memParentFileChange
                     FontSmoothing = fsmNone
-                    ExplicitHeight = 365
                   end
                 end
                 object tabSelectedFile: TTabSheet
                   Caption = 'Selected File'
                   ImageIndex = 1
-                  ExplicitHeight = 371
                   object memSelectedFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
@@ -340,16 +329,14 @@ object frmMain: TfrmMain
                     ReadOnly = True
                     OnChange = memSelectedFileChange
                     FontSmoothing = fsmNone
-                    ExplicitHeight = 365
                   end
                 end
               end
             end
           end
           object tabList: TTabSheet
-            Caption = 'List'
+            Caption = 'Units List'
             ImageIndex = 1
-            ExplicitHeight = 409
             object Splitter3: TSplitter
               Left = 497
               Top = 0
@@ -365,7 +352,6 @@ object frmMain: TfrmMain
               Align = alLeft
               BevelOuter = bvNone
               TabOrder = 0
-              ExplicitHeight = 409
               object edtListSearch: TEdit
                 AlignWithMargins = True
                 Left = 3
@@ -417,7 +403,6 @@ object frmMain: TfrmMain
                 OnPaintText = vtUnitsListPaintText
                 OnGetImageIndex = vtCommonGetImageIndex
                 OnHeaderClick = vtCommonHeaderClick
-                ExplicitHeight = 377
                 Columns = <
                   item
                     Position = 0
@@ -465,7 +450,6 @@ object frmMain: TfrmMain
               BevelOuter = bvNone
               Caption = 'Select a file to display it'#39's contents here.'
               TabOrder = 1
-              ExplicitHeight = 409
               object pcList: TPageControl
                 Left = 0
                 Top = 0
@@ -474,10 +458,8 @@ object frmMain: TfrmMain
                 ActivePage = tabUsesList
                 Align = alClient
                 TabOrder = 0
-                ExplicitHeight = 409
                 object tabUsedBy: TTabSheet
                   Caption = 'Used By Units'
-                  ExplicitHeight = 379
                   object edtSearchUsedByList: TEdit
                     AlignWithMargins = True
                     Left = 0
@@ -527,7 +509,6 @@ object frmMain: TfrmMain
                     OnPaintText = vtUnitsListPaintText
                     OnGetImageIndex = vtCommonGetImageIndex
                     OnHeaderClick = vtCommonHeaderClick
-                    ExplicitHeight = 353
                     Columns = <
                       item
                         Position = 0
@@ -569,7 +550,6 @@ object frmMain: TfrmMain
                 object tabUsesList: TTabSheet
                   Caption = 'Uses Units'
                   ImageIndex = 2
-                  ExplicitHeight = 379
                   object edtSearchUsesList: TEdit
                     AlignWithMargins = True
                     Left = 0
@@ -619,7 +599,6 @@ object frmMain: TfrmMain
                     OnPaintText = vtUnitsListPaintText
                     OnGetImageIndex = vtCommonGetImageIndex
                     OnHeaderClick = vtCommonHeaderClick
-                    ExplicitHeight = 353
                     Columns = <
                       item
                         Position = 0
@@ -661,7 +640,6 @@ object frmMain: TfrmMain
                 object tabSource: TTabSheet
                   Caption = 'Source'
                   ImageIndex = 1
-                  ExplicitHeight = 379
                   object memListFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
@@ -693,10 +671,65 @@ object frmMain: TfrmMain
                     ReadOnly = True
                     OnChange = memListFileChange
                     FontSmoothing = fsmNone
-                    ExplicitHeight = 373
                   end
                 end
               end
+            end
+          end
+          object Modules: TTabSheet
+            Caption = 'Modules'
+            ImageIndex = 2
+            object vtModules: TVirtualStringTree
+              AlignWithMargins = True
+              Left = 3
+              Top = 3
+              Width = 1171
+              Height = 397
+              Margins.Right = 0
+              Align = alClient
+              Colors.UnfocusedColor = clMedGray
+              Header.AutoSizeIndex = 0
+              Header.Options = [hoColumnResize, hoDblClickResize, hoDrag, hoShowSortGlyphs, hoVisible, hoFullRepaintOnResize, hoHeightResize]
+              Images = ImageList1
+              TabOrder = 0
+              TreeOptions.AutoOptions = [toAutoDropExpand, toAutoSort, toAutoTristateTracking, toAutoHideButtons, toAutoDeleteMovedNodes]
+              TreeOptions.SelectionOptions = [toFullRowSelect, toRightClickSelect]
+              TreeOptions.StringOptions = [toSaveCaptions, toShowStaticText, toAutoAcceptEditChange]
+              OnGetText = vtModulesGetText
+              Columns = <
+                item
+                  Position = 0
+                  Text = 'Module'
+                  Width = 350
+                end
+                item
+                  Position = 1
+                  Text = 'Origin'
+                  Width = 70
+                end
+                item
+                  Position = 2
+                  Text = 'Usage'
+                  Width = 80
+                end
+                item
+                  Alignment = taRightJustify
+                  Position = 3
+                  Text = 'File Count'
+                  Width = 150
+                end
+                item
+                  Alignment = taRightJustify
+                  Position = 4
+                  Text = 'Files not in Path'
+                  Width = 150
+                end
+                item
+                  Alignment = taRightJustify
+                  Position = 5
+                  Text = 'Lines Of Code'
+                  Width = 150
+                end>
             end
           end
         end
@@ -709,7 +742,6 @@ object frmMain: TfrmMain
         Align = alBottom
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitTop = 442
         object Panel9: TPanel
           Left = 858
           Top = 0
@@ -788,7 +820,6 @@ object frmMain: TfrmMain
         ReadOnly = True
         TabOrder = 0
         Zoom = 100
-        ExplicitHeight = 19
       end
     end
   end
@@ -993,6 +1024,16 @@ object frmMain: TfrmMain
               item
                 Action = actSaveCircularRefs
                 Caption = 'Sav&e circular reference'
+              end
+              item
+                Caption = '-'
+              end
+              item
+                Action = actExportModulesToCSV
+              end
+              item
+                Action = actExportModulesToGraphML
+                Caption = 'Save &Modules to GraphML'
               end>
             Action = actExportDropDown
             Caption = 'E&xport'
@@ -1176,6 +1217,16 @@ object frmMain: TfrmMain
       Caption = 'Remove unused units (step 2/2): remove unused units'
       OnExecute = actRemoveUnUsedUnitsExecute
     end
+    object actExportModulesToGraphML: TAction
+      Category = 'Export'
+      Caption = 'Save Modules to GraphML'
+      OnExecute = actExportModulesToGraphMLExecute
+    end
+    object actExportModulesToCSV: TAction
+      Category = 'Export'
+      Caption = 'Save Modules to CSV'
+      OnExecute = actExportModulesToCSVExecute
+    end
   end
   object popTree: TPopupMenu
     Images = ImageList1
@@ -1348,24 +1399,24 @@ object frmMain: TfrmMain
       end
     end
   end
-  object OpenDialog1: TOpenDialog
+  object openDialog_Project: TOpenDialog
     DefaultExt = '.dspr'
     Filter = 
       'Dependency Scanner Projects (*.dsprj)|*.dsprj|All Files (*.*)|*.' +
       '*'
     Title = 'Open Project'
-    Left = 344
-    Top = 200
+    Left = 576
+    Top = 240
   end
-  object SaveDialog1: TSaveDialog
+  object saveDialog_Project: TSaveDialog
     DefaultExt = '.dsprj'
     Filter = 
       'Dependency Scanner Projects (*.dsprj)|*.dsprj|All Files (*.*)|*.' +
       '*'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Title = 'Save Project'
-    Left = 280
-    Top = 200
+    Left = 576
+    Top = 184
   end
   object tmrClose: TTimer
     Enabled = False
@@ -1380,29 +1431,29 @@ object frmMain: TfrmMain
     Left = 136
     Top = 336
   end
-  object SaveDialog2: TSaveDialog
+  object saveDialog_Units_XML: TSaveDialog
     DefaultExt = '.xml'
     Filter = 'XML Files (*.xml)|*.xml|All Files (*.*)|*.*'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Title = 'Export to XML'
-    Left = 48
-    Top = 197
+    Left = 744
+    Top = 285
   end
-  object SaveDialogGephiCSV: TSaveDialog
+  object saveDialog_Units_GephiCSV: TSaveDialog
     DefaultExt = '.csv'
     Filter = 'CSV Files (*.csv)|*.csv|All Files (*.*)|*.*'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Title = 'Export to Gephi Formatted CSV'
-    Left = 136
-    Top = 197
+    Left = 744
+    Top = 173
   end
-  object SaveDialog4: TSaveDialog
+  object saveDialog_Units_GraphML: TSaveDialog
     DefaultExt = '.graphml'
     Filter = 'GraphML Files (*.graphml)|*.graphml|All Files (*.*)|*.*'
     Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
     Title = 'Export to GraphML'
-    Left = 208
-    Top = 197
+    Left = 744
+    Top = 229
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
@@ -1950,5 +2001,21 @@ object frmMain: TfrmMain
     Title = 'Apply multiple renames'
     Left = 344
     Top = 264
+  end
+  object saveDialog_Modules_GraphML: TSaveDialog
+    DefaultExt = '.graphml'
+    Filter = 'GraphML Files (*.graphml)|*.graphml|All Files (*.*)|*.*'
+    Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
+    Title = 'Export Modules to GraphML'
+    Left = 888
+    Top = 229
+  end
+  object saveDialog_Modules_CSV: TSaveDialog
+    DefaultExt = '.csv'
+    Filter = 'CSV Files (*.csv)|*.csv|All Files (*.*)|*.*'
+    Options = [ofOverwritePrompt, ofHideReadOnly, ofEnableSizing]
+    Title = 'Export to CSV'
+    Left = 888
+    Top = 101
   end
 end

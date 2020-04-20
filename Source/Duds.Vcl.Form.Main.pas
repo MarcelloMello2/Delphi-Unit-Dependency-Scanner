@@ -65,6 +65,8 @@ uses
   Duds.Export.GraphML,
   Duds.Modules.Classes,
   Duds.Modules.Analyzer,
+  Duds.Modules.Export.CSV,
+  Duds.Modules.Export.GraphML,
   Duds.Refactoring.FormatUses,
   Duds.Refactoring.RenameUnit,
   Duds.Refactoring.AddUnitToUses,
@@ -126,8 +128,8 @@ type
     SaveProjectAs1: TMenuItem;
     N2: TMenuItem;
     N8: TMenuItem;
-    OpenDialog1: TOpenDialog;
-    SaveDialog1: TSaveDialog;
+    openDialog_Project: TOpenDialog;
+    saveDialog_Project: TSaveDialog;
     OpenDialogMultipleRenames: TOpenDialog;
     ActionToolBar1: TActionToolBar;
     pnlBackground: TPanel;
@@ -169,14 +171,14 @@ type
     ShowfileinWindowsExplorer1: TMenuItem;
     N11: TMenuItem;
     actSaveToXML: TAction;
-    SaveDialog2: TSaveDialog;
+    saveDialog_Units_XML: TSaveDialog;
     actSaveToGephiCSV: TAction;
     N12: TMenuItem;
     SavetoXML1: TMenuItem;
     SavetoGephiCSV1: TMenuItem;
-    SaveDialogGephiCSV: TSaveDialog;
+    saveDialog_Units_GephiCSV: TSaveDialog;
     actSaveToGraphML: TAction;
-    SaveDialog4: TSaveDialog;
+    saveDialog_Units_GraphML: TSaveDialog;
     edtSearch: TEdit;
     edtListSearch: TEdit;
     edtSearchUsedByList: TEdit;
@@ -209,6 +211,12 @@ type
     Formatusesofthisfile1: TMenuItem;
     Formatusesofthisfile2: TMenuItem;
     N15: TMenuItem;
+    actExportModulesToGraphML: TAction;
+    saveDialog_Modules_GraphML: TSaveDialog;
+    Modules: TTabSheet;
+    vtModules: TVirtualStringTree;
+    actExportModulesToCSV: TAction;
+    saveDialog_Modules_CSV: TSaveDialog;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure vtUnitsTreeGetNodeDataSize(Sender: TBaseVirtualTree; var NodeDataSize: Integer);
@@ -287,9 +295,13 @@ type
     procedure actSaveCircularRefsExecute(Sender: TObject);
     procedure actApplyRenameListExecute(Sender: TObject);
     procedure actAddUnitToUsesExecute(Sender: TObject);
+    procedure actExportModulesToCSVExecute(Sender: TObject);
+    procedure actExportModulesToGraphMLExecute(Sender: TObject);
     procedure actRemoveUnUsedUnitsExecute(Sender: TObject);
     procedure actRemoveUnusedUnitsProcessPalOutputExecute(Sender: TObject);
     procedure actFormatUsesOfFileExecute(Sender: TObject);
+    procedure vtModulesGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
+        Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
   private
     FModel: TDudsModel;
     FDependencyAnalyzer: TDudsDependencyAnalyzer;
@@ -464,6 +476,7 @@ begin
   vtUsedByUnits.NodeDataSize := SizeOf(TNodeData);
   vtUsesUnits.NodeDataSize := SizeOf(TNodeData);
   vtStats.NodeDataSize := SizeOf(TNodeData);
+  vtModules.NodeDataSize := SizeOf(TNodeData);
 
   FModel := TDudsModel.Create;
   FDependencyAnalyzer := nil;
@@ -1474,8 +1487,8 @@ begin
     if vtUnitsTree.FocusedNode <> nil then
       vtUnitsTree.ScrollIntoView(vtUnitsTree.FocusedNode, TRUE);
   finally
-    if SaveDialogGephiCSV.Execute then
-      LStrs.SaveToFile(SaveDialogGephiCSV.Filename);
+    if saveDialog_Units_GephiCSV.Execute then
+      LStrs.SaveToFile(saveDialog_Units_GephiCSV.Filename);
     LStrs.Free;
     vtUnitsTree.EndUpdate;
   end;
@@ -1516,11 +1529,11 @@ end;
 
 procedure TfrmMain.actLoadProjectExecute(Sender: TObject);
 begin
-  if OpenDialog1.Execute and CheckSaveProject then
+  if openDialog_Project.Execute and CheckSaveProject then
   begin
-    if LoadProjectSettings(OpenDialog1.Filename) then
+    if LoadProjectSettings(openDialog_Project.Filename) then
     begin
-      FProjectFilename := OpenDialog1.Filename;
+      FProjectFilename := openDialog_Project.Filename;
 
       SetFormCaption;
     end;
@@ -2168,11 +2181,24 @@ procedure TfrmMain.FillGUIFromModel;
 
   end;
 
+  procedure FillModules;
+  var
+    Node: PVirtualNode;
+    module: TModule;
+  begin
+    for module in fModel.Modules.OrderedModules do
+    begin
+      Node := vtModules.AddChild(nil);
+      SetID(Node, module.ID);
+    end;
+  end;
+
 begin
   vtUnitsTree.Clear;
   vtUnitsList.Clear;
   vtUsedByUnits.Clear;
   vtUsesUnits.Clear;
+  vtModules.Clear;
   memParentFile.Clear;
   memSelectedFile.Clear;
 
@@ -2185,6 +2211,7 @@ begin
   try
     FillTreeAndCalcCircularReferences;
     FillLists;
+    FillModules;
 
     if vtUnitsTree.FocusedNode = nil then
       vtUnitsTree.SelectNodeEx(vtUnitsTree.GetFirst);
@@ -2354,26 +2381,64 @@ end;
 
 procedure TfrmMain.actSaveToGephiCSVExecute(Sender: TObject);
 begin
-  if SaveDialogGephiCSV.Execute then
-    ExportToGephi(FModel, actShowUnitsNotInPath.Checked, SaveDialogGephiCSV.Filename);
+  if saveDialog_Units_GephiCSV.Execute then
+    ExportToGephi(FModel, actShowUnitsNotInPath.Checked, saveDialog_Units_GephiCSV.Filename);
 end;
 
 procedure TfrmMain.actSaveToGraphMLExecute(Sender: TObject);
 begin
-  if SaveDialog4.Execute then
-    ExportToGraphML(FModel, actShowUnitsNotInPath.Checked, SaveDialog4.Filename);
+  if saveDialog_Units_GraphML.Execute then
+    ExportToGraphML(FModel, actShowUnitsNotInPath.Checked, saveDialog_Units_GraphML.Filename);
 end;
-
-
 
 procedure TfrmMain.actSaveToXMLExecute(Sender: TObject);
 begin
-  if SaveDialog2.Execute then
+  if saveDialog_Units_XML.Execute then
   begin
     if pcView.ActivePage = tabTree then
-      ExportToXML(vtUnitsTree, SaveDialog2.Filename)
+      ExportToXML(vtUnitsTree, saveDialog_Units_XML.Filename)
     else
-      ExportToXML(vtUnitsList, SaveDialog2.Filename)
+      ExportToXML(vtUnitsList, saveDialog_Units_XML.Filename)
+  end;
+end;
+
+procedure TfrmMain.actExportModulesToCSVExecute(Sender: TObject);
+var
+  aExportModulesToCSV: TExportModulesToCSV;
+begin
+  if saveDialog_Modules_CSV.Execute then
+  begin
+    aExportModulesToCSV := TExportModulesToCSV.Create;
+    try
+      aExportModulesToCSV.Model           := FModel;
+      aExportModulesToCSV.OnLog           := Self.Log;;
+      aExportModulesToCSV.ProjectSettings := FProjectSettings;
+      aExportModulesToCSV.FileName        := saveDialog_Modules_CSV.FileName;
+
+      aExportModulesToCSV.ExportModules;
+    finally
+      aExportModulesToCSV.Free;
+    end;
+  end;
+end;
+
+procedure TfrmMain.actExportModulesToGraphMLExecute(Sender: TObject);
+var
+  aExportModulesToGraphML: TExportModulesToGraphML;
+begin
+  if saveDialog_Modules_GraphML.Execute then
+  begin
+    aExportModulesToGraphML := TExportModulesToGraphML.Create;
+    try
+      aExportModulesToGraphML.Model           := FModel;
+      aExportModulesToGraphML.OnLog           := Self.Log;;
+      aExportModulesToGraphML.ProjectSettings := FProjectSettings;
+      aExportModulesToGraphML.FileName        := saveDialog_Modules_GraphML.FileName;
+
+      aExportModulesToGraphML.ExportModules;
+    finally
+      aExportModulesToGraphML.Free;
+    end;
   end;
 end;
 
@@ -2391,11 +2456,11 @@ end;
 
 function TfrmMain.SaveProjectAs: Boolean;
 begin
-  Result := SaveDialog1.Execute;
+  Result := saveDialog_Project.Execute;
 
   if Result then
   begin
-    FProjectFilename := SaveDialog1.Filename;
+    FProjectFilename := saveDialog_Project.Filename;
 
     SaveProjectSettings(FProjectFilename);
   end;
@@ -2519,6 +2584,7 @@ begin
   ScaleVT(vtUnitsList);
   ScaleVT(vtUsedByUnits);
   ScaleVT(vtUsesUnits);
+  ScaleVT(vtModules);
 
   RichEditUnitPath.Height := ScaleDimension(RichEditUnitPath.Height, PixelsPerInch);
 end;
@@ -2585,6 +2651,44 @@ begin
 
     vtStats.RootNodeCount := FStats.Count;
     vtStats.Invalidate;
+  end;
+end;
+
+procedure TfrmMain.vtModulesGetText(Sender: TBaseVirtualTree; Node:
+    PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType; var CellText:
+    string);
+var
+  aModule: TModule;
+begin
+  aModule := fModel.Modules.OrderedModules[GetID(Node) - 1]; // ID beginnt mit 1, ObjectList mit 0
+
+  CellText := '';
+
+  if TextType <> ttStatic then
+  begin
+
+    case Column of
+      0:
+        CellText := aModule.Name;
+      1:
+        if aModule.Origin <> moUndefined then
+          CellText := TModulesSerializer.cModuleOriginJSONEnumValues[aModule.Origin];
+      2:
+        if aModule.Usage <> muUndefined then
+          CellText := TModulesSerializer.cModuleUsageJSONEnumValues[aModule.Usage];
+
+      3:
+        if aModule.AnalysisData.NumberOfFiles > 0 then
+          CellText := FormatCardinal(aModule.AnalysisData.NumberOfFiles);
+
+      4:
+        if aModule.AnalysisData.NumberOfFilesNotInPath > 0 then
+          CellText := FormatCardinal(aModule.AnalysisData.NumberOfFilesNotInPath);
+
+      5:
+        if aModule.AnalysisData.LinesOfCode > 0 then
+          CellText := FormatCardinal(aModule.AnalysisData.LinesOfCode);
+    end;
   end;
 end;
 
