@@ -13,7 +13,7 @@ resourcestring
   StrModulesIdentified = '%d out of %d ".pas" files could be mapped to modules';
   StrParsingFiles = 'Parsing files';
   StrTransferingToGUI = 'Transfering model data to GUI';
-  StrDFilesWithATo = '%d used unit(s) found and a total of %s lines parsed';
+  StrDFilesWithATo = '%d used unit(s) & project files found and a total of %s lines parsed';
   StrUpdateTheUsesClauseIn = 'Update the uses clause in "%s"?';
   StrUnableToFindFile = 'Unable to find file "%s"';
   StrUsesClauseIn = '"%s" not updated as the text has been changed from "%s" to "%s"';
@@ -28,7 +28,7 @@ resourcestring
   StrFCircularFiles = 'Circular References';
   StrParsedFiles = 'Unique Parsed Files';
   StrFilesFound = 'Total Used Units & Project Files';
-  StrTotalLines = 'Total Lines of Code';
+  StrTotalLines = 'Total Lines of Code (incl. Project Files)';
   StrSearchPathFiles = 'Search Path Files';
   StrNotInSearchPathFiles = 'Not in Search Path Files';
   StrScanDepth = 'Current Scan Depth';

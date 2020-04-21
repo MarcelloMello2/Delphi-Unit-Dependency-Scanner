@@ -19,6 +19,7 @@ type
     fUnitsToModulesSearchlist: TObjectDictionary<string, TModule>;
     fPathsToModulesSearchlist: TObjectDictionary<string, TModule>;
     fOrderedModules: TObjectList<TModule>;
+    fUnknownModule: TModule;
 
   public
     constructor Create;
@@ -26,10 +27,14 @@ type
 
     procedure AddModule(Module: TModule);
 
-    procedure ClearAllLists;
+    procedure Clear;
     procedure ReBuildFastSearchList;
     procedure ClearModulesAnalysisData;
     function FindModuleForUnit(UnitInfo: IUnitInfo; out Module: TModule): Boolean;
+
+    procedure CreateUnknownModule;
+
+    property UnknownModule: TModule read fUnknownModule;
 
     property Dictionary: TObjectDictionary<String, TModule> read fDictionary;
     property OrderedModules: TObjectList<TModule> read fOrderedModules;
@@ -51,8 +56,6 @@ type
 implementation
 
 { TModulesSerializer }
-
-
 
 class procedure TModulesSerializer.ReadFromJson(aContent: string;
   aModulesList: TModulesList);
@@ -185,15 +188,14 @@ begin
   Module.ID := fOrderedModules.Count; // save unique id in TModule for easy usage in e.g. export to graphml
 end;
 
-procedure TModulesList.ClearAllLists;
+procedure TModulesList.Clear;
 begin
   fUnitsToModulesSearchlist.Clear;
   fPathsToModulesSearchlist.Clear;
+  fUnknownModule := nil;
   fOrderedModules.Clear;
   fDictionary.Clear;
 end;
-
-
 
 constructor TModulesList.Create;
 begin
@@ -203,6 +205,19 @@ begin
 
   fUnitsToModulesSearchlist := TObjectDictionary<string, TModule>.Create;
   fPathsToModulesSearchlist := TObjectDictionary<string, TModule>.Create;
+
+  fUnknownModule := nil;
+end;
+
+procedure TModulesList.CreateUnknownModule;
+begin
+  if Assigned(fUnknownModule) then
+    raise Exception.Create('unknown module already created');
+
+  fUnknownModule      := TModule.Create;
+  fUnknownModule.Name := 'unknown module';
+
+  AddModule(fUnknownModule);
 end;
 
 destructor TModulesList.Destroy;

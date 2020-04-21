@@ -47,7 +47,7 @@ begin
   FParsedDelphiRootFiles.Clear;
   FParsedDelphiFiles.Clear;
   FDelphiFileList.Clear;
-  fModules.ClearAllLists;
+  fModules.Clear;
 end;
 
 constructor TDudsModel.Create;

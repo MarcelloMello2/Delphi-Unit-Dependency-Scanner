@@ -112,8 +112,6 @@ var
   Module: TModule;
   UnitsWithUnknownModules: string;
   aUnitScopes: TStringList;
-const
-  cUnknownModule = 'unknown module';
 begin
   // pre-checks
   if aUsesList.ContainsCompilerSwitches then
@@ -143,7 +141,7 @@ begin
   UnitsWithUnknownModules := '';
   for aUsesElement in aUsesList do
     if aUsesElement.ElementType = etUnit then
-      if aUsesElement.Module = nil then
+      if aUsesElement.Module = FModel.Modules.UnknownModule then
         AddToken(UnitsWithUnknownModules, aUsesElement.TextValue);
   if not UnitsWithUnknownModules.IsEmpty then
     if fAllowModuleGroupingWithUnknownModules then
@@ -177,19 +175,22 @@ begin
     for aUsesElement in aUsesList do
       aUsesListBuf.Add(TUsesElement.Create(aUsesElement));
 
-    // 2.2 iterate all known modules and insert all units from the buffer list into the orginal list
+    // 2.2 iterate all known(!) modules and insert all units from the buffer list into the orginal list
     aUsesList.Clear;
     for Module in FModel.Modules.OrderedModules  do
     begin
-      i := 0;
-      while i < aUsesListBuf.Count do
+      if Module <> FModel.Modules.UnknownModule then
       begin
-        if aUsesListBuf[i].Module = Module then
+        i := 0;
+        while i < aUsesListBuf.Count do
         begin
-          aUsesList.Add(TUsesElement.Create(aUsesListBuf[i]));
-          aUsesListBuf.Delete(i);
-        end else
-          Inc(i);
+          if aUsesListBuf[i].Module = Module then
+          begin
+            aUsesList.Add(TUsesElement.Create(aUsesListBuf[i]));
+            aUsesListBuf.Delete(i);
+          end else
+            Inc(i);
+        end;
       end;
     end;
 
@@ -218,9 +219,10 @@ begin
     if aDelphiFile = nil then
        raise Exception.CreateFmt('could not find a parsed delphi file for uses list element "%s"', [aUsesElement.TextValue]);    
 
-    aCurrentModuleName := cUnknownModule;
     if Assigned(aDelphiFile.UnitInfo.Module) then
-      aCurrentModuleName :=   aDelphiFile.UnitInfo.Module.Name; // TODO: specify explizit "group comment" property in the modules definition?
+      aCurrentModuleName := aDelphiFile.UnitInfo.Module.Name
+    else
+      raise Exception.CreateFmt('no module definition for file %s - internal error!?', [aDelphiFile.UnitInfo.DelphiUnitName]);
          
     if aCurrentModuleName <> aLastModuleName then
     begin

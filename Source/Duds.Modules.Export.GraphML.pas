@@ -7,6 +7,7 @@ uses
 
   Xml.XMLDoc, Xml.XMLIntf,
 
+  Duds.Common.Utils,
   Duds.Common.Types,
   Duds.Common.Strings,
   Duds.Common.Classes,
@@ -90,6 +91,32 @@ begin
 end;
 
 procedure TExportModulesToGraphML.AppendModuleNodes(xmlGraph: IXMLNode);
+
+  function BuildNodeHtmlText(module: TModule): string;
+  const
+    cHtmlTemplate = '<html>'         +
+                    '  <div>'        +
+                    '  <b>%s </b>'   + // main label in bold
+                    '%s'             + // <- insert additional lines here
+                    '  </div>'       +
+                    '</html>';
+  var
+    AdditionalLines: string;
+  begin
+    AdditionalLines := '';
+
+    if module.AnalysisData.NumberOfFiles > 0 then
+      AddToken(AdditionalLines, Format('<br></br>Files: %s', [FormatCardinal(module.AnalysisData.NumberOfFiles)]), '');
+
+    if module.AnalysisData.NumberOfFilesNotInPath > 0 then
+      AddToken(AdditionalLines, Format('<br></br><font style="color:red">Files not in Path: %s</font>', [FormatCardinal(module.AnalysisData.NumberOfFilesNotInPath)]), '');
+
+    if module.AnalysisData.LinesOfCode > 0 then
+      AddToken(AdditionalLines, Format('<br></br>LoC: %s', [FormatCardinal(module.AnalysisData.LinesOfCode)]), '');
+
+    Result := Format(cHtmlTemplate, [module.Name, AdditionalLines]);
+  end;
+
 var
   CurrentModule: TModule;
   ModuleNode: IXMLNode;
@@ -109,7 +136,7 @@ begin
 
     ShapeNode := ModuleData.AddChild('y:ShapeNode');
 
-    ShapeNode.AddChild('y:NodeLabel').Text := CurrentModule.Name;
+    ShapeNode.AddChild('y:NodeLabel').Text := BuildNodeHtmlText(CurrentModule);
 
     if CurrentModule.Usage = muTest then
       ShapeNode.AddChild('y:Fill').Attributes['color']        := cModuleOriginLightColors[CurrentModule.Origin]

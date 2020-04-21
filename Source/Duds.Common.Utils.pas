@@ -58,7 +58,7 @@ begin
 
   while p > 0 do
   begin
-    Insert(',', Result, p + 1);
+    Insert(FormatSettings.ThousandSeparator, Result, p + 1);
 
     dec(p, 3);
   end;

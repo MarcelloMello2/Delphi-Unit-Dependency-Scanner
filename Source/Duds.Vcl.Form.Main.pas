@@ -2381,18 +2381,24 @@ end;
 
 procedure TfrmMain.actSaveToGephiCSVExecute(Sender: TObject);
 begin
+  saveDialog_Units_GephiCSV.FileName := ChangeFileExt(FProjectFilename, '.units.gephi.csv');
+
   if saveDialog_Units_GephiCSV.Execute then
     ExportToGephi(FModel, actShowUnitsNotInPath.Checked, saveDialog_Units_GephiCSV.Filename);
 end;
 
 procedure TfrmMain.actSaveToGraphMLExecute(Sender: TObject);
 begin
+  saveDialog_Units_GraphML.FileName := ChangeFileExt(FProjectFilename, '.units.graphml');
+
   if saveDialog_Units_GraphML.Execute then
     ExportToGraphML(FModel, actShowUnitsNotInPath.Checked, saveDialog_Units_GraphML.Filename);
 end;
 
 procedure TfrmMain.actSaveToXMLExecute(Sender: TObject);
 begin
+  saveDialog_Units_XML.FileName := ChangeFileExt(FProjectFilename, '.units.xml');
+
   if saveDialog_Units_XML.Execute then
   begin
     if pcView.ActivePage = tabTree then
@@ -2406,6 +2412,8 @@ procedure TfrmMain.actExportModulesToCSVExecute(Sender: TObject);
 var
   aExportModulesToCSV: TExportModulesToCSV;
 begin
+  saveDialog_Modules_CSV.FileName := ChangeFileExt(FProjectFilename, '.modules.csv');
+
   if saveDialog_Modules_CSV.Execute then
   begin
     aExportModulesToCSV := TExportModulesToCSV.Create;
@@ -2426,6 +2434,8 @@ procedure TfrmMain.actExportModulesToGraphMLExecute(Sender: TObject);
 var
   aExportModulesToGraphML: TExportModulesToGraphML;
 begin
+  saveDialog_Modules_GraphML.FileName := ChangeFileExt(FProjectFilename, '.modules.graphml');
+
   if saveDialog_Modules_GraphML.Execute then
   begin
     aExportModulesToGraphML := TExportModulesToGraphML.Create;

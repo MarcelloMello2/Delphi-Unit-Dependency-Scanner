@@ -700,12 +700,12 @@ object frmMain: TfrmMain
                 item
                   Position = 0
                   Text = 'Module'
-                  Width = 350
+                  Width = 450
                 end
                 item
                   Position = 1
                   Text = 'Origin'
-                  Width = 70
+                  Width = 100
                 end
                 item
                   Position = 2
@@ -1030,6 +1030,7 @@ object frmMain: TfrmMain
               end
               item
                 Action = actExportModulesToCSV
+                Caption = 'Save M&odules to CSV'
               end
               item
                 Action = actExportModulesToGraphML

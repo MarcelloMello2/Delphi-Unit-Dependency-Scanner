@@ -33,6 +33,7 @@ var
 begin
   Model.Modules.ClearModulesAnalysisData;
   Model.Modules.ReBuildFastSearchList;
+  Model.Modules.CreateUnknownModule;
 
   UnitsTotal := 0;
   UnitsMapped := 0;
@@ -42,15 +43,20 @@ begin
     if (aDelphiFile.UnitInfo.DelphiFileType = ftPAS) or (not aDelphiFile.InSearchPath) then  // files that are not in search path do not get a filetype but should be '.pas'...
     begin
       Inc(UnitsTotal);
+
+      // try to find a matching module
       if Model.Modules.FindModuleForUnit(aDelphiFile.UnitInfo, aModule) then
-      begin
-        aDelphiFile.UnitInfo.Module := aModule;
-        Inc(UnitsMapped);
-        aModule.AnalysisData.NumberOfFiles := aModule.AnalysisData.NumberOfFiles + 1;
-        if not aDelphiFile.InSearchPath then
-          aModule.AnalysisData.NumberOfFilesNotInPath := aModule.AnalysisData.NumberOfFilesNotInPath + 1;
-        aModule.AnalysisData.LinesOfCode   := aModule.AnalysisData.LinesOfCode   + aDelphiFile.UnitInfo.LineCount;
-      end;
+        Inc(UnitsMapped)
+      else
+        aModule := Model.Modules.UnknownModule;
+
+      aDelphiFile.UnitInfo.Module := aModule;
+
+      // update the modules analysis data
+      aModule.AnalysisData.NumberOfFiles := aModule.AnalysisData.NumberOfFiles + 1;
+      if not aDelphiFile.InSearchPath then
+        aModule.AnalysisData.NumberOfFilesNotInPath := aModule.AnalysisData.NumberOfFilesNotInPath + 1;
+      aModule.AnalysisData.LinesOfCode   := aModule.AnalysisData.LinesOfCode   + aDelphiFile.UnitInfo.LineCount;
     end;
   end;
 end;
