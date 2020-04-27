@@ -16,13 +16,14 @@ uses
   Duds.Common.Language,
   Duds.Scan.Model,
 
-  Duds.Common.Parser.Pascal;
+  Duds.Common.Parser.Pascal,
+  Duds.Common.UsesParser;
 
 type
   TDudsDependencyAnalyzer = class(TObject)
   private
     FModel: TDudsModel;
-    FPascalUnitExtractor: TPascalUnitExtractor;
+    FOnLog: TLogProcedure;
     FProjectSettings: TProjectSettings;
     FParsedFileCount: Integer;
     FFMXFormCount: Integer;
@@ -37,6 +38,9 @@ type
 
     FCancelled: Boolean;
 
+    procedure Log(const Msg: String; const Severity: Integer = LogInfo); overload;
+    procedure Log(const Msg: String; const Args: array of const; const Severity: Integer); overload;
+
     procedure AnalyzeUnitOrProjectFile(Unitname: string; IsRootFile: Boolean);
     procedure AddParsedDelphiFile(UnitInfo: IUnitInfo; IsRootFile: Boolean; InPath: Boolean);
   public
@@ -46,6 +50,7 @@ type
     procedure ScanRootFilesAndBuildUsesLists;
 
     property Model: TDudsModel read FModel write FModel;
+    property OnLog: TLogProcedure read FOnLog    write FOnLog;
     property ProjectSettings: TProjectSettings read FProjectSettings write FProjectSettings;
 
     property ParsedFileCount: Integer read FParsedFileCount;
@@ -78,13 +83,22 @@ begin
   FSemiCircularFiles := 0;
   FCircularFiles := 0;
   FFilesNotInPath := 0;
-  FPascalUnitExtractor := TPascalUnitExtractor.Create(nil);
 end;
 
 destructor TDudsDependencyAnalyzer.Destroy;
 begin
-  FreeAndNil(FPascalUnitExtractor);
   inherited;
+end;
+
+procedure TDudsDependencyAnalyzer.Log(const Msg: String; const Severity: Integer);
+begin
+  if Assigned(FOnLog) then
+    FOnLog('Dependency Analyzer: ' + Msg, Severity);
+end;
+
+procedure TDudsDependencyAnalyzer.Log(const Msg: String; const Args: array of const; const Severity: Integer);
+begin
+  Log(Format(Msg, Args), Severity);
 end;
 
 procedure TDudsDependencyAnalyzer.AddParsedDelphiFile(UnitInfo: IUnitInfo; IsRootFile: Boolean; InPath: Boolean);
@@ -111,6 +125,7 @@ var
   UnitInfo: IUnitInfo;
   UsedUnitInfo: IUsedUnitInfo;
   DelphiFile: TDelphiFile;
+  aUsesParser : TUsesParser;
 begin
   Application.ProcessMessages;
 
@@ -139,7 +154,13 @@ begin
         try
           // parse the file (.pas, .dpr, .dpk, ...) and extract the used units into `UnitInfo`
           // -> this returns `FALSE` e.g. when it is an unknown file type
-          Parsed := FPascalUnitExtractor.GetUsedUnits(Filename, UnitInfo);
+          aUsesParser := TUsesParser.Create;
+          try
+            aUsesParser.OnLog := fOnLog;
+            Parsed := aUsesParser.GetUsedUnitsFromFile(Filename, UnitInfo);
+          finally
+            FreeAndNil(aUsesParser);
+          end;
 
           // when used unit have a "in '..filename.pas'" part, then those files might not be part of the
           // "known" files in the model yet => add them

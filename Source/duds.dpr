@@ -2,8 +2,12 @@ program duds;
 
 uses
   Vcl.Forms,
+  SimpleParser.Lexer in 'DelphiAST\Source\SimpleParser\SimpleParser.Lexer.pas',
+  SimpleParser.Lexer.Types in 'DelphiAST\Source\SimpleParser\SimpleParser.Lexer.Types.pas',
+  Duds.Common.UsesParser,
   Duds.Common.Parser.Pascal,
   Duds.Common.Parser.Pascal.Tokeniser,
+  Duds.Common.Parser.Pascal.Extractor,
   Duds.Common.Interfaces,
   Duds.Common.Types,
   Duds.Common.Language,

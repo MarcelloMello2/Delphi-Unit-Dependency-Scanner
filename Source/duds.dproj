@@ -130,6 +130,8 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
+        <DCCReference Include="DelphiAST\Source\SimpleParser\SimpleParser.Lexer.pas"/>
+        <DCCReference Include="DelphiAST\Source\SimpleParser\SimpleParser.Lexer.Types.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

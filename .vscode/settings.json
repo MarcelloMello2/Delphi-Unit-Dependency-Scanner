@@ -6,5 +6,6 @@
             ],
             "url": "./schema/modules.schema.json"
         }
-    ]
+    ],
+    "omnipascal.createBuildScripts": true
 }

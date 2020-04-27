@@ -63,6 +63,7 @@ type
   );
 
   TUsedUnitType = (
+    utUnknown,
     utInterface,
     utImplementation,
     utContains

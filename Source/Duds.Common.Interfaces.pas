@@ -43,20 +43,25 @@ type
     function GetDelphiUnitName: String;
     function GetUsesType: TUsedUnitType;
     function GetFilename: String;
+    function GetDefinedFilePath: string;
 
     procedure SetPosition(const Value: Integer);
     procedure SetInFilePosition(const Value: Integer);
     procedure SetDelphiUnitName(const Value: String);
     procedure SetUsesType(const Value: TUsedUnitType);
     procedure SetFilename(const Value: String);
+    procedure SetDefinedFilePath(const Value: String);
 
     procedure UpdatePosition(Offset: Integer);
 
     property DelphiUnitName: String read GetDelphiUnitName write SetDelphiUnitName;
     property Position: Integer read GetPosition write SetPosition;
-    property InFilePosition: Integer read GetInFilePosition write SetInFilePosition;   // offset of the  <in '..\..\abc.pas'>   part
     property UsesType: TUsedUnitType read GetUsesType write SetUsesType;
-    property Filename: String read GetFilename write SetFilename;
+
+    property DefinedFilePath: String read GetDefinedFilePath write SetDefinedFilePath; // [optional] file path as defined in the unit, e.g. '..\myUnit.pas'
+    property Filename:        String read GetFilename        write SetFilename;        // [optional] resolved, absolute file path
+    property InFilePosition: Integer read GetInFilePosition  write SetInFilePosition;  // [optional] offset of the  <in '..\..\abc.pas'>   part
+
   end;
 
   TModuleAnalysisData = class // simple pojo

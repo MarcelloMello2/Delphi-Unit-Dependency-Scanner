@@ -307,7 +307,6 @@ type
     FDependencyAnalyzer: TDudsDependencyAnalyzer;
     FTreeNodeObjects: TObjectList<TNodeObject>;
     FSearchText: String;
-    FPascalUnitExtractor: TPascalUnitExtractor;
     FLineCount: Integer;
     FStats: TStringList;
     FScannedUsesCount: Integer;
@@ -485,8 +484,6 @@ begin
 
   FEnvironmentSettings := TEnvironmentSettings.Create;
   FProjectSettings := TProjectSettings.Create;
-
-  FPascalUnitExtractor := TPascalUnitExtractor.Create(Self);
 
   UpdateTreeControls(nil);
   UpdateListControls(nil);
@@ -2285,6 +2282,7 @@ begin
         FDependencyAnalyzer := TDudsDependencyAnalyzer.Create;
         try
           FDependencyAnalyzer.Model           := FModel;
+          FDependencyAnalyzer.OnLog           := Self.Log;
           FDependencyAnalyzer.ProjectSettings := FProjectSettings;
           FDependencyAnalyzer.ScanRootFilesAndBuildUsesLists;
 
