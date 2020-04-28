@@ -103,7 +103,7 @@ object frmMain: TfrmMain
           Top = 0
           Width = 1182
           Height = 433
-          ActivePage = tabTree
+          ActivePage = tabList
           Align = alClient
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -129,7 +129,7 @@ object frmMain: TfrmMain
               Align = alLeft
               BevelOuter = bvNone
               TabOrder = 0
-              object edtSearch: TEdit
+              object edtSearchTree: TEdit
                 AlignWithMargins = True
                 Left = 3
                 Top = 3
@@ -153,9 +153,9 @@ object frmMain: TfrmMain
                 ParentFont = False
                 TabOrder = 0
                 TextHint = 'Search'
-                OnChange = edtSearchEditChange
-                OnKeyDown = edtSearchEditKeyDown
-                OnKeyPress = edtSearchEditKeyPress
+                OnChange = edtSearchTreeChange
+                OnKeyDown = edtSearchTreeKeyDown
+                OnKeyPress = edtSearchTreeKeyPress
               end
               object vtUnitsTree: TVirtualStringTree
                 AlignWithMargins = True
@@ -353,7 +353,7 @@ object frmMain: TfrmMain
               Align = alLeft
               BevelOuter = bvNone
               TabOrder = 0
-              object edtListSearch: TEdit
+              object edtSearchList: TEdit
                 AlignWithMargins = True
                 Left = 3
                 Top = 3
@@ -377,7 +377,7 @@ object frmMain: TfrmMain
                 ParentFont = False
                 TabOrder = 0
                 TextHint = 'Search Unit List'
-                OnChange = edtListSearchEditChange
+                OnChange = edtSearchListChange
               end
               object vtUnitsList: TVirtualStringTree
                 AlignWithMargins = True
@@ -833,6 +833,13 @@ object frmMain: TfrmMain
       item
         Items = <
           item
+            Action = actSettings
+            Caption = 'Se&ttings'
+          end
+          item
+            Caption = '-'
+          end
+          item
             Action = actStartScan
             Caption = '&Scan'
             ImageIndex = 6
@@ -843,6 +850,17 @@ object frmMain: TfrmMain
             Action = actStopScan
             ImageIndex = 7
             ShortCut = 16497
+          end
+          item
+            Caption = '-'
+          end
+          item
+            Action = actExpandAll
+            Caption = '&Expand All'
+          end
+          item
+            Action = actCollapseAll
+            Caption = '&Collapse All'
           end
           item
             Caption = '-'
@@ -947,26 +965,11 @@ object frmMain: TfrmMain
             Caption = '-'
           end
           item
-            Action = actExpandAll
-            Caption = '&Expand All'
-          end
-          item
-            Action = actCollapseAll
-            Caption = '&Collapse All'
-          end
-          item
-            Caption = '-'
-          end
-          item
             Action = actShowUnitsNotInPath
             Caption = 'S&how Units not in Path'
           end
           item
-            Caption = '-'
-          end
-          item
-            Action = actSettings
-            Caption = 'Se&ttings'
+            Action = actShowOnlyUnknownModules
           end
           item
             Caption = '-'
@@ -998,6 +1001,7 @@ object frmMain: TfrmMain
       Caption = 'Refactorings'
     end
     object actShowUnitsNotInPath: TAction
+      Category = 'Filter'
       AutoCheck = True
       Caption = 'Show Units not in Path'
       OnExecute = actShowUnitsNotInPathExecute
@@ -1034,18 +1038,22 @@ object frmMain: TfrmMain
       OnExecute = actAddUnitToUsesExecute
     end
     object actExpandAll: TAction
+      Category = 'Tree Actions'
       Caption = 'Expand All'
       OnExecute = actExpandAllExecute
     end
     object actExpand: TAction
+      Category = 'Tree Actions'
       Caption = 'Expand'
       OnExecute = actExpandExecute
     end
     object actCollapseAll: TAction
+      Category = 'Tree Actions'
       Caption = 'Collapse All'
       OnExecute = actCollapseAllExecute
     end
     object actCollapse: TAction
+      Category = 'Tree Actions'
       Caption = 'Collapse'
       OnExecute = actCollapseExecute
     end
@@ -1130,6 +1138,12 @@ object frmMain: TfrmMain
       Category = 'Export'
       Caption = 'Save Modules to CSV'
       OnExecute = actExportModulesToCSVExecute
+    end
+    object actShowOnlyUnknownModules: TAction
+      Category = 'Filter'
+      AutoCheck = True
+      Caption = 'Show only unknown modules'
+      OnExecute = actShowOnlyUnknownModulesExecute
     end
   end
   object popTree: TPopupMenu

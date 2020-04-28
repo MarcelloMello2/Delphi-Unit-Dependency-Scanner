@@ -180,8 +180,8 @@ type
     saveDialog_Units_GephiCSV: TSaveDialog;
     actSaveToGraphML: TAction;
     saveDialog_Units_GraphML: TSaveDialog;
-    edtSearch: TEdit;
-    edtListSearch: TEdit;
+    edtSearchTree: TEdit;
+    edtSearchList: TEdit;
     edtSearchUsedByList: TEdit;
     edtSearchUsesList: TEdit;
     vtUnitsList: TVirtualStringTree;
@@ -218,12 +218,19 @@ type
     vtModules: TVirtualStringTree;
     actExportModulesToCSV: TAction;
     saveDialog_Modules_CSV: TSaveDialog;
+    actShowOnlyUnknownModules: TAction;
+
     procedure FormCreate(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormDestroy(Sender: TObject);
+
+    procedure vtCommonHeaderClick(Sender: TVTHeader; HitInfo: TVTHeaderHitInfo);
+    procedure vtCommonGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
+      Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
+
     procedure vtUnitsTreeGetNodeDataSize(Sender: TBaseVirtualTree; var NodeDataSize: Integer);
     procedure vtUnitsTreeGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
       var CellText: string);
-    procedure edtSearchEditChange(Sender: TObject);
     procedure vtUnitsTreePaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType);
     procedure vtUnitsTreeDrawText(Sender: TBaseVirtualTree; TargetCanvas: TCanvas;
@@ -235,83 +242,95 @@ type
     procedure vtUnitsTreeGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
       Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
     procedure vtUnitsTreeDblClick(Sender: TObject);
-    procedure actStartScanExecute(Sender: TObject);
-    procedure actShowUnitsNotInPathExecute(Sender: TObject);
-    procedure ActionManager1Update(Action: TBasicAction; var Handled: Boolean);
     procedure vtUnitsTreeFocusChanging(Sender: TBaseVirtualTree; OldNode, NewNode: PVirtualNode;
       OldColumn, NewColumn: TColumnIndex; var Allowed: Boolean);
-    procedure memParentFileChange(Sender: TObject);
-    procedure memSelectedFileChange(Sender: TObject);
-    procedure actSaveChangesExecute(Sender: TObject);
-    procedure actRenameExecute(Sender: TObject);
-    procedure edtSearchEditKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure edtSearchEditKeyPress(Sender: TObject; var Key: Char);
-    procedure actExpandAllExecute(Sender: TObject);
-    procedure actExpandExecute(Sender: TObject);
-    procedure actCollapseAllExecute(Sender: TObject);
-    procedure actCollapseExecute(Sender: TObject);
+    procedure vtUnitsTreeCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
+      var Result: Integer);
+    procedure edtSearchTreeChange(Sender: TObject);
+    procedure edtSearchTreeKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure edtSearchTreeKeyPress(Sender: TObject; var Key: Char);
+
     procedure vtUnitsListGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
       TextType: TVSTTextType; var CellText: string);
-    procedure vtStatsGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-      var CellText: string);
-    procedure vtStatsPaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;
-      Column: TColumnIndex; TextType: TVSTTextType);
     procedure vtUnitsListFocusChanging(Sender: TBaseVirtualTree; OldNode, NewNode: PVirtualNode;
       OldColumn, NewColumn: TColumnIndex; var Allowed: Boolean);
     procedure vtUnitsListFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
     procedure vtUnitsListSearchComparison(Sender: TObject; Node: PVirtualNode; const SearchTerms: TStrings;
       var IsMatch: Boolean);
-    procedure edtListSearchEditChange(Sender: TObject);
     procedure vtUnitsListDblClick(Sender: TObject);
     procedure vtUnitsListPaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType);
-    procedure actStopScanExecute(Sender: TObject);
-    procedure memListFileChange(Sender: TObject);
     procedure vtUnitsListCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
       var Result: Integer);
-    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    procedure vtUnitsTreeCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
-      var Result: Integer);
-    procedure actExitExecute(Sender: TObject);
-    procedure actSettingsExecute(Sender: TObject);
-    procedure actLoadProjectExecute(Sender: TObject);
-    procedure actSaveProjectExecute(Sender: TObject);
-    procedure actSaveProjectAsExecute(Sender: TObject);
-    procedure tmrCloseTimer(Sender: TObject);
-    procedure edtSearchUsedByListEditChange(Sender: TObject);
-    procedure edtSearchUsesListEditChange(Sender: TObject);
-    procedure actNewProjectExecute(Sender: TObject);
-    procedure actCloseProjectExecute(Sender: TObject);
-    procedure actSearchAndReplaceExecute(Sender: TObject);
-    procedure edtSearchSearchClick(Sender: TObject);
-    procedure tmrLoadedTimer(Sender: TObject);
-    procedure actShowFileExecute(Sender: TObject);
-    procedure actSaveToXMLExecute(Sender: TObject);
-    procedure actSaveToGephiCSVExecute(Sender: TObject);
-    procedure actSaveToGraphMLExecute(Sender: TObject);
-    procedure vtLogGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-      var CellText: string);
-    procedure vtCommonHeaderClick(Sender: TVTHeader; HitInfo: TVTHeaderHitInfo);
-    procedure vtLogGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
-      var Ghosted: Boolean; var ImageIndex: TImageIndex);
-    procedure vtCommonGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
-      Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
-    procedure actSaveCircularRefsExecute(Sender: TObject);
-    procedure actApplyRenameListExecute(Sender: TObject);
-    procedure actAddUnitToUsesExecute(Sender: TObject);
-    procedure actExportModulesToCSVExecute(Sender: TObject);
-    procedure actExportModulesToGraphMLExecute(Sender: TObject);
-    procedure actRemoveUnUsedUnitsExecute(Sender: TObject);
-    procedure actRemoveUnusedUnitsProcessPalOutputExecute(Sender: TObject);
-    procedure actFormatUsesOfFileExecute(Sender: TObject);
+    procedure vtUnitsListDrawText(Sender: TBaseVirtualTree; TargetCanvas:
+        TCanvas; Node: PVirtualNode; Column: TColumnIndex; const Text: string;
+        const CellRect: TRect; var DefaultDraw: Boolean);
+    procedure edtSearchListChange(Sender: TObject);
+
     procedure vtModulesDrawText(Sender: TBaseVirtualTree; TargetCanvas: TCanvas;
         Node: PVirtualNode; Column: TColumnIndex; const Text: string; const
         CellRect: TRect; var DefaultDraw: Boolean);
     procedure vtModulesGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
         Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
-    procedure vtUnitsListDrawText(Sender: TBaseVirtualTree; TargetCanvas:
-        TCanvas; Node: PVirtualNode; Column: TColumnIndex; const Text: string;
-        const CellRect: TRect; var DefaultDraw: Boolean);
+
+    procedure vtLogGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
+      var CellText: string);
+    procedure vtLogGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
+      var Ghosted: Boolean; var ImageIndex: TImageIndex);
+
+    procedure vtStatsGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
+      var CellText: string);
+    procedure vtStatsPaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;
+      Column: TColumnIndex; TextType: TVSTTextType);
+
+    procedure actStartScanExecute(Sender: TObject);
+    procedure actStopScanExecute(Sender: TObject);
+    procedure actExitExecute(Sender: TObject);
+    procedure actSettingsExecute(Sender: TObject);
+    procedure actLoadProjectExecute(Sender: TObject);
+    procedure actSaveProjectExecute(Sender: TObject);
+    procedure actSaveProjectAsExecute(Sender: TObject);
+    procedure actNewProjectExecute(Sender: TObject);
+    procedure actCloseProjectExecute(Sender: TObject);
+
+    procedure actShowUnitsNotInPathExecute(Sender: TObject);
+    procedure actShowOnlyUnknownModulesExecute(Sender: TObject);
+
+    procedure ActionManager1Update(Action: TBasicAction; var Handled: Boolean);
+
+    procedure actCollapseAllExecute(Sender: TObject);
+    procedure actCollapseExecute(Sender: TObject);
+    procedure actExpandAllExecute(Sender: TObject);
+    procedure actExpandExecute(Sender: TObject);
+
+    procedure memListFileChange(Sender: TObject);
+    procedure memParentFileChange(Sender: TObject);
+    procedure memSelectedFileChange(Sender: TObject);
+    procedure actSaveChangesExecute(Sender: TObject);
+
+    procedure tmrCloseTimer(Sender: TObject);
+    procedure tmrLoadedTimer(Sender: TObject);
+
+    procedure edtSearchUsedByListEditChange(Sender: TObject);
+    procedure edtSearchUsesListEditChange(Sender: TObject);
+    procedure actSearchAndReplaceExecute(Sender: TObject);
+
+    procedure actShowFileExecute(Sender: TObject);
+
+    procedure actRenameExecute(Sender: TObject);
+    procedure actApplyRenameListExecute(Sender: TObject);
+    procedure actAddUnitToUsesExecute(Sender: TObject);
+    procedure actRemoveUnUsedUnitsExecute(Sender: TObject);
+    procedure actRemoveUnusedUnitsProcessPalOutputExecute(Sender: TObject);
+    procedure actFormatUsesOfFileExecute(Sender: TObject);
+
+    procedure actSaveToXMLExecute(Sender: TObject);
+    procedure actSaveToGephiCSVExecute(Sender: TObject);
+    procedure actSaveToGraphMLExecute(Sender: TObject);
+    procedure actSaveCircularRefsExecute(Sender: TObject);
+    procedure actExportModulesToCSVExecute(Sender: TObject);
+    procedure actExportModulesToGraphMLExecute(Sender: TObject);
+
   private
     FModel: TDudsModel;
     FDependencyAnalyzer: TDudsDependencyAnalyzer;
@@ -643,42 +662,15 @@ begin
   memSelectedFile.Modified := TRUE;
 end;
 
-procedure TfrmMain.edtListSearchEditChange(Sender: TObject);
+procedure TfrmMain.edtSearchListChange(Sender: TObject);
 begin
-  SearchList(vtUnitsList, edtListSearch.Text);
-end;
-
-procedure TfrmMain.edtSearchEditChange(Sender: TObject);
-begin
-  SearchTree(edtSearch.Text, TRUE);
-end;
-
-procedure TfrmMain.edtSearchEditKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-  if Key = 13 then
-  begin
-    Key := 00;
-
-    if edtSearch.Text <> '' then
-      SearchTree(edtSearch.Text, FALSE);
-  end;
+  SearchList(vtUnitsList, edtSearchList.Text);
 end;
 
 procedure TfrmMain.ClearLog;
 begin
   TDudsLogger.GetInstance.Clear;
   UpdateLogEntries;
-end;
-
-procedure TfrmMain.edtSearchEditKeyPress(Sender: TObject; var Key: Char);
-begin
-  if Key = #13 then
-    Key := #00;
-end;
-
-procedure TfrmMain.edtSearchSearchClick(Sender: TObject);
-begin
-  SearchTree(edtSearch.Text, FALSE);
 end;
 
 procedure TfrmMain.edtSearchUsedByListEditChange(Sender: TObject);
@@ -2090,7 +2082,7 @@ begin
     UpdateTreeControls(vtUnitsTree.FocusedNode);
     UpdateListControls(vtUnitsList.FocusedNode);
 
-    SearchList(vtUnitsList, edtListSearch.Text);
+    SearchList(vtUnitsList, edtSearchList.Text);
 
     vtUsedByUnits.Invalidate;
   end;
@@ -2632,6 +2624,12 @@ begin
       SW_NORMAL);
 end;
 
+procedure TfrmMain.actShowOnlyUnknownModulesExecute(Sender: TObject);
+begin
+//  if actShowOnlyUnknownModules.Checked then TODO
+
+end;
+
 procedure TfrmMain.actShowUnitsNotInPathExecute(Sender: TObject);
 begin
   ShowUnitsNotInPath;
@@ -2739,6 +2737,28 @@ begin
   FFMXFormCount := 0;
   FVCLFormCount := 0;
   FFilesNotInPath := 0;
+end;
+
+procedure TfrmMain.edtSearchTreeChange(Sender: TObject);
+begin
+  SearchTree(edtSearchTree.Text, TRUE);
+end;
+
+procedure TfrmMain.edtSearchTreeKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if Key = 13 then
+  begin
+    Key := 00;
+
+    if edtSearchTree.Text <> '' then
+      SearchTree(edtSearchTree.Text, FALSE);
+  end;
+end;
+
+procedure TfrmMain.edtSearchTreeKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then
+    Key := #00;
 end;
 
 procedure TfrmMain.UpdateStats(ForceUpdate: Boolean);
