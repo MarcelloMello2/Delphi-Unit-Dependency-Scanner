@@ -64,11 +64,13 @@ type
     FLink: Pointer;
     FCircularReference: TCircularRelationshipType;
     FSearchTermInChildren: Boolean;
+    fUnknownModuleInChildren: Boolean;
   public
     property Link: Pointer read FLink write FLink;
     property CircularReference: TCircularRelationshipType read FCircularReference write FCircularReference;
     property DelphiFile: TDelphiFile read FDelphiFile write FDelphiFile;
     property SearchTermInChildren: Boolean read FSearchTermInChildren write FSearchTermInChildren;
+    property UnknownModuleInChildren: Boolean read fUnknownModuleInChildren write fUnknownModuleInChildren;
   end;
 
   TFileInfo = class(TObject)

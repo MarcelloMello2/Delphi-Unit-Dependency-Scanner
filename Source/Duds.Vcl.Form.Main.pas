@@ -358,15 +358,15 @@ type
     FNextStatusUpdate: TDateTime;
     FDeepestScanDepth: Integer;
     FClosing: Boolean;
-    FShowTermParents: Boolean;
+    FShowSearchTermParents: Boolean;
     FRunScanOnLoad: Boolean;
 
     procedure FillGUIFromModel;
-    procedure SearchTree(const SearchText: String; FromFirstNode: Boolean);
-    function IsSearchHitNode(Node: PVirtualNode): Boolean;
+    procedure SearchUnitsTree(const SearchText: String; FromFirstNode: Boolean);
+    function UnitsTreeIsSearchHitNode(Node: PVirtualNode): Boolean;
     function GetNodePath(Node: PVirtualNode): String;
     procedure SetNodePathRichEdit(Node: PVirtualNode; ARichEdit: TRichEdit);
-    procedure ShowUnitsNotInPath;
+    procedure SetNodesVisibilityForAllNodes;
     procedure SetNodeVisibility(VT: TVirtualStringTree; Node: PVirtualNode; DelphiFile: TDelphiFile);
     function GetLinkedNode(Node: PVirtualNode): PVirtualNode;
     procedure UpdateTreeControls(Node: PVirtualNode);
@@ -392,7 +392,7 @@ type
     procedure RenameDelphiFile(const aClearLog: Boolean; const SearchString, ReplaceString: String;
       const DummyRun, RenameHistoryFiles, ExactMatch, InsertOldNameComment,
       LowerCaseExtension: Boolean);
-    procedure SearchList(VT: TVirtualStringTree; const SearchText: String);
+    procedure SearchUnitsList(VT: TVirtualStringTree; const SearchText: String);
     procedure SearchUnitsListChildList(VT: TVirtualStringTree; const SearchText: String; UsedBy: Boolean);
     procedure ClearGUIAndModelAndCloseControls;
     function CheckNotRunning: Boolean;
@@ -434,6 +434,8 @@ const
 
   cUnknownModuleBackgroundColor   = $000021DB;
   cUnknownModuleForegroundColor   = $00FAFAFA;
+
+  cSearchHitMarkColor = $008CFFFF;
 
 {$R *.dfm}
 
@@ -517,6 +519,7 @@ begin
 
   aColumn           := tree.Header.Columns.Add; // Column Index 0
   aColumn.Text      := 'Unit';
+  aColumn.Width     := 300;
 
   aColumn           := tree.Header.Columns.Add; // Column Index 1
   aColumn.Text      := 'File Type';
@@ -573,9 +576,9 @@ begin
   UpdateTreeControls(nil);
   UpdateListControls(nil);
 
-  FLoadLastProject := TRUE;
-  FShowTermParents := FALSE;
-  FRunScanOnLoad := TRUE;
+  FLoadLastProject       := TRUE;
+  FShowSearchTermParents := True;
+  FRunScanOnLoad         := TRUE;
 
   FixDPI;
 
@@ -664,7 +667,7 @@ end;
 
 procedure TfrmMain.edtSearchListChange(Sender: TObject);
 begin
-  SearchList(vtUnitsList, edtSearchList.Text);
+  SearchUnitsList(vtUnitsList, edtSearchList.Text);
 end;
 
 procedure TfrmMain.ClearLog;
@@ -743,125 +746,24 @@ end;
 
 procedure TfrmMain.SaveSettings;
 begin
-  FEnvironmentSettings.StatusLogHeight := pnlLog.Height;
-  FEnvironmentSettings.TreeWidth := pnlTree.Width;
-  FEnvironmentSettings.ListWidth := pnlList.Width;
+  FEnvironmentSettings.StatusLogHeight    := pnlLog.Height;
+  FEnvironmentSettings.TreeWidth          := pnlTree.Width;
+  FEnvironmentSettings.ListWidth          := pnlList.Width;
   FEnvironmentSettings.ShowUnitsNotInPath := actShowUnitsNotInPath.Checked;
-  FEnvironmentSettings.LoadLastProject := FLoadLastProject;
-  FEnvironmentSettings.ProjectFilename := FProjectFilename;
-  FEnvironmentSettings.RunScanOnLoad := FRunScanOnLoad;
+  FEnvironmentSettings.LoadLastProject    := FLoadLastProject;
+  FEnvironmentSettings.ProjectFilename    := FProjectFilename;
+  FEnvironmentSettings.RunScanOnLoad      := FRunScanOnLoad;
 
-  FEnvironmentSettings.WindowLeft := Left;
-  FEnvironmentSettings.WindowTop := Top;
-  FEnvironmentSettings.WindowWidth := Width;
-  FEnvironmentSettings.WindowHeight := Height;
-  FEnvironmentSettings.UnitPatchHeight := PanelFooter.Height;
+  FEnvironmentSettings.WindowLeft         := Left;
+  FEnvironmentSettings.WindowTop          := Top;
+  FEnvironmentSettings.WindowWidth        := Width;
+  FEnvironmentSettings.WindowHeight       := Height;
+  FEnvironmentSettings.UnitPatchHeight    := PanelFooter.Height;
 
-  FEnvironmentSettings.WindowState := Integer(WindowState);
+  FEnvironmentSettings.WindowState        := Integer(WindowState);
 
   ForceDirectories(ExtractFileDir(GetSettingsFilename));
   FEnvironmentSettings.SaveToFile(GetSettingsFilename);
-end;
-
-// search list "Unit list"
-procedure TfrmMain.SearchList(VT: TVirtualStringTree; const SearchText: String);
-var
-  Node: PVirtualNode;
-  LowerSearchText: String;
-  DelphiFile: TDelphiFile;
-  InSearchPathOrShowAll,
-  UnitMatchesSearchTerm: Boolean;
-begin
-  VT.BeginUpdate;
-  try
-    LowerSearchText := LowerCase(SearchText);
-
-    Node := VT.GetFirst;
-
-    while Node <> nil do
-    begin
-      DelphiFile := FModel.DelphiFileList[GetID(Node)];
-
-      InSearchPathOrShowAll := DelphiFile.InSearchPath or (not DelphiFile.InSearchPath and actShowUnitsNotInPath.Checked);
-      UnitMatchesSearchTerm := (LowerSearchText = '')
-                               or ((pos(LowerSearchText, LowerCase(DelphiFile.UnitInfo.DelphiUnitName)) <> 0))
-                               or ((DelphiFile.UnitInfo.Module <> nil) and (Pos(LowerSearchText, LowerCase(DelphiFile.UnitInfo.Module.Name)) > 0));
-
-      VT.IsVisible[Node] :=  UnitMatchesSearchTerm and InSearchPathOrShowAll;
-
-      Node := Node.NextSibling;
-    end;
-
-    VT.Invalidate;
-  finally
-    VT.EndUpdate;
-  end;
-end;
-
-procedure TfrmMain.SearchTree(const SearchText: String; FromFirstNode: Boolean);
-var
-  Node, EndNode, ParentStepNode: PVirtualNode;
-begin
-  vtUnitsTree.BeginUpdate;
-  try
-    FSearchText := LowerCase(SearchText);
-
-    if (vtUnitsTree.FocusedNode = nil) or (FromFirstNode) then
-    begin
-      Node := vtUnitsTree.GetFirst;
-
-      EndNode := nil;
-    end
-    else
-    begin
-      Node := vtUnitsTree.GetNext(vtUnitsTree.FocusedNode);
-
-      if Node = nil then
-        Node := vtUnitsTree.GetFirst;
-
-      EndNode := vtUnitsTree.GetPrevious(Node);
-    end;
-
-    while Node <> EndNode do
-    begin
-      if IsSearchHitNode(Node) then
-      begin
-        if vtUnitsTree.IsVisible[Node] then
-        begin
-          vtUnitsTree.SelectNodeEx(Node, TRUE, TRUE);
-
-          if not FShowTermParents then
-            Break;
-        end;
-
-        if FShowTermParents then
-        begin
-          ParentStepNode := Node.Parent;
-
-          while ParentStepNode <> vtUnitsTree.RootNode do
-          begin
-            if FTreeNodeObjects[GetID(ParentStepNode)].SearchTermInChildren then
-              Break
-            else
-              FTreeNodeObjects[GetID(ParentStepNode)].SearchTermInChildren := TRUE;
-
-            ParentStepNode := ParentStepNode.Parent;
-          end;
-        end;
-      end
-      else
-        FTreeNodeObjects[GetID(Node)].SearchTermInChildren := FALSE;
-
-      Node := vtUnitsTree.GetNext(Node);
-
-      if (Node = nil) and (EndNode <> nil) then
-        Node := vtUnitsTree.GetFirst;
-    end;
-
-    vtUnitsTree.Invalidate;
-  finally
-    vtUnitsTree.EndUpdate;
-  end;
 end;
 
 procedure TfrmMain.vtLogGetImageIndex(Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
@@ -911,16 +813,15 @@ end;
 procedure TfrmMain.vtUnitsTreeBeforeItemErase(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
   ItemRect: TRect; var ItemColor: TColor; var EraseAction: TItemEraseAction);
 begin
-  if IsSearchHitNode(Node) then
+  if UnitsTreeIsSearchHitNode(Node) then
   begin
     EraseAction := eaColor;
-    ItemColor := $008CFFFF;
+    ItemColor   := cSearchHitMarkColor;
   end
-  else if (FTreeNodeObjects[GetID(Node)].SearchTermInChildren) or
-    ((Node.Parent <> Sender.RootNode) and (FTreeNodeObjects[GetID(Node.Parent)].SearchTermInChildren)) then
+  else if (FTreeNodeObjects[GetID(Node)].SearchTermInChildren) then
   begin
     EraseAction := eaColor;
-    ItemColor := $00CCFFCC;
+    ItemColor   := $00CCFFCC;
   end;
 end;
 
@@ -1463,7 +1364,7 @@ begin
   else
   begin
     aDelphiFile := FTreeNodeObjects[GetID(Node)].DelphiFile;
-    if (Column = 0) and (Sender.FocusedNode = Node) and (IsSearchHitNode(Node)) then
+    if (Column = 0) and (Sender.FocusedNode = Node) and (UnitsTreeIsSearchHitNode(Node)) then
       TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
 
     if not Sender.Selected[Node] then
@@ -1511,20 +1412,6 @@ begin
     end;
 end;
 
-function TfrmMain.IsSearchHitNode(Node: PVirtualNode): Boolean;
-var
-  aUnitInfo: IUnitInfo;
-begin
-  Result := false;
-
-  if Assigned(Node) then
-  begin
-    aUnitInfo := FTreeNodeObjects[GetID(Node)].DelphiFile.UnitInfo;
-    Result :=    (Pos(FSearchText, LowerCase(aUnitInfo.DelphiUnitName)) > 0)
-              or ((aUnitInfo.Module <> nil) and (Pos(FSearchText, LowerCase(aUnitInfo.Module.Name)) > 0));
-  end;
-end;
-
 procedure TfrmMain.actCloseProjectExecute(Sender: TObject);
 begin
   if (CheckNotRunning) and (CheckSaveProject) then
@@ -1535,24 +1422,14 @@ begin
   end;
 end;
 
-procedure TfrmMain.actCollapseAllExecute(Sender: TObject);
+procedure TfrmMain.actExitExecute(Sender: TObject);
 begin
-  vtUnitsTree.CollapseAll(nil);
-end;
-
-procedure TfrmMain.actCollapseExecute(Sender: TObject);
-begin
-  vtUnitsTree.Expanded[vtUnitsTree.FocusedNode] := FALSE;
+  Close;
 end;
 
 procedure TfrmMain.actExpandExecute(Sender: TObject);
 begin
   vtUnitsTree.ExpandAll(vtUnitsTree.FocusedNode);
-end;
-
-procedure TfrmMain.actExitExecute(Sender: TObject);
-begin
-  Close;
 end;
 
 procedure TfrmMain.actExpandAllExecute(Sender: TObject);
@@ -1561,9 +1438,35 @@ begin
 end;
 
 procedure TfrmMain.ExpandAll;
+var
+  OldCursor: TCursor;
 begin
-  vtUnitsTree.ExpandAll(nil);
-  vtUnitsTree.AutoFitColumns;
+  OldCursor := Screen.Cursor;
+  Screen.Cursor := crHourGlass;
+  try
+    vtUnitsTree.ExpandAll(nil);
+    vtUnitsTree.AutoFitColumns(False, smaUseColumnOption, 2, 10);
+  finally
+    Screen.Cursor := OldCursor;
+  end;
+end;
+
+procedure TfrmMain.actCollapseAllExecute(Sender: TObject);
+var
+  OldCursor: TCursor;
+begin
+  OldCursor := Screen.Cursor;
+  Screen.Cursor := crHourGlass;
+  try
+    vtUnitsTree.CollapseAll(nil);
+  finally
+    Screen.Cursor := OldCursor;
+  end;
+end;
+
+procedure TfrmMain.actCollapseExecute(Sender: TObject);
+begin
+  vtUnitsTree.Expanded[vtUnitsTree.FocusedNode] := FALSE;
 end;
 
 procedure TfrmMain.ActionManager1Update(Action: TBasicAction; var Handled: Boolean);
@@ -1615,7 +1518,9 @@ var
 begin
   DelphiFile := GetFocusedDelphiFile;
 
-  actShowUnitsNotInPath.Enabled := (not FBusy);
+  actShowUnitsNotInPath.Enabled     := (not FBusy) and (not actShowOnlyUnknownModules.Checked);
+  actShowOnlyUnknownModules.Enabled := not FBusy;
+
   actSaveChanges.Enabled := (not FBusy) and ((memParentFile.Modified) or (memSelectedFile.Modified) or
     (memListFile.Modified));
 
@@ -2082,7 +1987,7 @@ begin
     UpdateTreeControls(vtUnitsTree.FocusedNode);
     UpdateListControls(vtUnitsList.FocusedNode);
 
-    SearchList(vtUnitsList, edtSearchList.Text);
+    SearchUnitsList(vtUnitsList, edtSearchList.Text);
 
     vtUsedByUnits.Invalidate;
   end;
@@ -2202,6 +2107,22 @@ procedure TfrmMain.FillGUIFromModel;
 
   end;
 
+  procedure MarkAllParentsContainingUnknownModule(node: PVirtualNode);
+  var
+    ParentStepNode: PVirtualNode;
+  begin
+    ParentStepNode := Node.Parent;
+    while ParentStepNode <> vtUnitsTree.RootNode do
+    begin
+      if FTreeNodeObjects[GetID(ParentStepNode)].UnknownModuleInChildren then
+        Break
+      else
+        FTreeNodeObjects[GetID(ParentStepNode)].UnknownModuleInChildren := True;
+
+      ParentStepNode := ParentStepNode.Parent;
+    end;
+  end;
+
   procedure AddTreeNode(Parent: PVirtualNode; UsageType: TUsedUnitType; UnitOrProjectFileName: string);
   var
     DelphiFile: TDelphiFile;
@@ -2225,6 +2146,10 @@ procedure TfrmMain.FillGUIFromModel;
       UnitWasAddedForTheFirstTime := not Assigned(DelphiFile.BaseTreeNode);
       if UnitWasAddedForTheFirstTime then
          DelphiFile.BaseTreeNode := TreeNode;
+
+      // update the "" information for all parents
+      if DelphiFile.UnitInfo.Module = FModel.Modules.UnknownModule then
+        MarkAllParentsContainingUnknownModule(TreeNode);
 
       // Calc Circular Ref by walking up the tree
       if Parent = nil then
@@ -2335,8 +2260,8 @@ begin
     if vtUnitsList.FocusedNode = nil then
       vtUnitsList.SelectNodeEx(vtUnitsList.GetFirst);
   finally
-    vtUnitsTree.AutoFitColumns;
-    vtUnitsList.AutoFitColumns;
+    vtUnitsTree.AutoFitColumns(False, smaUseColumnOption, 2, 10);
+    vtUnitsList.AutoFitColumns(False, smaUseColumnOption, 1, 6);
     vtModules.AutoFitColumns;
 
     vtUnitsTree.EndUpdate;
@@ -2624,61 +2549,199 @@ begin
       SW_NORMAL);
 end;
 
-procedure TfrmMain.actShowOnlyUnknownModulesExecute(Sender: TObject);
-begin
-//  if actShowOnlyUnknownModules.Checked then TODO
-
-end;
-
-procedure TfrmMain.actShowUnitsNotInPathExecute(Sender: TObject);
-begin
-  ShowUnitsNotInPath;
-end;
-
-procedure TfrmMain.SetNodeVisibility(VT: TVirtualStringTree; Node: PVirtualNode; DelphiFile: TDelphiFile);
-begin
-  if (Node <> nil) and (DelphiFile <> nil) then
-    VT.IsVisible[Node] := (DelphiFile.InSearchPath) or
-      ((not DelphiFile.InSearchPath) and (actShowUnitsNotInPath.Checked));
-end;
-
-procedure TfrmMain.ShowUnitsNotInPath; // TODO: This seems to be doubled logic, compare with Search-Methods for tree and list...
+// search list "Unit list"
+procedure TfrmMain.SearchUnitsList(VT: TVirtualStringTree; const SearchText: String);
 var
   Node: PVirtualNode;
+  LowerSearchText: String;
+  DelphiFile: TDelphiFile;
+  InSearchPathOrShowAll,
+  UnitMatchesSearchTerm: Boolean;
 begin
-  vtUnitsTree.BeginUpdate;
+  VT.BeginUpdate;
   try
-    Node := vtUnitsTree.GetFirst;
+    LowerSearchText := LowerCase(SearchText);
+
+    Node := VT.GetFirst;
 
     while Node <> nil do
     begin
-      SetNodeVisibility(vtUnitsTree, Node, FTreeNodeObjects[GetID(Node)].DelphiFile);
+      DelphiFile := FModel.DelphiFileList[GetID(Node)];
 
-      Node := vtUnitsTree.GetNext(Node);
-    end;
+      InSearchPathOrShowAll := DelphiFile.InSearchPath or (not DelphiFile.InSearchPath and actShowUnitsNotInPath.Checked);
+      UnitMatchesSearchTerm := (LowerSearchText = '')
+                               or ((pos(LowerSearchText, LowerCase(DelphiFile.UnitInfo.DelphiUnitName)) <> 0))
+                               or ((DelphiFile.UnitInfo.Module <> nil) and (Pos(LowerSearchText, LowerCase(DelphiFile.UnitInfo.Module.Name)) > 0));
 
-    if vtUnitsTree.FocusedNode <> nil then
-      vtUnitsTree.ScrollIntoView(vtUnitsTree.FocusedNode, TRUE);
-  finally
-    vtUnitsTree.EndUpdate;
-  end;
-
-  vtUnitsList.BeginUpdate;
-  try
-    Node := vtUnitsList.GetFirst;
-
-    while Node <> nil do
-    begin
-      SetNodeVisibility(vtUnitsList, Node, FModel.DelphiFileList[GetID(Node)]);
+      VT.IsVisible[Node] :=  UnitMatchesSearchTerm and InSearchPathOrShowAll;
 
       Node := Node.NextSibling;
     end;
 
-    if vtUnitsList.FocusedNode <> nil then
-      vtUnitsList.ScrollIntoView(vtUnitsList.FocusedNode, TRUE);
+    VT.Invalidate;
   finally
-    vtUnitsList.EndUpdate;
+    VT.EndUpdate;
   end;
+end;
+
+procedure TfrmMain.SearchUnitsTree(const SearchText: String; FromFirstNode: Boolean);
+var
+  Node, EndNode, ParentStepNode: PVirtualNode;
+begin
+  vtUnitsTree.BeginUpdate;
+  try
+    FSearchText := LowerCase(SearchText);
+
+    if (vtUnitsTree.FocusedNode = nil) or (FromFirstNode) then
+    begin
+      Node := vtUnitsTree.GetFirst;
+
+      EndNode := nil;
+    end
+    else
+    begin
+      Node := vtUnitsTree.GetNext(vtUnitsTree.FocusedNode);
+
+      if Node = nil then
+        Node := vtUnitsTree.GetFirst;
+
+      EndNode := vtUnitsTree.GetPrevious(Node);
+    end;
+
+    while Node <> EndNode do
+    begin
+      if UnitsTreeIsSearchHitNode(Node) then
+      begin
+        if vtUnitsTree.IsVisible[Node] then
+        begin
+          vtUnitsTree.SelectNodeEx(Node, TRUE, TRUE);
+
+          if not FShowSearchTermParents then
+            Break;
+        end;
+
+        if FShowSearchTermParents then
+        begin
+          ParentStepNode := Node.Parent;
+
+          while ParentStepNode <> vtUnitsTree.RootNode do
+          begin
+            if FTreeNodeObjects[GetID(ParentStepNode)].SearchTermInChildren then
+              Break
+            else
+              FTreeNodeObjects[GetID(ParentStepNode)].SearchTermInChildren := TRUE;
+
+            ParentStepNode := ParentStepNode.Parent;
+          end;
+        end;
+      end
+      else
+        FTreeNodeObjects[GetID(Node)].SearchTermInChildren := FALSE;
+
+      Node := vtUnitsTree.GetNext(Node);
+
+      if (Node = nil) and (EndNode <> nil) then
+        Node := vtUnitsTree.GetFirst;
+    end;
+
+    vtUnitsTree.Invalidate;
+  finally
+    vtUnitsTree.EndUpdate;
+  end;
+end;
+
+function TfrmMain.UnitsTreeIsSearchHitNode(Node: PVirtualNode): Boolean;
+var
+  aUnitInfo: IUnitInfo;
+begin
+  Result := false;
+
+  if Assigned(Node) then
+  begin
+    aUnitInfo := FTreeNodeObjects[GetID(Node)].DelphiFile.UnitInfo;
+    Result :=    (Pos(FSearchText, LowerCase(aUnitInfo.DelphiUnitName)) > 0)
+              or ((aUnitInfo.Module <> nil) and (Pos(FSearchText, LowerCase(aUnitInfo.Module.Name)) > 0));
+  end;
+end;
+
+procedure TfrmMain.SetNodeVisibility(VT: TVirtualStringTree; Node: PVirtualNode; DelphiFile: TDelphiFile);
+var
+  aIsUnknownModule: Boolean;
+  aVisible: Boolean;
+begin
+  if (Node <> nil) and (DelphiFile <> nil) then
+  begin
+    aVisible := true;
+    if actShowOnlyUnknownModules.Checked then
+    begin
+      aIsUnknownModule := (DelphiFile.UnitInfo.Module = fModel.Modules.UnknownModule) or FTreeNodeObjects[GetID(Node)].UnknownModuleInChildren;
+      aVisible         := aIsUnknownModule;
+    end
+    else
+      if not actShowUnitsNotInPath.Checked then
+        aVisible := DelphiFile.InSearchPath;
+
+    VT.IsVisible[Node] := aVisible;
+  end;
+end;
+
+procedure TfrmMain.SetNodesVisibilityForAllNodes; // TODO: This seems to be doubled logic, compare with Search-Methods for tree and list...
+var
+  Node: PVirtualNode;
+  OldCursor: TCursor;
+begin
+  OldCursor := Screen.Cursor;
+  Screen.Cursor := crHourGlass;
+  try
+    // Update the units tree
+    vtUnitsTree.BeginUpdate;
+    try
+      Node := vtUnitsTree.GetFirst;
+      while Node <> nil do
+      begin
+        SetNodeVisibility(vtUnitsTree, Node, FTreeNodeObjects[GetID(Node)].DelphiFile);
+        Node := vtUnitsTree.GetNext(Node);
+      end;
+      if vtUnitsTree.FocusedNode <> nil then
+        vtUnitsTree.ScrollIntoView(vtUnitsTree.FocusedNode, TRUE);
+      vtUnitsTree.AutoFitColumns(False, smaUseColumnOption, 2, 10);
+    finally
+      vtUnitsTree.EndUpdate;
+    end;
+
+    // Update the units list
+    vtUnitsList.BeginUpdate;
+    try
+      Node := vtUnitsList.GetFirst;
+      while Node <> nil do
+      begin
+        SetNodeVisibility(vtUnitsList, Node, FModel.DelphiFileList[GetID(Node)]);
+        Node := Node.NextSibling;
+      end;
+      if vtUnitsList.FocusedNode <> nil then
+        vtUnitsList.ScrollIntoView(vtUnitsList.FocusedNode, TRUE);
+      vtUnitsList.AutoFitColumns(False, smaUseColumnOption, 1, 6);
+    finally
+      vtUnitsList.EndUpdate;
+    end;
+  finally
+    Screen.Cursor := OldCursor;
+  end;
+end;
+
+procedure TfrmMain.actShowOnlyUnknownModulesExecute(Sender: TObject);
+begin
+  // When this filter is activated, the "not in path" must be activated too, otherwise one could
+  // not see the "unknown module" units that are "not in path"
+  if actShowOnlyUnknownModules.Checked then
+    actShowUnitsNotInPath.Checked := true;
+
+  SetNodesVisibilityForAllNodes;
+end;
+
+procedure TfrmMain.actShowUnitsNotInPathExecute(Sender: TObject);
+begin
+  SetNodesVisibilityForAllNodes;
 end;
 
 procedure TfrmMain.tmrCloseTimer(Sender: TObject);
@@ -2727,21 +2790,21 @@ end;
 
 procedure TfrmMain.ClearStats;
 begin
-  FScannedUsesCount := 0;
+  FScannedUsesCount  := 0;
   FSemiCircularFiles := 0;
-  FCircularFiles := 0;
-  FParsedFileCount := 0;
-  FLineCount := 0;
-  FDeepestScanDepth := 0;
-  FScanDepth := 0;
-  FFMXFormCount := 0;
-  FVCLFormCount := 0;
-  FFilesNotInPath := 0;
+  FCircularFiles     := 0;
+  FParsedFileCount   := 0;
+  FLineCount         := 0;
+  FDeepestScanDepth  := 0;
+  FScanDepth         := 0;
+  FFMXFormCount      := 0;
+  FVCLFormCount      := 0;
+  FFilesNotInPath    := 0;
 end;
 
 procedure TfrmMain.edtSearchTreeChange(Sender: TObject);
 begin
-  SearchTree(edtSearchTree.Text, TRUE);
+  SearchUnitsTree(edtSearchTree.Text, TRUE);
 end;
 
 procedure TfrmMain.edtSearchTreeKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -2751,7 +2814,7 @@ begin
     Key := 00;
 
     if edtSearchTree.Text <> '' then
-      SearchTree(edtSearchTree.Text, FALSE);
+      SearchUnitsTree(edtSearchTree.Text, FALSE);
   end;
 end;
 

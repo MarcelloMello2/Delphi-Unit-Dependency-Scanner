@@ -103,7 +103,7 @@ object frmMain: TfrmMain
           Top = 0
           Width = 1182
           Height = 433
-          ActivePage = tabList
+          ActivePage = tabTree
           Align = alClient
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -189,7 +189,7 @@ object frmMain: TfrmMain
                   item
                     Position = 0
                     Text = 'Unit'
-                    Width = 350
+                    Width = 300
                   end
                   item
                     Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coResizable, coShowDropMark, coAllowFocus]
@@ -202,16 +202,22 @@ object frmMain: TfrmMain
                     Width = 70
                   end
                   item
+                    CaptionAlignment = taRightJustify
+                    Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coResizable, coShowDropMark, coVisible, coAllowFocus, coUseCaptionAlignment, coEditable, coStyleColor]
                     Position = 3
                     Text = 'LoC'
                     Width = 80
                   end
                   item
+                    CaptionAlignment = taRightJustify
+                    Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coResizable, coShowDropMark, coVisible, coAllowFocus, coUseCaptionAlignment, coEditable, coStyleColor]
                     Position = 4
                     Text = 'Used By Units'
                     Width = 80
                   end
                   item
+                    CaptionAlignment = taRightJustify
+                    Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coResizable, coShowDropMark, coVisible, coAllowFocus, coUseCaptionAlignment, coEditable, coStyleColor]
                     Position = 5
                     Text = 'Used Units'
                     Width = 80
