@@ -35,7 +35,8 @@ uses
   Duds.Common.Interfaces,
   Duds.Common.Refactoring,
   Duds.Refactoring.FormatUsesHelper,
-  Duds.Common.Parser.Pascal,
+  Duds.Common.UnitInfo,
+  Duds.Common.UsedUnitInfo,
   Duds.Scan.Model;
 
 type

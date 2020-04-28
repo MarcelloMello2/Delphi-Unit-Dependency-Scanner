@@ -62,11 +62,29 @@ type
     ftLIB
   );
 
+const
+  DelphiFileTypeStrings: Array[TDelphiFileType] of String = (
+    'Unknown',
+    'Pascal',
+    'Program',
+    'Package',
+    'Library'
+  );
+
+type
   TUsedUnitType = (
     utUnknown,
     utInterface,
     utImplementation,
     utContains
+  );
+const
+
+  UsesTypeStrings: Array[TUsedUnitType] of String = (
+    'Unknown',
+    'Interface',
+    'Implementation',
+    'Contains'
   );
 
 const

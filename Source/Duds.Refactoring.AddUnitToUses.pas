@@ -15,7 +15,8 @@ uses
   Duds.Common.Log,
   Duds.Common.Interfaces,
   Duds.Common.Refactoring,
-  Duds.Common.Parser.Pascal,
+  Duds.Common.UnitInfo,
+  Duds.Common.UsedUnitInfo,
   Duds.Scan.Model;
 
 type

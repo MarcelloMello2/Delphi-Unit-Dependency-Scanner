@@ -3,13 +3,14 @@ unit Duds.Common.UsesParser;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.Generics.Collections,
+  System.SysUtils, System.Classes, System.Generics.Collections, IOUtils,
 
   Duds.Common.Utils,
   Duds.Common.Files,
   Duds.Common.Types,
   Duds.Common.Interfaces,
-  Duds.Common.Parser.Pascal,
+  Duds.Common.UnitInfo,
+  Duds.Common.UsedUnitInfo,
   Duds.Common.Log,
   Duds.Common.Language,
   Duds.Modules.Classes,
@@ -21,6 +22,12 @@ type
   TUsesLexer = class(TmwPasLex)
   private
     fCurrentUsesType: TUsedUnitType;
+
+    fLoC_Count: integer;
+    fLoC_HasCodeInLine: Boolean;
+    fLoC_ReachedTheEnd: Boolean;
+
+    function GetLinesOfCode: integer;
   public
     constructor Create;
 
@@ -30,13 +37,35 @@ type
     function ProceedToNextContains: Boolean;
     function ProceedToNextUses: Boolean;
 
+    procedure Next;
+
     property CurrentUsesType: TUsedUnitType read fCurrentUsesType;
+    property LinesOfCode: integer read GetLinesOfCode; // this is only defined after a complete lexing until the end of the file (ptNull)
+  end;
+
+  TUsesParserIncludeHandler = class(TInterfacedObject, IIncludeHandler)
+  private
+    fFileName: string;
+    FOnLog: TLogProcedure;
+    fAlreadyLoggedMissingIncludes: TStringlist;
+
+    procedure Log(const Msg: String; const Severity: Integer = LogInfo); overload;
+    procedure Log(const Msg: String; const Args: array of const; const Severity: Integer); overload;
+  public
+    constructor Create(const FileName: string; OnLog: TLogProcedure;
+        AlreadyLoggedMissingIncludes: TStringList);
+    function GetIncludeFileContent(const ParentFileName, IncludeName: string; out Content: string;
+      out FileName: string): Boolean;
+
+    property OnLog: TLogProcedure read FOnLog    write FOnLog;
+    property AlreadyLoggedMissingIncludes: TStringlist read fAlreadyLoggedMissingIncludes write fAlreadyLoggedMissingIncludes;
   end;
 
   TUsesParser = class
   private
     fUsesLexer: TUsesLexer;
     FOnLog: TLogProcedure;
+    fAlreadyLoggedMissingIncludes: TStringlist;
 
     procedure Log(const Msg: String; const Severity: Integer = LogInfo); overload;
     procedure Log(const Msg: String; const Args: array of const; const Severity: Integer); overload;
@@ -45,6 +74,7 @@ type
 
     function ConsumeDottyIdentifier(aLexer: TUsesLexer): string;
     procedure ReadUses(UnitInfo: IUnitInfo; UsesType: TUsedUnitType);
+    function GetLinesOfCode: integer;
   public
     constructor Create;
     destructor Destroy; override;
@@ -53,6 +83,8 @@ type
     function GetUsedUnitsFromFile(const UnitFileName: String; var UnitInfo: IUnitInfo): Boolean;
 
     property OnLog: TLogProcedure read FOnLog    write FOnLog;
+    property AlreadyLoggedMissingIncludes: TStringlist read fAlreadyLoggedMissingIncludes write fAlreadyLoggedMissingIncludes;
+    property LinesOfCode: integer read GetLinesOfCode;
 
   end;
 
@@ -63,8 +95,45 @@ implementation
 constructor TUsesLexer.Create;
 begin
   inherited Create;
-  fCurrentUsesType := utUnknown;
-  UseDefines       := false; // we want to see all tokens, so do not activate compiler switch logic
+  fCurrentUsesType   := utUnknown;
+  UseDefines         := false; // we want to see all tokens, so do not activate compiler switch logic
+  fLoC_Count       := 0;
+  fLoC_HasCodeInLine := false;
+  fLoC_ReachedTheEnd     := false;
+end;
+
+// next with counting "lines of code"
+function TUsesLexer.GetLinesOfCode: integer;
+begin
+  if fLoC_ReachedTheEnd then
+    Result := fLoC_Count
+  else
+    Result := 0;
+end;
+
+// hides ".Next" of base class, implements "real lines of code" counting
+procedure TUsesLexer.Next;
+begin
+  inherited Next;
+
+  case TokenID of
+    ptCRLF :
+      begin
+        if fLoC_HasCodeInLine then
+          Inc(fLoC_Count); // ptCRLFco would occur for crlf inside a comment => don't count
+        fLoC_HasCodeInLine := false;
+      end;
+    ptNull :
+      begin
+        if fLoC_HasCodeInLine then
+          Inc(fLoC_Count);
+        fLoC_ReachedTheEnd := true;
+      end
+  else
+    if not fLoC_HasCodeInLine then
+      if not IsJunk then
+        fLoC_HasCodeInLine := true;
+  end;
 end;
 
 procedure TUsesLexer.ProceedToFileType;
@@ -99,6 +168,57 @@ begin
     end;
   end;
   Result := GenID = ptUses;
+end;
+
+{ TUsesParserIncludeHandler }
+
+constructor TUsesParserIncludeHandler.Create(const FileName: string; OnLog: TLogProcedure; AlreadyLoggedMissingIncludes: TStringList);
+begin
+  inherited Create;
+  fFileName                     := FileName;
+  FOnLog                        := OnLog;
+  fAlreadyLoggedMissingIncludes := AlreadyLoggedMissingIncludes;
+end;
+
+procedure TUsesParserIncludeHandler.Log(const Msg: String; const Severity: Integer);
+begin
+  if Assigned(FOnLog) then
+    FOnLog('Uses Parser: ' + Msg, Severity);
+end;
+
+procedure TUsesParserIncludeHandler.Log(const Msg: String; const Args: array of const; const Severity: Integer);
+begin
+  Log(Format(Msg, Args), Severity);
+end;
+
+function TUsesParserIncludeHandler.GetIncludeFileContent(const ParentFileName,
+  IncludeName: string; out Content, FileName: string): Boolean;
+var
+  IncludeFileName: string;
+  FileContent: TStringList;
+begin
+  FileContent := TStringList.Create;
+  try
+    IncludeFileName := TPath.Combine(ExtractFilePath(fFileName), IncludeName.TrimStart(['''']).TrimEnd(['''']));
+    if not FileExists(IncludeFileName) then
+    begin
+      Result := False;
+      if fAlreadyLoggedMissingIncludes.IndexOf(IncludeFileName.ToLower) = -1 then
+      begin
+        Log('Could not resolve include in file "%s" - "%s" not found (searching only in same path)', [fFileName, IncludeName], LogWarning);
+        fAlreadyLoggedMissingIncludes.Add(IncludeFileName.ToLower);
+      end;
+      Exit;
+    end;
+
+    FileContent.LoadFromFile(IncludeFileName);
+    Content := FileContent.Text;
+    FileName := IncludeFileName;
+
+    Result := True;
+  finally
+    FileContent.Free;
+  end;
 end;
 
 { TUsesParser }
@@ -136,10 +256,11 @@ begin
     case fUsesLexer.GenId of
       ptIdentifier:
         begin
-          UsedUnitInfo                := TUsedUnitInfo.Create;
-          UsedUnitInfo.Position       := fUsesLexer.TokenPos; // TODO: Should be point
-          UsedUnitInfo.DelphiUnitName := ConsumeDottyIdentifier(fUsesLexer);
-          UsedUnitInfo.UsesType       := UsesType;
+          UsedUnitInfo                     := TUsedUnitInfo.Create;
+          UsedUnitInfo.Position            := fUsesLexer.TokenPos;
+          UsedUnitInfo.IsInIncludeFileName := fUsesLexer.FileName; // .FileName is empty, when we are NOT in an inlcude file
+          UsedUnitInfo.DelphiUnitName      := ConsumeDottyIdentifier(fUsesLexer);
+          UsedUnitInfo.UsesType            := UsesType;
           UnitInfo.UsedUnits.Add(UsedUnitInfo);
 
           // after consuming the (dotty)name, we may already have reached the end of this uses entry
@@ -172,7 +293,7 @@ begin
               if PathToken.EndsWith(UnitNameWithExtension, true) then
               begin
                 PosOfUnitNameInPath          := Length(PathToken) - Length(UnitNameWithExtension);
-                UsedUnitInfo.InFilePosition  := fUsesLexer.AheadLex.TokenPos + PosOfUnitNameInPath;  // start position of the unit name in the path string const  // TODO: Should be point
+                UsedUnitInfo.InFilePosition  := fUsesLexer.AheadLex.TokenPos + PosOfUnitNameInPath;  // start position of the unit name in the path string const
               end
               else
               begin
@@ -197,7 +318,9 @@ begin
   UnitInfo.Filename := UnitFileName;
 
   fUsesLexer.Origin := Source;
-  // TODO: Set File name in include handler, lexer.filename is empty when in "main" file
+
+  // create an include handler
+  fUsesLexer.IncludeHandler       := TUsesParserIncludeHandler.Create(UnitFileName, FOnLog, fAlreadyLoggedMissingIncludes);
 
   // step 1: determine file type by file content -> "uses", "program", "package", ...
   fUsesLexer.ProceedToFileType;
@@ -221,10 +344,8 @@ begin
   if fUsesLexer.GenID = ptNull then
     raise Exception.Create('file name identifier not found');
 
-  UnitInfo.DelphiUnitNamePosition := fUsesLexer.TokenPos; //  TODO: transform to "point" information - unit name is not always in the first line!!!
+  UnitInfo.DelphiUnitNamePosition := fUsesLexer.TokenPos;
   UnitInfo.DelphiUnitName         := ConsumeDottyIdentifier(fUsesLexer);
-
-//  UnitInfo.LineCount := UnitStrings.Count; // TODO: Calc real "lines of code" - don't count comments
 
   case UnitInfo.DelphiFileType of
     ftPAS:
@@ -245,6 +366,9 @@ begin
           ReadUses(UnitInfo, utContains);
       end;
   end;
+
+  // "lines of code" gets calculated while parsing, so we can only receive it down here
+  UnitInfo.LinesOfCode := fUsesLexer.LinesOfCode;
 end;
 
 constructor TUsesParser.Create;
@@ -283,6 +407,11 @@ begin
   end
   else
     Result := StringStream.Encoding.GetString(StringStream.Bytes, 0, StringStream.Size);
+end;
+
+function TUsesParser.GetLinesOfCode: integer;
+begin
+  Result := fUsesLexer.LinesOfCode;
 end;
 
 function TUsesParser.GetUsedUnitsFromFile(const UnitFileName: String; var UnitInfo: IUnitInfo): Boolean;

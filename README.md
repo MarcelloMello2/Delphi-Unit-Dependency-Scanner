@@ -5,6 +5,8 @@ The Delphi Unit Dependency Scanner (or DUDS as it has become known) parses a Del
 
 ## Analysis Features
 
+**docs for v.3? "module support" features missing here!**
+
 The uses hierarchy can be displayed in several different ways, searched and sorted.
 
 The unit relationships can be exported in several formats - XML, Gephi CSV and GraphML.
@@ -40,7 +42,7 @@ This project was originally developen by Paul Spencer Thornton and the repositor
 ## Parsing & Compiler Switches
 
 Parsing of the uses lists does not respect compiler switches. This is useful for renaming across multiple projects with different switches set and not considered as a bug.
-Parsing is "handmade" and implemented to only recognize uses lists. Using a tokenizer/parser like [DelphiAST](https://github.com/RomanYankovsky/DelphiAST) would leed to better compatibility / less parsing errors but it would also take away the advantage of "ignoring compiler switches".
+Parsing uses the lexer (NOT the parser) from [DelphiAST](https://github.com/RomanYankovsky/DelphiAST).
 
 ## Requirements
 
@@ -48,6 +50,8 @@ DUDS is built with Delphi 10.3.3. The following 3rd party libraries are required
 
 - VirtualTreeView
 - SynEdit
+
+3rd party code from DelphiAST is included in the repository.
 
 ## Usage
 

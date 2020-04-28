@@ -54,7 +54,8 @@ uses
   Duds.Common.Strings,
   Duds.Common.Utils,
   Duds.Common.Interfaces,
-  Duds.Common.Parser.Pascal,
+  Duds.Common.UnitInfo,
+  Duds.Common.UsedUnitInfo,
   Duds.Common.Refactoring,
   Duds.Common.Language,
   Duds.Common.Log,
@@ -225,6 +226,9 @@ type
     procedure edtSearchEditChange(Sender: TObject);
     procedure vtUnitsTreePaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;
       Column: TColumnIndex; TextType: TVSTTextType);
+    procedure vtUnitsTreeDrawText(Sender: TBaseVirtualTree; TargetCanvas: TCanvas;
+        Node: PVirtualNode; Column: TColumnIndex; const Text: string; const
+        CellRect: TRect; var DefaultDraw: Boolean);      
     procedure vtUnitsTreeBeforeItemErase(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
       ItemRect: TRect; var ItemColor: TColor; var EraseAction: TItemEraseAction);
     procedure vtUnitsTreeFocusChanged(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
@@ -300,8 +304,14 @@ type
     procedure actRemoveUnUsedUnitsExecute(Sender: TObject);
     procedure actRemoveUnusedUnitsProcessPalOutputExecute(Sender: TObject);
     procedure actFormatUsesOfFileExecute(Sender: TObject);
+    procedure vtModulesDrawText(Sender: TBaseVirtualTree; TargetCanvas: TCanvas;
+        Node: PVirtualNode; Column: TColumnIndex; const Text: string; const
+        CellRect: TRect; var DefaultDraw: Boolean);
     procedure vtModulesGetText(Sender: TBaseVirtualTree; Node: PVirtualNode;
         Column: TColumnIndex; TextType: TVSTTextType; var CellText: string);
+    procedure vtUnitsListDrawText(Sender: TBaseVirtualTree; TargetCanvas:
+        TCanvas; Node: PVirtualNode; Column: TColumnIndex; const Text: string;
+        const CellRect: TRect; var DefaultDraw: Boolean);
   private
     FModel: TDudsModel;
     FDependencyAnalyzer: TDudsDependencyAnalyzer;
@@ -384,6 +394,7 @@ type
     procedure FixDPI;
     function CompareTwoModulesTreeNodes(aDelphiFile1,
       aDelphiFile2: TDelphiFile): Integer;
+    procedure SetupUnitsListsColumns(tree: TVirtualStringTree);
 
     property Modified: Boolean read FModified write SetModified;
   end;
@@ -398,6 +409,12 @@ uses
   Duds.Vcl.Form.Settings,
   Duds.Vcl.Form.FindReplace,
   Duds.Vcl.Form.AddUnitToUses;
+
+const
+  cNotInSearchpathForegroundColor = clGray;
+
+  cUnknownModuleBackgroundColor   = $000021DB;
+  cUnknownModuleForegroundColor   = $00FAFAFA;
 
 {$R *.dfm}
 
@@ -464,16 +481,65 @@ begin
   end;
 end;
 
+const
+  cvtUnitsList_ColumnIdx_Unit              = 0;
+  cvtUnitsList_ColumnIdx_FileType          = 1;
+  cvtUnitsList_ColumnIdx_LoC               = 2;
+  cvtUnitsList_ColumnIdx_UsedByUnits_Count = 3;
+  cvtUnitsList_ColumnIdx_UsedUnits_Count   = 4;
+  cvtUnitsList_ColumnIdx_FileName          = 5;
+  cvtUnitsList_ColumnIdx_Module            = 6;
+
+procedure TfrmMain.SetupUnitsListsColumns(tree: TVirtualStringTree);
+var
+  aColumn: TVirtualTreeColumn;
+begin
+  tree.Header.Columns.Clear;
+
+  aColumn           := tree.Header.Columns.Add; // Column Index 0
+  aColumn.Text      := 'Unit';
+
+  aColumn           := tree.Header.Columns.Add; // Column Index 1
+  aColumn.Text      := 'File Type';
+
+  aColumn           := tree.Header.Columns.Add; // Column Index 2
+  aColumn.Text      := 'LoC';
+  aColumn.Alignment := taRightJustify;
+
+  aColumn           := tree.Header.Columns.Add; // Column Index 3
+  aColumn.Text      := 'Used By Units';
+  aColumn.Alignment := taRightJustify;
+
+  aColumn           := tree.Header.Columns.Add; // Column Index 4
+  aColumn.Text      := 'Used Units';
+  aColumn.Alignment := taRightJustify;
+
+  aColumn           := tree.Header.Columns.Add; // Column Index 5
+  aColumn.Text      := 'Filename';
+
+  aColumn           := tree.Header.Columns.Add; // Column Index 6
+  aColumn.Text      := 'Module';
+  aColumn.Position  := 5; // bring before 'Filename'
+end;
+
 procedure TfrmMain.FormCreate(Sender: TObject);
 begin
   pcSource.ActivePageIndex := 0;
   pcView.ActivePageIndex := 0;
   pcList.ActivePageIndex := 0;
 
-  vtUnitsList.NodeDataSize := SizeOf(TNodeData);
+  // Units tree
   vtUnitsTree.NodeDataSize := SizeOf(TNodeData);
+
+  // Units lists (3x)
+  vtUnitsList.NodeDataSize   := SizeOf(TNodeData);
+  SetupUnitsListsColumns(vtUnitsList);
   vtUsedByUnits.NodeDataSize := SizeOf(TNodeData);
-  vtUsesUnits.NodeDataSize := SizeOf(TNodeData);
+  SetupUnitsListsColumns(vtUsedByUnits);
+  vtUsesUnits.NodeDataSize   := SizeOf(TNodeData);
+  SetupUnitsListsColumns(vtUsesUnits);
+
+
   vtStats.NodeDataSize := SizeOf(TNodeData);
   vtModules.NodeDataSize := SizeOf(TNodeData);
 
@@ -902,7 +968,7 @@ begin
       Result := CompareStr(DelphiFileTypeStrings[NodeObject1.DelphiFile.UnitInfo.DelphiFileType],
         DelphiFileTypeStrings[NodeObject2.DelphiFile.UnitInfo.DelphiFileType]);
     3:
-      Result := CompareInteger(NodeObject1.DelphiFile.UnitInfo.LineCount, NodeObject2.DelphiFile.UnitInfo.LineCount);
+      Result := CompareInteger(NodeObject1.DelphiFile.UnitInfo.LinesOfCode, NodeObject2.DelphiFile.UnitInfo.LinesOfCode);
     4:
       Result := CompareInteger(NodeObject1.DelphiFile.UsedCount, NodeObject2.DelphiFile.UsedCount);
     5:
@@ -962,6 +1028,7 @@ procedure TfrmMain.UpdateTreeControls(Node: PVirtualNode);
 var
   ParentFileInfo: IUnitInfo;
   UsedUnitInfo: IUsedUnitInfo;
+  ParentFileNameToShow: string;
 begin
   SetNodePathRichEdit(Node, RichEditUnitPath);
 
@@ -983,12 +1050,16 @@ begin
     if (Node.Parent <> vtUnitsTree.RootNode) and (FileExists(FTreeNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo.Filename))
     then
     begin
-      ParentFileInfo := FTreeNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo;
+      ParentFileInfo       := FTreeNodeObjects[GetID(Node.Parent)].DelphiFile.UnitInfo;
+      ParentFileNameToShow := ParentFileInfo.Filename;
+
       UsedUnitInfo := ParentFileInfo.UsedUnits[GetNodeIndex(Node)];
 
-      tabParentFile.Caption := ExtractFileName(ParentFileInfo.Filename);
+      if not UsedUnitInfo.IsInIncludeFileName.IsEmpty then
+        ParentFileNameToShow := UsedUnitInfo.IsInIncludeFileName;
 
-      memParentFile.Lines.LoadFromFile(ParentFileInfo.Filename);
+      tabParentFile.Caption := ExtractFileName(ParentFileNameToShow);
+      memParentFile.Lines.LoadFromFile(ParentFileNameToShow);
 
       memParentFile.SelStart := UsedUnitInfo.Position;
       if UsedUnitInfo.InFilePosition > 0 then
@@ -1142,8 +1213,8 @@ begin
           CellText := DelphiFileTypeStrings[UnitInfo.DelphiFileType];
 
       3:
-        if UnitInfo.LineCount > 0 then
-          CellText := IntToStr(UnitInfo.LineCount);
+        if UnitInfo.LinesOfCode > 0 then
+          CellText := IntToStr(UnitInfo.LinesOfCode);
 
       4:
         CellText := IntToStr(DelphiFile.UsedCount);
@@ -1205,40 +1276,6 @@ begin
   end;
 end;
 
-procedure TfrmMain.vtUnitsListCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
-  var Result: Integer);
-var
-  idx1, idx2: Integer;
-  DelphiFile1, DelphiFile2: TDelphiFile;
-begin
-  idx1 := GetID(Node1);
-  idx2 := GetID(Node2);
-
-  if (idx1 <> -1) and (idx2 <> -1) then
-  begin
-    DelphiFile1 := FModel.DelphiFileList[idx1];
-    DelphiFile2 := FModel.DelphiFileList[idx2];
-
-    case Column of
-      0:
-        Result := CompareStr(DelphiFile1.UnitInfo.DelphiUnitName, DelphiFile2.UnitInfo.DelphiUnitName);
-      1:
-        Result := CompareStr(DelphiFileTypeStrings[DelphiFile1.UnitInfo.DelphiFileType],
-          DelphiFileTypeStrings[DelphiFile2.UnitInfo.DelphiFileType]);
-      2:
-        Result := CompareInteger(DelphiFile1.UnitInfo.LineCount, DelphiFile2.UnitInfo.LineCount);
-      3:
-        Result := CompareInteger(DelphiFile1.UsedCount, DelphiFile2.UsedCount);
-      4:
-        Result := CompareInteger(DelphiFile1.UnitInfo.UsedUnits.Count, DelphiFile2.UnitInfo.UsedUnits.Count);
-      5:
-        Result := CompareStr(DelphiFile1.UnitInfo.Filename, DelphiFile2.UnitInfo.Filename);
-      6:
-        Result := CompareTwoModulesTreeNodes(DelphiFile1, DelphiFile2);
-    end;
-  end;
-end;
-
 procedure TfrmMain.vtUnitsListDblClick(Sender: TObject);
 begin
   if TVirtualStringTree(Sender).FocusedNode <> nil then
@@ -1273,6 +1310,9 @@ begin
 
     SearchUnitsListChildList(vtUsedByUnits, edtSearchUsedByList.Text, TRUE);
     SearchUnitsListChildList(vtUsesUnits, edtSearchUsesList.Text, FALSE);
+
+    vtUsedByUnits.AutoFitColumns;
+    vtUsesUnits.AutoFitColumns;
   end;
 end;
 
@@ -1298,6 +1338,46 @@ begin
   end;
 end;
 
+procedure TfrmMain.vtUnitsListCompareNodes(Sender: TBaseVirtualTree; Node1, Node2: PVirtualNode; Column: TColumnIndex;
+  var Result: Integer);
+var
+  idx1, idx2: Integer;
+  DelphiFile1, DelphiFile2: TDelphiFile;
+begin
+  idx1 := GetID(Node1);
+  idx2 := GetID(Node2);
+
+  if (idx1 <> -1) and (idx2 <> -1) then
+  begin
+    DelphiFile1 := FModel.DelphiFileList[idx1];
+    DelphiFile2 := FModel.DelphiFileList[idx2];
+
+    case Column of
+      cvtUnitsList_ColumnIdx_Unit:
+        Result := CompareStr(DelphiFile1.UnitInfo.DelphiUnitName, DelphiFile2.UnitInfo.DelphiUnitName);
+
+      cvtUnitsList_ColumnIdx_FileType:
+        Result := CompareStr(DelphiFileTypeStrings[DelphiFile1.UnitInfo.DelphiFileType],
+          DelphiFileTypeStrings[DelphiFile2.UnitInfo.DelphiFileType]);
+
+      cvtUnitsList_ColumnIdx_LoC:
+        Result := CompareInteger(DelphiFile1.UnitInfo.LinesOfCode, DelphiFile2.UnitInfo.LinesOfCode);
+
+      cvtUnitsList_ColumnIdx_UsedByUnits_Count:
+        Result := CompareInteger(DelphiFile1.UsedCount, DelphiFile2.UsedCount);
+
+      cvtUnitsList_ColumnIdx_UsedUnits_Count:
+        Result := CompareInteger(DelphiFile1.UnitInfo.UsedUnits.Count, DelphiFile2.UnitInfo.UsedUnits.Count);
+
+      cvtUnitsList_ColumnIdx_FileName:
+        Result := CompareStr(DelphiFile1.UnitInfo.Filename, DelphiFile2.UnitInfo.Filename);
+
+      cvtUnitsList_ColumnIdx_Module:
+        Result := CompareTwoModulesTreeNodes(DelphiFile1, DelphiFile2);
+    end;
+  end;
+end;
+
 procedure TfrmMain.vtUnitsListGetText(Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex;
   TextType: TVSTTextType; var CellText: string);
 var
@@ -1310,30 +1390,55 @@ begin
   UnitInfo   := DelphiFile.UnitInfo;
 
   case Column of
-    0:
+    cvtUnitsList_ColumnIdx_Unit:
       CellText := UnitInfo.DelphiUnitName;
-    1:
+
+    cvtUnitsList_ColumnIdx_FileType:
       if DelphiFile.InSearchPath then
         CellText := DelphiFileTypeStrings[UnitInfo.DelphiFileType];
-    2:
-      CellText := IntToStr(UnitInfo.LineCount);
-    3:
+
+    cvtUnitsList_ColumnIdx_LoC:
+      CellText := IntToStr(UnitInfo.LinesOfCode);
+
+    cvtUnitsList_ColumnIdx_UsedByUnits_Count:
       CellText := IntToStr(DelphiFile.UsedCount);
-    4:
+
+    cvtUnitsList_ColumnIdx_UsedUnits_Count:
       CellText := IntToStr(DelphiFile.UnitInfo.UsedUnits.Count);
-    5:
+
+    cvtUnitsList_ColumnIdx_FileName:
       CellText := UnitInfo.Filename;
-    6:
+
+    cvtUnitsList_ColumnIdx_Module:
       if Assigned(UnitInfo.Module) then
         CellText := UnitInfo.Module.Name;
   end;
+end;
+
+procedure TfrmMain.vtUnitsListDrawText(Sender: TBaseVirtualTree;
+    TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex; const
+    Text: string; const CellRect: TRect; var DefaultDraw: Boolean);
+var
+  aDelphiFile: TDelphiFile;
+begin
+  // highlight "unknown modules"
+  if Column = cvtUnitsList_ColumnIdx_Module then
+    if not Sender.Selected[Node] then
+    begin
+      aDelphiFile := FModel.DelphiFileList[GetID(Node)];
+      if aDelphiFile.UnitInfo.Module = FModel.Modules.UnknownModule then
+      begin
+        TargetCanvas.Brush.Color := cUnknownModuleBackgroundColor;
+        TargetCanvas.Font.Color  := cUnknownModuleForegroundColor;
+      end;
+    end;
 end;
 
 procedure TfrmMain.vtUnitsListPaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;
   Column: TColumnIndex; TextType: TVSTTextType);
 begin
   if (not Sender.Selected[Node]) and (not FModel.DelphiFileList[GetID(Node)].InSearchPath) then
-    TargetCanvas.Font.Color := clGray;
+    TargetCanvas.Font.Color := cNotInSearchpathForegroundColor;
 end;
 
 procedure TfrmMain.vtUnitsListSearchComparison(Sender: TObject; Node: PVirtualNode; const SearchTerms: TStrings;
@@ -1355,6 +1460,8 @@ end;
 
 procedure TfrmMain.vtUnitsTreePaintText(Sender: TBaseVirtualTree; const TargetCanvas: TCanvas; Node: PVirtualNode;
   Column: TColumnIndex; TextType: TVSTTextType);
+var
+  aDelphiFile: TDelphiFile;
 begin
   if TextType = ttStatic then
   begin
@@ -1363,24 +1470,26 @@ begin
   end
   else
   begin
+    aDelphiFile := FTreeNodeObjects[GetID(Node)].DelphiFile;
     if (Column = 0) and (Sender.FocusedNode = Node) and (IsSearchHitNode(Node)) then
       TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
 
     if not Sender.Selected[Node] then
     begin
-      if not FTreeNodeObjects[GetID(Node)].DelphiFile.InSearchPath then
-        TargetCanvas.Font.Color := clGray
+      if not aDelphiFile.InSearchPath then
+        TargetCanvas.Font.Color := cNotInSearchpathForegroundColor
       else if FTreeNodeObjects[GetID(GetLinkedNode(Node))].DelphiFile.UnitInfo.DelphiFileType = ftUnknown then
         TargetCanvas.Font.Color := clRed;
     end;
 
+    // highlight "linked" nodes
     if Column = 0 then
     begin
       if FTreeNodeObjects[GetID(Node)].Link <> nil then
       begin
         if not Sender.Selected[Node] then
         begin
-          if FTreeNodeObjects[GetID(Node)].DelphiFile.InSearchPath then
+          if aDelphiFile.InSearchPath then
             TargetCanvas.Font.Color := clBlue
           else
             TargetCanvas.Font.Color := $00FEC9B1;
@@ -1390,6 +1499,24 @@ begin
       end;
     end;
   end;
+end;
+
+procedure TfrmMain.vtUnitsTreeDrawText(Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
+  Column: TColumnIndex; const Text: string; const CellRect: TRect; var DefaultDraw: Boolean);
+var
+  aDelphiFile: TDelphiFile;
+begin
+  // highlight "unknown modules"
+  if Column = 10 then // Column = 'Modules'
+    if not Sender.Selected[Node] then
+    begin
+      aDelphiFile := FTreeNodeObjects[GetID(Node)].DelphiFile;
+      if aDelphiFile.UnitInfo.Module = FModel.Modules.UnknownModule then
+      begin
+        TargetCanvas.Brush.Color := cUnknownModuleBackgroundColor;
+        TargetCanvas.Font.Color  := cUnknownModuleForegroundColor;
+      end;
+    end;
 end;
 
 function TfrmMain.IsSearchHitNode(Node: PVirtualNode): Boolean;
@@ -1444,8 +1571,7 @@ end;
 procedure TfrmMain.ExpandAll;
 begin
   vtUnitsTree.ExpandAll(nil);
-
-  vtUnitsTree.AutoFitColumns
+  vtUnitsTree.AutoFitColumns;
 end;
 
 procedure TfrmMain.ActionManager1Update(Action: TBasicAction; var Handled: Boolean);
@@ -2012,7 +2138,7 @@ var
             XMLNode.Attributes['Name'] := DelphiFile.UnitInfo.DelphiUnitName;
             XMLNode.Attributes['UsedCount'] := DelphiFile.UsedCount.ToString;
             XMLNode.Attributes['InSearchPath'] := DelphiFile.InSearchPath;
-            XMLNode.Attributes['LineCount'] := DelphiFile.UnitInfo.LineCount;
+            XMLNode.Attributes['LineCount'] := DelphiFile.UnitInfo.LinesOfCode;
             XMLNode.Attributes['UnitNameCharPosition'] := DelphiFile.UnitInfo.DelphiUnitNamePosition;
             XMLNode.Attributes['FileType'] := DelphiFileTypeStrings[DelphiFile.UnitInfo.DelphiFileType];
 
@@ -2205,6 +2331,7 @@ begin
   vtUnitsList.BeginUpdate;
   vtUsedByUnits.BeginUpdate;
   vtUsesUnits.BeginUpdate;
+  vtModules.BeginUpdate;
   try
     FillTreeAndCalcCircularReferences;
     FillLists;
@@ -2216,12 +2343,15 @@ begin
     if vtUnitsList.FocusedNode = nil then
       vtUnitsList.SelectNodeEx(vtUnitsList.GetFirst);
   finally
-    ExpandAll;
+    vtUnitsTree.AutoFitColumns;
+    vtUnitsList.AutoFitColumns;
+    vtModules.AutoFitColumns;
 
     vtUnitsTree.EndUpdate;
     vtUnitsList.EndUpdate;
     vtUsedByUnits.EndUpdate;
     vtUsesUnits.EndUpdate;
+    vtModules.EndUpdate;
 
     UpdateListControls(vtUnitsList.FocusedNode);
   end;
@@ -2271,7 +2401,7 @@ begin
       FileScanner := TDudsFileScanner.Create;
       try
         FileScanner.LoadFilesInSearchPaths(FModel, FProjectSettings);
-        Log(StrDFilesFound, [FModel.Files.Count]);
+        Log(StrDFilesFound, [FormatCardinal(FModel.Files.Count)]);
       finally
         FreeAndNil(FileScanner);
       end;
@@ -2291,7 +2421,7 @@ begin
           FDeepestScanDepth  := FDependencyAnalyzer.DeepestScanDepth;
           FFMXFormCount      := FDependencyAnalyzer.FMXFormCount;
           FVCLFormCount      := FDependencyAnalyzer.VCLFormCount;
-          FLineCount         := FDependencyAnalyzer.LineCount;
+          FLineCount         := FDependencyAnalyzer.LinesOfCode;
           FSemiCircularFiles := FDependencyAnalyzer.SemiCircularFiles;
           FCircularFiles     := FDependencyAnalyzer.CircularFiles;
           FFilesNotInPath    := FDependencyAnalyzer.FilesNotInPath;
@@ -2304,19 +2434,19 @@ begin
       //   at this point, all unit that were "seen" (by root files, search paths
       //   or parsing units) are identified
       TModulesAnalyzer.MapUnitsToModules(FModel, aUnitsTotal, aUnitsInModules);
-      Log(StrModulesIdentified, [aUnitsInModules, aUnitsTotal]);
+      Log(StrModulesIdentified, [FormatCardinal(aUnitsInModules), FormatCardinal(aUnitsTotal)]);
 
       // step 5: fill gui trees with data
       if not FCancelled then
         FillGUIFromModel;
     finally
-      UpdateLogEntries;
       FBusy := FALSE;
 
       actStartScan.Visible := TRUE;
       actStopScan.Visible := FALSE;
 
       ShowHideControls;
+      UpdateLogEntries;
 
       UpdateStats(TRUE);
       UpdateTreeControls(vtUnitsTree.FocusedNode);
@@ -2698,6 +2828,26 @@ begin
           CellText := FormatCardinal(aModule.AnalysisData.LinesOfCode);
     end;
   end;
+end;
+
+procedure TfrmMain.vtModulesDrawText(Sender: TBaseVirtualTree; TargetCanvas:
+    TCanvas; Node: PVirtualNode; Column: TColumnIndex; const Text: string;
+    const CellRect: TRect; var DefaultDraw: Boolean);
+var
+  aModule: TModule;
+begin
+  aModule := fModel.Modules.OrderedModules[GetID(Node) - 1]; // ID beginnt mit 1, ObjectList mit 0
+
+  // highlight "unknown modules"
+  if Column = 0 then // Column = 'name'
+    if not Sender.Selected[Node] then
+    begin
+      if aModule = FModel.Modules.UnknownModule then
+      begin
+        TargetCanvas.Brush.Color := cUnknownModuleBackgroundColor;
+        TargetCanvas.Font.Color  := cUnknownModuleForegroundColor;
+      end;
+    end;
 end;
 
 end.

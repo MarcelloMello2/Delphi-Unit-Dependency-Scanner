@@ -8,12 +8,12 @@ resourcestring
   StrSHasBeenModifi = '"%s" has been modified. Would you like to save the changes?';
   StrScanningDSearchRootFiles = 'Scanning %d root files';
   StrScanningDSearchSearchPaths = 'Scanning %d search paths (expanded from %d defined paths)';
-  StrDFilesFound = '%d matching file(s) found in the search paths';
+  StrDFilesFound = '%s matching file(s) found in the search paths';
   StrModulesDefinitionLoaded = 'Modules definition loaded, found %d modules';
-  StrModulesIdentified = '%d out of %d ".pas" files could be mapped to modules';
+  StrModulesIdentified = '%s out of %s ".pas" files could be mapped to modules';
   StrParsingFiles = 'Parsing files';
   StrTransferingToGUI = 'Transfering model data to GUI';
-  StrDFilesWithATo = '%d used unit(s) & project files found and a total of %s lines parsed';
+  StrDFilesWithATo = '%s used unit(s) & project files found and a total of %s lines parsed';
   StrUpdateTheUsesClauseIn = 'Update the uses clause in "%s"?';
   StrUnableToFindFile = 'Unable to find file "%s"';
   StrUsesClauseIn = '"%s" not updated as the text has been changed from "%s" to "%s"';

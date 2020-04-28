@@ -33,7 +33,8 @@ uses
   Duds.Common.Classes,
   Duds.Modules.Classes,
   Duds.Modules.Analyzer,
-  Duds.Common.Parser.Pascal,
+  Duds.Common.UnitInfo,
+  Duds.Common.UsedUnitInfo,
   Duds.Common.Types,
 
   Duds.Refactoring.FormatUses;
@@ -256,7 +257,7 @@ procedure TFormatUsesRefactoringTestWithModel.LoadMockDelphiFiles;
   begin
     aUnitInfo                        := TUnitInfo.Create;
     aUnitInfo.Filename               := ''; // no filename under real conditions mean => unit not found in search path
-    aUnitInfo.LineCount              := 0;
+    aUnitInfo.LinesOfCode            := 0;
     aUnitInfo.DelphiFileType         := ftPAS;
     aUnitInfo.DelphiUnitName         := DelphiUnitname;
     aUnitInfo.DelphiUnitNamePosition := 0;

@@ -1,40 +1,60 @@
 Easy-IP Delphi Unit Dependency Scanner
 --------------------------------------
 
-v2.? (cfmaer)
+v3.? (cfmaer)
+Main area of improvement: Provide support to identify, check and report module dependencies.
+Added: Module Support
+ - Ability to define a list of modules (json) 
+   - units, that belong to the module (search paths or unit names)
+   - allowed module dependencies
+   - origin (delphi-core, 3rdParty, own code)
+   - usage (production-code / test-code)   
+ - Added a json schema file for easy modules design in vscode (code completion and syntax checking)
+ - New modules view in GUI with stats per module
+ - Ability to search for module names in GUI trees
+ - Ability to export modules data to csv & GraphML
+ - units that cannot be mapped to a defined module will be mapped to the built-in "unknown module"
+ - Highlight "unknown modules" in all GUI trees
 Added: Utilities to remove unused units based on reports from Pascal Analyzer
 Added: Ability to restrict the "add unit B to uses clauses of all units that already use unit A" operation to a list of units
+Added: automatic formatting of uses clauses with grouping by modules
+Update: Use lexer from DelphiAST instead of self-made lexer. Completely new implementation of uses parsing.
+Update: Analysis time performance improvements for large code bases (now < 10 seconds for 2.5m LoC, 4.500 files with Core i7, SSD)
+Added: Handle include files (beta), log missing include files as warnings
+Added: Implemented new Lines of Code (LoC) counting (ignores empty lines, comments etc.)
+Updates: unit tests for uses parsing, LoC counting, uses list formatting & unused units removal
+Updates: lots of code refactorings
 
 v2.2 (cfmaer)
 Fixed: Clear settings before loading a project
 Added: Ignore empty lines in project settings "root files"
 Added: new feature "add unit B to uses clauses of all units that already use unit A" 
-Update: code refactorings
+Update: lots of code code refactorings (separate logic & GUI)
 
 v2.1 (cfmaer)
 Fixed: Unit renaming was broken
 Fixed: offset calculation for following units after rename 
 Fixed: Same app icon for release config
 Fixed: parsing of "in '..\path\to\file.pas'" was broken when containing spaces
-Added: "expand path on scan" (for details see search paths dialog)
-Added: "applyMultipleRenames from csv"
+Added: Ability to expand a search path to inlcude all sub-folders (for details see search paths dialog)
+Added: Ability to apply multiple renames from a csv file (batch rename)
 Added: new options for unit renaming "insert old name comment" & "lower case extension"
 Added: Stats 'Semi Circular references' and 'Circular references' (philipp-H) 
 Added: csv export for Semi and Circular references (philipp-H)
 Deleted: 64bit target
 
-v2.0
+v2.0 (norgepaul)
 Licence: Released as open source software - https://github.com/norgepaul/DelphiUnitDependencyScanner
 
-v1.6
+v1.6 (norgepaul)
 Fixed: Relative filenames were not parsed correctly in dpr files.
 
-v1.5
+v1.5 (norgepaul)
 Fixed: Load last project/Run scan on load settings not saved.
 Fixed: Some units not found in path if they were followed directly by a line feed/CR.
 Added: Export to GraphML.
 
-v1.4  
+v1.4 (norgepaul)  
 Fixed: Open and Save dialog titles
 Fixed: Save dialog didn't prompt on file overwrite.
 Fixed: Small punctuation error.
@@ -44,14 +64,14 @@ Fixed: Recursively adding paths updated the UI each time a path was found.
 Added: Export to XML
 Added: Export to Gephi CSV
 
-V1.3
+V1.3 (norgepaul)
 Update: Added differentiation between circular and semi circular unit references.
 Update: Added "Show file in Windows Explorer" to context menus.
 
-V1.2
+V1.2 (norgepaul)
 Fixed: Installer would not close if you automatically ran the application.
 
-V1.1
+V1.1 (norgepaul)
 Fixed: The parser missed the end of the uses clause if the final ';' was directly preceded by an comment.
 Fixed: Unable to delete search paths.
 Fixed: Recursive search directories not added if the root directory is already there.

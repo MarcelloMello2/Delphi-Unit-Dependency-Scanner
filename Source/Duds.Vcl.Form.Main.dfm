@@ -103,7 +103,7 @@ object frmMain: TfrmMain
           Top = 0
           Width = 1182
           Height = 433
-          ActivePage = Modules
+          ActivePage = tabTree
           Align = alClient
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -177,6 +177,7 @@ object frmMain: TfrmMain
                 OnBeforeItemErase = vtUnitsTreeBeforeItemErase
                 OnCompareNodes = vtUnitsTreeCompareNodes
                 OnDblClick = vtUnitsTreeDblClick
+                OnDrawText = vtUnitsTreeDrawText
                 OnFocusChanged = vtUnitsTreeFocusChanged
                 OnFocusChanging = vtUnitsTreeFocusChanging
                 OnGetText = vtUnitsTreeGetText
@@ -202,7 +203,7 @@ object frmMain: TfrmMain
                   end
                   item
                     Position = 3
-                    Text = 'Lines'
+                    Text = 'LoC'
                     Width = 80
                   end
                   item
@@ -230,12 +231,12 @@ object frmMain: TfrmMain
                     Width = 30
                   end
                   item
-                    Position = 9
+                    Position = 10
                     Text = 'Filename'
                     Width = 400
                   end
                   item
-                    Position = 10
+                    Position = 9
                     Text = 'Module'
                     Width = 120
                   end>
@@ -387,7 +388,8 @@ object frmMain: TfrmMain
                 Margins.Right = 0
                 Align = alClient
                 Colors.UnfocusedColor = clMedGray
-                Header.AutoSizeIndex = 0
+                Header.AutoSizeIndex = -1
+                Header.MainColumn = -1
                 Header.Options = [hoColumnResize, hoDblClickResize, hoDrag, hoShowSortGlyphs, hoVisible, hoFullRepaintOnResize, hoHeightResize]
                 Images = ImageList1
                 PopupMenu = popTree
@@ -397,48 +399,14 @@ object frmMain: TfrmMain
                 TreeOptions.SelectionOptions = [toFullRowSelect, toRightClickSelect]
                 OnCompareNodes = vtUnitsListCompareNodes
                 OnDblClick = vtUnitsListDblClick
+                OnDrawText = vtUnitsListDrawText
                 OnFocusChanged = vtUnitsListFocusChanged
                 OnFocusChanging = vtUnitsListFocusChanging
                 OnGetText = vtUnitsListGetText
                 OnPaintText = vtUnitsListPaintText
                 OnGetImageIndex = vtCommonGetImageIndex
                 OnHeaderClick = vtCommonHeaderClick
-                Columns = <
-                  item
-                    Position = 0
-                    Text = 'Unit'
-                    Width = 350
-                  end
-                  item
-                    Position = 1
-                    Text = 'File Type'
-                    Width = 70
-                  end
-                  item
-                    Position = 2
-                    Text = 'Lines'
-                    Width = 80
-                  end
-                  item
-                    Position = 3
-                    Text = 'Used By Units'
-                    Width = 80
-                  end
-                  item
-                    Position = 4
-                    Text = 'Used Units'
-                    Width = 80
-                  end
-                  item
-                    Position = 5
-                    Text = 'Filename'
-                    Width = 400
-                  end
-                  item
-                    Position = 6
-                    Text = 'Module'
-                    Width = 120
-                  end>
+                Columns = <>
               end
             end
             object Panel10: TPanel
@@ -455,7 +423,7 @@ object frmMain: TfrmMain
                 Top = 0
                 Width = 674
                 Height = 403
-                ActivePage = tabUsesList
+                ActivePage = tabUsedBy
                 Align = alClient
                 TabOrder = 0
                 object tabUsedBy: TTabSheet
@@ -495,7 +463,8 @@ object frmMain: TfrmMain
                     Margins.Right = 0
                     Align = alClient
                     Colors.UnfocusedColor = clMedGray
-                    Header.AutoSizeIndex = 0
+                    Header.AutoSizeIndex = -1
+                    Header.MainColumn = -1
                     Header.Options = [hoColumnResize, hoDblClickResize, hoDrag, hoShowSortGlyphs, hoVisible, hoFullRepaintOnResize, hoHeightResize]
                     Images = ImageList1
                     PopupMenu = popTree
@@ -505,46 +474,12 @@ object frmMain: TfrmMain
                     TreeOptions.SelectionOptions = [toFullRowSelect, toRightClickSelect]
                     OnCompareNodes = vtUnitsListCompareNodes
                     OnDblClick = vtUnitsListDblClick
+                    OnDrawText = vtUnitsListDrawText
                     OnGetText = vtUnitsListGetText
                     OnPaintText = vtUnitsListPaintText
                     OnGetImageIndex = vtCommonGetImageIndex
                     OnHeaderClick = vtCommonHeaderClick
-                    Columns = <
-                      item
-                        Position = 0
-                        Text = 'Unit'
-                        Width = 350
-                      end
-                      item
-                        Position = 1
-                        Text = 'File Type'
-                        Width = 70
-                      end
-                      item
-                        Position = 2
-                        Text = 'Lines'
-                        Width = 80
-                      end
-                      item
-                        Position = 3
-                        Text = 'Used By Units'
-                        Width = 80
-                      end
-                      item
-                        Position = 4
-                        Text = 'Used Units'
-                        Width = 80
-                      end
-                      item
-                        Position = 5
-                        Text = 'Filename'
-                        Width = 400
-                      end
-                      item
-                        Position = 6
-                        Text = 'Module'
-                        Width = 120
-                      end>
+                    Columns = <>
                   end
                 end
                 object tabUsesList: TTabSheet
@@ -585,7 +520,8 @@ object frmMain: TfrmMain
                     Margins.Right = 0
                     Align = alClient
                     Colors.UnfocusedColor = clMedGray
-                    Header.AutoSizeIndex = 0
+                    Header.AutoSizeIndex = -1
+                    Header.MainColumn = -1
                     Header.Options = [hoColumnResize, hoDblClickResize, hoDrag, hoShowSortGlyphs, hoVisible, hoFullRepaintOnResize, hoHeightResize]
                     Images = ImageList1
                     PopupMenu = popTree
@@ -595,46 +531,12 @@ object frmMain: TfrmMain
                     TreeOptions.SelectionOptions = [toFullRowSelect, toRightClickSelect]
                     OnCompareNodes = vtUnitsListCompareNodes
                     OnDblClick = vtUnitsListDblClick
+                    OnDrawText = vtUnitsListDrawText
                     OnGetText = vtUnitsListGetText
                     OnPaintText = vtUnitsListPaintText
                     OnGetImageIndex = vtCommonGetImageIndex
                     OnHeaderClick = vtCommonHeaderClick
-                    Columns = <
-                      item
-                        Position = 0
-                        Text = 'Unit'
-                        Width = 350
-                      end
-                      item
-                        Position = 1
-                        Text = 'File Type'
-                        Width = 70
-                      end
-                      item
-                        Position = 2
-                        Text = 'Lines'
-                        Width = 80
-                      end
-                      item
-                        Position = 3
-                        Text = 'Used By Units'
-                        Width = 80
-                      end
-                      item
-                        Position = 4
-                        Text = 'Used Units'
-                        Width = 80
-                      end
-                      item
-                        Position = 5
-                        Text = 'Filename'
-                        Width = 400
-                      end
-                      item
-                        Position = 6
-                        Text = 'Module'
-                        Width = 120
-                      end>
+                    Columns = <>
                   end
                 end
                 object tabSource: TTabSheet
@@ -695,6 +597,7 @@ object frmMain: TfrmMain
               TreeOptions.AutoOptions = [toAutoDropExpand, toAutoSort, toAutoTristateTracking, toAutoHideButtons, toAutoDeleteMovedNodes]
               TreeOptions.SelectionOptions = [toFullRowSelect, toRightClickSelect]
               TreeOptions.StringOptions = [toSaveCaptions, toShowStaticText, toAutoAcceptEditChange]
+              OnDrawText = vtModulesDrawText
               OnGetText = vtModulesGetText
               Columns = <
                 item

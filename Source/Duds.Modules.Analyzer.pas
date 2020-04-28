@@ -56,7 +56,7 @@ begin
       aModule.AnalysisData.NumberOfFiles := aModule.AnalysisData.NumberOfFiles + 1;
       if not aDelphiFile.InSearchPath then
         aModule.AnalysisData.NumberOfFilesNotInPath := aModule.AnalysisData.NumberOfFilesNotInPath + 1;
-      aModule.AnalysisData.LinesOfCode   := aModule.AnalysisData.LinesOfCode   + aDelphiFile.UnitInfo.LineCount;
+      aModule.AnalysisData.LinesOfCode   := aModule.AnalysisData.LinesOfCode   + aDelphiFile.UnitInfo.LinesOfCode;
     end;
   end;
 end;

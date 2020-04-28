@@ -11,7 +11,8 @@ uses
   Duds.Common.Types,
   Duds.Common.UsesParser,
   Duds.Common.Interfaces,
-  Duds.Common.Parser.Pascal;
+  Duds.Common.UnitInfo,
+  Duds.Common.UsedUnitInfo;
 
 implementation
 
@@ -32,6 +33,9 @@ type
 
     [Test]
     procedure FileTypesAndUnitNames;
+
+    [Test]
+    procedure CountLinesWhileParsingForUses;
 
     [Test]
     procedure SimpleProgram;
@@ -93,6 +97,67 @@ begin
   GetUnits('package myPackage;', UnitInfo);
   Assert.AreEqual(ftDPK, UnitInfo.DelphiFileType, 'file type');
   Assert.AreEqual('myPackage', UnitInfo.DelphiUnitName, 'unit name');
+end;
+
+procedure TUsesParserTest.CountLinesWhileParsingForUses;
+
+  function ParseUnitsAndGetLinesOfCode(code: string): integer;
+  var
+    aUsesParser : TUsesParser;
+    UnitInfo: IUnitInfo;
+  begin
+    aUsesParser := TUsesParser.Create;
+    try
+      aUsesParser.GetUsedUnitsFromSource('', code, UnitInfo);
+      Result := aUsesParser.LinesOfCode;
+    finally
+      aUsesParser.Free;
+    end;
+  end;
+
+var
+  code: string;
+begin
+  code := '';
+  Assert.AreEqual(0, ParseUnitsAndGetLinesOfCode(code), 'lines of code');
+
+  // no line breaks
+  code := 'program myProgram; '                    +
+          'uses '                                  +
+          '  unit1 in ''unit1.pas''           ,  ' +
+          '  unit2 in ''..\unit2.pas''        ,  ' +
+          '  unit3 in ''C:\temp\unit3.pas''   ;  ' +
+          'end.';
+  Assert.AreEqual(1, ParseUnitsAndGetLinesOfCode(code), 'lines of code');
+
+  // normal line breaks, no comments, every line should count
+  code := 'program myProgram; '                    + sLineBreak +
+          'uses '                                  + sLineBreak +
+          '  unit1 in ''unit1.pas''           ,  ' + sLineBreak +
+          '  unit2 in ''..\unit2.pas''        ,  ' + sLineBreak +
+          '  unit3 in ''C:\temp\unit3.pas''   ;  ' + sLineBreak +
+          'end.';
+  Assert.AreEqual(6, ParseUnitsAndGetLinesOfCode(code), 'lines of code');
+
+  // normal line breaks, comments & empty lines
+  code := { 1} 'program myProgram; '            + sLineBreak +
+          { 2} 'uses '                          + sLineBreak +
+          {  } '    '                           + sLineBreak + // <- empty line, do NOT count
+          { 3} '  unit1,              '         + sLineBreak +
+          {  } '  // only comment in line'      + sLineBreak + // <- only comment, do NOT count
+          {  } '{$IFDEF DELPHI16}'              + sLineBreak + // <- switch only, do NOT count
+          { 4} '  unit2, '                      + sLineBreak +
+          {  } '{$ENDIF}'                       + sLineBreak + // <- switch only, do NOT count
+          { 5} '  unit3, '                      + sLineBreak +
+          { 6} '  unit4; // comment after code' + sLineBreak + // <- code & comment, count it!
+          { 7} 'type               '            + sLineBreak +
+          { 8} '  MyClass = class  '            + sLineBreak +
+          {  } '  { multi '                     + sLineBreak + // <- comment only, do NOT count
+          {  } '    line '                      + sLineBreak + // <- comment only, do NOT count
+          { 9} '    comment } end; '            + sLineBreak + // <- comment & code, do NOT count
+          {10} 'end.'                           + sLineBreak +
+          {  } '';                                             // <- empty line after end of unit, do NOT count
+  Assert.AreEqual(10, ParseUnitsAndGetLinesOfCode(code), 'lines of code');
 end;
 
 procedure TUsesParserTest.CheckUsedUnits(UnitInfo: IUnitInfo; aExpectedUsesNames: array of string;
@@ -244,12 +309,15 @@ code =
   '{$IFDEF DELPHI16}'       + sLineBreak +
   '  System.UITypes'        + sLineBreak +  // <- this test would fail, when lexer.UseDefines would be activated
   '  // this is a comment ' + sLineBreak +
-  '{$ENDIF};';
+  '{$ENDIF}'                + sLineBreak +
+  '  ;';
 var
   UnitInfo: IUnitInfo;
 begin
   GetUnits(code, UnitInfo);
   CheckUsedUnits(UnitInfo, ['System.UITypes'], [], [], [utInterface]);
+
+  Assert.AreEqual(5, UnitInfo.LinesOfCode);
 end;
 
 procedure TUsesParserTest.UnitWithDoubledBodyBySwitches;

@@ -16,7 +16,8 @@ uses
   Duds.Common.Language,
   Duds.Scan.Model,
 
-  Duds.Common.Parser.Pascal,
+  Duds.Common.UnitInfo,
+  Duds.Common.UsedUnitInfo,
   Duds.Common.UsesParser;
 
 type
@@ -24,6 +25,7 @@ type
   private
     FModel: TDudsModel;
     FOnLog: TLogProcedure;
+    fAlreadyLoggedMissingIncludes: TStringList;
     FProjectSettings: TProjectSettings;
     FParsedFileCount: Integer;
     FFMXFormCount: Integer;
@@ -31,7 +33,7 @@ type
     FScannedUsesCount: Integer;
     FScanDepth: Integer;
     FDeepestScanDepth: Integer;
-    FLineCount: Integer;
+    fLinesOfCode: Integer;
     FSemiCircularFiles: Integer;
     FCircularFiles: Integer;
     FFilesNotInPath: Integer;
@@ -58,7 +60,7 @@ type
     property VCLFormCount: Integer read FVCLFormCount;
     property ScannedUsesCount: Integer read FScannedUsesCount;
     property DeepestScanDepth: Integer read FDeepestScanDepth;
-    property LineCount: Integer read FLineCount;
+    property LinesOfCode: Integer read fLinesOfCode;
     property SemiCircularFiles: Integer read FSemiCircularFiles;
     property CircularFiles: Integer read FCircularFiles;
     property FilesNotInPath: Integer read FFilesNotInPath;
@@ -73,20 +75,22 @@ implementation
 
 constructor TDudsDependencyAnalyzer.Create;
 begin
-  FParsedFileCount := 0;
-  FFMXFormCount := 0;
-  FVCLFormCount := 0;
-  FScannedUsesCount := 0;
-  FScanDepth := 0;
-  FDeepestScanDepth := 0;
-  FLineCount := 0;
+  FParsedFileCount   := 0;
+  FFMXFormCount      := 0;
+  FVCLFormCount      := 0;
+  FScannedUsesCount  := 0;
+  FScanDepth         := 0;
+  FDeepestScanDepth  := 0;
+  fLinesOfCode       := 0;
   FSemiCircularFiles := 0;
-  FCircularFiles := 0;
-  FFilesNotInPath := 0;
+  FCircularFiles     := 0;
+  FFilesNotInPath    := 0;
+  fAlreadyLoggedMissingIncludes := TStringList.Create(TDuplicates.dupError, true, false);
 end;
 
 destructor TDudsDependencyAnalyzer.Destroy;
 begin
+  fAlreadyLoggedMissingIncludes.Free;
   inherited;
 end;
 
@@ -157,6 +161,7 @@ begin
           aUsesParser := TUsesParser.Create;
           try
             aUsesParser.OnLog := fOnLog;
+            aUsesParser.AlreadyLoggedMissingIncludes := fAlreadyLoggedMissingIncludes;
             Parsed := aUsesParser.GetUsedUnitsFromFile(Filename, UnitInfo);
           finally
             FreeAndNil(aUsesParser);
@@ -170,7 +175,7 @@ begin
 
           AddParsedDelphiFile(UnitInfo, IsRootFile, TRUE);
 
-          FLineCount := FLineCount + UnitInfo.LineCount;
+          fLinesOfCode := fLinesOfCode + UnitInfo.LinesOfCode;
           Inc(FParsedFileCount);
 
           if FileExists(ChangeFileExt(UnitInfo.Filename, '.dfm')) then
@@ -221,7 +226,7 @@ begin
       else
         AnalyzeUnitOrProjectFile(ExtractFilenameNoExt(RootFile), TRUE);
 
-  TDudsLogger.GetInstance.Log(StrDFilesWithATo, [FModel.ParsedDelphiFiles.Count, FormatCardinal(FLineCount)]);
+  TDudsLogger.GetInstance.Log(StrDFilesWithATo, [FormatCardinal(FModel.ParsedDelphiFiles.Count), FormatCardinal(fLinesOfCode)]);
 end;
 
 end.

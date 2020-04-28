@@ -44,6 +44,7 @@ type
     function GetUsesType: TUsedUnitType;
     function GetFilename: String;
     function GetDefinedFilePath: string;
+    function GetIsInIncludeFileName: string;
 
     procedure SetPosition(const Value: Integer);
     procedure SetInFilePosition(const Value: Integer);
@@ -51,11 +52,13 @@ type
     procedure SetUsesType(const Value: TUsedUnitType);
     procedure SetFilename(const Value: String);
     procedure SetDefinedFilePath(const Value: String);
+    procedure SetIsInIncludeFileName(const Value: String);
 
     procedure UpdatePosition(Offset: Integer);
 
     property DelphiUnitName: String read GetDelphiUnitName write SetDelphiUnitName;
     property Position: Integer read GetPosition write SetPosition;
+    property IsInIncludeFileName: string read GetIsInIncludeFileName write SetIsInIncludeFileName;
     property UsesType: TUsedUnitType read GetUsesType write SetUsesType;
 
     property DefinedFilePath: String read GetDefinedFilePath write SetDefinedFilePath; // [optional] file path as defined in the unit, e.g. '..\myUnit.pas'
@@ -118,7 +121,7 @@ type
     function GetDelphiUnitName: String;
     function GetDelphiFileType: TDelphiFileType;
     function GetFilename: String;
-    function GetLineCount: Integer;
+    function GetLinesOfCode: Integer;
     function GetDelphiUnitNamePosition: Integer;
     function GetUsedUnits: TList<IUsedUnitInfo>;
     function GetPreviousUnitName: String;
@@ -127,14 +130,14 @@ type
     procedure SetDelphiUnitName(const Value: String);
     procedure SetDelphiFileType(const Value: TDelphiFileType);
     procedure SetFilename(const Value: String);
-    procedure SetLineCount(const Value: Integer);
+    procedure SetLinesOfCode(const Value: Integer);
     procedure SetDelphiUnitNamePosition(const Value: Integer);
     procedure SetPreviousUnitName(const Value: String);
     procedure SetModule(const Value: TModule);
 
     property DelphiUnitName: String read GetDelphiUnitName write SetDelphiUnitName;
     property Filename: String read GetFilename write SetFilename;
-    property LineCount: Integer read GetLineCount write SetLineCount;
+    property LinesOfCode: Integer read GetLinesOfCode write SetLinesOfCode;
     property DelphiUnitNamePosition: Integer read GetDelphiUnitNamePosition write SetDelphiUnitNamePosition;
     property DelphiFileType: TDelphiFileType read GetDelphiFileType write SetDelphiFileType;
     property UsedUnits: TList<IUsedUnitInfo> read GetUsedUnits;
