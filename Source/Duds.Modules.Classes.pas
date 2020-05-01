@@ -105,6 +105,8 @@ var
   aReferencedModule: TModule;
   aModuleUsageString: string;
   aModuleUsage: TModuleUsage;
+  aPath: string;
+  aUnit: string;
 begin
   if not Assigned(aModulesList) then
     raise Exception.Create('aModulesList must be assigned');
@@ -156,13 +158,29 @@ begin
       begin
          if aContains.TryGetValue<TJSONArray>('paths', aPathsArray) then
            for j := 0 to aPathsArray.Count - 1 do
-             aNewModule.Paths.Add(IncludeTrailingPathDelimiter(aPathsArray.Items[j].Value).ToLower);
+           begin
+             aPath := IncludeTrailingPathDelimiter(aPathsArray.Items[j].Value).ToLower;
+             if aNewModule.Paths.IndexOf(aPath) = -1 then
+               aNewModule.Paths.Add(aPath)
+             else
+               raise Exception.CreateFmt('Path "%s" in module "%s" is re-defined. Paths must be unique.',
+                                         [aPath, aNewModule.Name]);
+           end;
 
          if aContains.TryGetValue<TJSONArray>('units', aUnitsArray) then
            for j := 0 to aUnitsArray.Count - 1 do
-             aNewModule.Units.Add(aUnitsArray.Items[j].Value.ToLower);
+           begin
+             aUnit := aUnitsArray.Items[j].Value.ToLower;
+             if aNewModule.Units.IndexOf(aUnit) = -1 then
+               aNewModule.Units.Add(aUnit)
+             else
+               raise Exception.CreateFmt('Unit "%s" in module "%s" is re-defined. Units must be unique.',
+                                         [aUnit, aNewModule.Name]);
+           end;
       end;
 
+      if aModulesList.Dictionary.ContainsKey(aNewModule.Name) then
+        raise Exception.CreateFmt('Module "%s" is re-defined. Module names must be unique in the module definition.', [aNewModule.Name]);
       aModulesList.AddModule(aNewModule);
     end;
   finally
