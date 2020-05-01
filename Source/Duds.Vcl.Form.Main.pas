@@ -1577,10 +1577,7 @@ end;
 procedure TfrmMain.ResetSettings;
 begin
   FProjectFilename := '';
-  FProjectSettings.RootFiles.Clear;
-  FProjectSettings.SearchPaths.Clear;
-  FProjectSettings.UnitScopeNames.Clear;
-  FProjectSettings.LinkUnits := TRUE;
+  FProjectSettings.Clear;
 end;
 
 function TfrmMain.CheckNotRunning: Boolean;
@@ -2317,8 +2314,12 @@ begin
       // step 2: scanning the disk for files (rootfiles & search paths)
       FileScanner := TDudsFileScanner.Create;
       try
-        FileScanner.LoadFilesInSearchPaths(FModel, FProjectSettings);
-        Log(StrDFilesFound, [FormatCardinal(FModel.Files.Count)]);
+        FileScanner.Model           := fModel;
+        FileScanner.ProjectSettings := FProjectSettings;
+        FileScanner.ProjectFilename := FProjectFilename;
+        FileScanner.ScanRootFileFolders;
+        FileScanner.ExpandAndScanSearchPaths;
+        Log(StrDFilesFound, [FormatCardinal(fModel.Files.Count)]);
       finally
         FreeAndNil(FileScanner);
       end;

@@ -6,9 +6,12 @@ resourcestring
   StrYes = 'Yes';
   StrNo = 'No';
   StrSHasBeenModifi = '"%s" has been modified. Would you like to save the changes?';
-  StrScanningDSearchRootFiles = 'Scanning %d root files';
+  StrScanningDSearchRootFiles = 'Scanning %d root file folders';
   StrScanningDSearchSearchPaths = 'Scanning %d search paths (expanded from %d defined paths)';
-  StrDFilesFound = '%s matching file(s) found in the search paths';
+  StrDuplicateSearchPathFound = 'Duplicated search path found in project settings: "%s"';
+  StrDuplicateSearchPathFoundByExpanding = 'Duplicated search path found in project settings: "%s" (while expanding defined path "%s")';
+  StrSearchPathDoesNotExist = 'Search path does not exist: "%s"';
+  StrDFilesFound = '%s matching files found in the paths (root file folders & search paths)';
   StrModulesDefinitionLoaded = 'Modules definition loaded, found %d modules';
   StrModulesIdentified = '%s out of %s ".pas" files could be mapped to modules';
   StrParsingFiles = 'Parsing files';
@@ -44,6 +47,7 @@ resourcestring
   StrPleaseStopTheCurr = 'Please stop the current scan first.';
   StrFileSRenamedTo = 'File "%s" renamed to "%s"';
   StrRootFileNotFound = 'Root file not found: "%s"';
+  StrRootFileDuplicateFound = 'Root file duplicate found in project settings: "%s"';
   StrUnableToParseS = 'Unable to parse "%s": %s';
   StrAmbigousUnitToModuleMapping = 'ambigous module definition: unit "%s" is defined to be part of module "%s" and module "%s"';
   StrAmbigousPathToModuleMapping = 'ambigous module definition: path "%s" is defined to be part of module "%s" and module "%s"';

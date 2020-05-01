@@ -132,10 +132,15 @@ function ScanFiles(const Path, Filter: String; Recursive: Boolean; IncludeDirect
         repeat
           if (StrPas(Win32FD.cFileName) <> '.') and (StrPas(Win32FD.cFileName) <> '..') then
           begin
-            AddToResult(Win32FD, Path);
 
-            if (IsDirectory(Win32FD)) and (Recursive) then
-              ScanFilesRec(IncludeTrailingPathDelimiter(concat(IncludeTrailingPathDelimiter(Path), Win32FD.cFileName)), Filter);
+            // don't add hidden paths
+//            if (Win32FD.dwFileAttributes and faHidden) <> 0 then
+//            begin
+              AddToResult(Win32FD, Path);
+
+              if (IsDirectory(Win32FD)) and (Recursive) then
+                ScanFilesRec(IncludeTrailingPathDelimiter(concat(IncludeTrailingPathDelimiter(Path), Win32FD.cFileName)), Filter);
+//            end;
           end;
         until not FindNextFile(hFindFile, Win32FD);
       end;

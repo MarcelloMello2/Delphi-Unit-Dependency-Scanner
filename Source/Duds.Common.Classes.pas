@@ -115,6 +115,8 @@ type
     constructor Create;
     destructor Destroy; override;
 
+    procedure Clear;
+
     property RootFiles: TStringList read FRootFiles write SetRootFiles;
     property SearchPaths: TStringList read FSearchPaths write SetSearchPaths;
     property UnitScopeNames: TStringList read FUnitScopeNames write SetUnitScopeNames;
@@ -213,6 +215,15 @@ end;
 
 
 { TProjectSettings }
+
+procedure TProjectSettings.Clear;
+begin
+  fRootFiles.Clear;
+  fSearchPaths.Clear;
+  fUnitScopeNames.Clear;
+  fLinkUnits             := True;
+  fModulesDefinitionFile := '';
+end;
 
 constructor TProjectSettings.Create;
 begin

@@ -219,12 +219,8 @@ var
 begin
   TDudsLogger.GetInstance.Log(StrParsingFiles);
 
-  for RootFile in FProjectSettings.RootFiles do
-    if not RootFile.IsEmpty then // allow empty definition lines (e.g. for visual structuring)
-      if not FileExists(RootFile) then
-        TDudsLogger.GetInstance.Log(StrRootFileNotFound, [RootFile], LogWarning)
-      else
-        AnalyzeUnitOrProjectFile(ExtractFilenameNoExt(RootFile), TRUE);
+  for RootFile in fModel.RootFiles do
+    AnalyzeUnitOrProjectFile(ExtractFilenameNoExt(RootFile), True);
 
   TDudsLogger.GetInstance.Log(StrDFilesWithATo, [FormatCardinal(FModel.ParsedDelphiFiles.Count), FormatCardinal(fLinesOfCode)]);
 end;

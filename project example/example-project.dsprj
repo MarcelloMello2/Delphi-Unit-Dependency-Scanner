@@ -1,0 +1,9 @@
+[Settings]
+LinkUnits=1
+ModulesDefinitionFile=
+[RootFiles]
+0=..\Source\duds.dpr
+1=..\Source\duds.test.dpr
+[SearchPaths]
+0=
+1=

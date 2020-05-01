@@ -11,6 +11,8 @@ type
   TDudsModel = class(TObject)
   private
     fModules: TModulesList;
+    fRootFiles: TStringList;
+
     FFiles: TDictionary<String, String>;
     FParsedDelphiRootFiles: TObjectList<TDelphiFile>;
     FParsedDelphiFiles: TObjectDictionary<String, TDelphiFile>;
@@ -31,6 +33,7 @@ type
                                   UnitScopeNames: TStringList): TDelphiFile;
 
     property Modules: TModulesList read fModules;
+    property RootFiles: TStringList read fRootFiles;
     property Files: TDictionary<String, String> read FFiles;
     property ParsedDelphiRootFiles: TObjectList<TDelphiFile> read FParsedDelphiRootFiles;
     property ParsedDelphiFiles: TObjectDictionary<String, TDelphiFile> read FParsedDelphiFiles;
@@ -48,12 +51,14 @@ begin
   FParsedDelphiFiles.Clear;
   FDelphiFileList.Clear;
   fModules.Clear;
+  fRootFiles.Clear;
 end;
 
 constructor TDudsModel.Create;
 begin
   inherited Create;
   fModules               := TModulesList.Create;
+  fRootFiles             := TStringList.Create(TDuplicates.dupError, false, false); // not sorted, to keep project settings order
   FFiles                 := TDictionary<String, String>.Create;
   FParsedDelphiRootFiles := TObjectList<TDelphiFile>.Create(FALSE);
   FParsedDelphiFiles     := TObjectDictionary<String, TDelphiFile>.Create([doOwnsValues]);
@@ -63,6 +68,7 @@ end;
 destructor TDudsModel.Destroy;
 begin
   FreeAndNil(fModules);
+  FreeAndNil(fRootFiles);
   FreeAndNil(FFiles);
   FreeAndNil(FParsedDelphiRootFiles);
   FreeAndNil(FParsedDelphiFiles);
