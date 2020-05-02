@@ -73,3 +73,4 @@ dcu
 bin/Win32/Debug
 .vscode/CompileOmniPascalServerProject.bat
 .vscode/tasks.json
+**/build/

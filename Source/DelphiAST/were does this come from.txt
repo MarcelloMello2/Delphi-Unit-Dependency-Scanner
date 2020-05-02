@@ -1,5 +1,0 @@
-Content of this folder is a copy of 
-'https://github.com/RomanYankovsky/DelphiAST' 
-commit 4cc426a269bca4bc1c0a8566293d9cefef05212d (2020/01/08)
-
-(only the lexer code was copied to keep it clear)

@@ -37,7 +37,7 @@ See Docs\Version History.txt
 
 ## Source
 
-This project was originally developen by Paul Spencer Thornton and the repository was cloned from [norgepaul/DUDS](https://github.com/norgepaul/DUDS). For more history, see there.
+This project was originally developed by Paul Spencer Thornton and the repository was cloned from [norgepaul/DUDS](https://github.com/norgepaul/DUDS). For more history, see there.
 
 ## Parsing & Compiler Switches
 
@@ -55,4 +55,4 @@ DUDS is built with Delphi 10.3.3. The following 3rd party libraries are required
 
 ## Usage
 
-Ready to use executable is located in `bin\Win32\Release`.
+Ready to use executable is located in `src\build\bin\Win32\Release`.
