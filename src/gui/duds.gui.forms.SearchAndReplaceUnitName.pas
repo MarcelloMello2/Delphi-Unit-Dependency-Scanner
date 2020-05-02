@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-unit duds.gui.forms.FindReplace;
+unit duds.gui.forms.SearchAndReplaceUnitName;
 
 interface
 
@@ -36,7 +36,7 @@ uses
   RegularExpressions;
 
 type
-  TfrmSearchAndReplace = class(TForm)
+  TfrmSearchAndReplaceUnitName = class(TForm)
     edtSearch: TEdit;
     Label1: TLabel;
     btnOK: TButton;
@@ -59,9 +59,6 @@ type
     { Public declarations }
   end;
 
-var
-  frmSearchAndReplace: TfrmSearchAndReplace;
-
 implementation
 
 resourcestring
@@ -69,14 +66,14 @@ resourcestring
 
 {$R *.dfm}
 
-procedure TfrmSearchAndReplace.edtSearchChange(Sender: TObject);
+procedure TfrmSearchAndReplaceUnitName.edtSearchChange(Sender: TObject);
 begin
   UpdateRegEx;
 
   btnOK.Enabled := (edtSearch.Text <> '') and (edtReplace.Text <> '') and (edtResult.Tag = 0);
 end;
 
-procedure TfrmSearchAndReplace.UpdateRegEx;
+procedure TfrmSearchAndReplaceUnitName.UpdateRegEx;
 begin
   try
     edtResult.Text := TRegEx.Replace(edtTest.Text, edtSearch.Text, edtReplace.Text);
@@ -93,13 +90,13 @@ begin
   end;
 end;
 
-procedure TfrmSearchAndReplace.edtSearchKeyPress(Sender: TObject; var Key: Char);
+procedure TfrmSearchAndReplaceUnitName.edtSearchKeyPress(Sender: TObject; var Key: Char);
 begin
   if CharInSet(Key, [' ']) then
     Key := #00;
 end;
 
-procedure TfrmSearchAndReplace.FormShow(Sender: TObject);
+procedure TfrmSearchAndReplaceUnitName.FormShow(Sender: TObject);
 begin
   UpdateRegEx;
 end;

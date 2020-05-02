@@ -37,14 +37,16 @@ uses
   duds.gui.HourGlass                                 in '..\src\gui\duds.gui.HourGlass.pas',
   duds.gui.Utils                                     in '..\src\gui\duds.gui.Utils.pas',
   duds.gui.VirtualTreeview                           in '..\src\gui\duds.gui.VirtualTreeview.pas',
-  duds.gui.forms.Main                                in '..\src\gui\duds.gui.forms.Main.pas' {frmMain},
-  duds.gui.forms.FindReplace                         in '..\src\gui\duds.gui.forms.FindReplace.pas' {frmSearchAndReplace},
-  duds.gui.forms.Settings                            in '..\src\gui\duds.gui.forms.Settings.pas' {frmDependencyScannerSetting},
-  duds.gui.forms.Rename                              in '..\src\gui\duds.gui.forms.Rename.pas' {frmRenameUnit},
-  duds.gui.forms.AddUnitToUses                       in '..\src\gui\duds.gui.forms.AddUnitToUses.pas' {frmAddNewUnit};
+  duds.gui.forms.Main                                in '..\src\gui\duds.gui.forms.Main.pas',
+  duds.gui.forms.Settings                            in '..\src\gui\duds.gui.forms.Settings.pas',
+  duds.gui.forms.SearchAndReplaceUnitName            in '..\src\gui\duds.gui.forms.SearchAndReplaceUnitName.pas',
+  duds.gui.forms.RenameUnit                          in '..\src\gui\duds.gui.forms.RenameUnit.pas',
+  duds.gui.forms.AddUnitToUses                       in '..\src\gui\duds.gui.forms.AddUnitToUses.pas';
 
 {$R *.res}
 
+var
+  frmMain: TfrmMain;
 begin
   {$IFDEF DEBUG}
   ReportMemoryLeaksOnShutdown := True;

@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-unit duds.gui.forms.Rename;
+unit duds.gui.forms.RenameUnit;
 
 interface
 
@@ -34,7 +34,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls;
 
 type
-  TfrmRenameUnit = class(TForm)
+  TfrmRenameUnitName = class(TForm)
     infoRenameCSV: TPanel;
     Panel5: TPanel;
     Label2: TLabel;
@@ -56,19 +56,16 @@ type
     { Public declarations }
   end;
 
-var
-  frmRenameUnit: TfrmRenameUnit;
-
 implementation
 
 {$R *.dfm}
 
-procedure TfrmRenameUnit.edtNewNameChange(Sender: TObject);
+procedure TfrmRenameUnitName.edtNewNameChange(Sender: TObject);
 begin
   btnOK.Enabled := edtNewName.Text <> '';
 end;
 
-procedure TfrmRenameUnit.edtNewNameKeyPress(Sender: TObject; var Key: Char);
+procedure TfrmRenameUnitName.edtNewNameKeyPress(Sender: TObject; var Key: Char);
 begin
   if CharInSet(Key, [' ']) then
     Key := #00;

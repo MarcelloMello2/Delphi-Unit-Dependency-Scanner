@@ -1,4 +1,4 @@
-object frmRenameUnit: TfrmRenameUnit
+object frmRenameUnitName: TfrmRenameUnitName
   Left = 0
   Top = 0
   ActiveControl = edtNewName

@@ -1,4 +1,4 @@
-object frmDependencyScannerSetting: TfrmDependencyScannerSetting
+object frmSettings: TfrmSettings
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
@@ -27,12 +27,8 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
     ActivePage = tabRootFiles
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 768
-    ExplicitHeight = 415
     object tabRootFiles: TTabSheet
       Caption = 'Root Files'
-      ExplicitWidth = 760
-      ExplicitHeight = 387
       object Panel4: TPanel
         Left = 826
         Top = 0
@@ -41,8 +37,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitLeft = 647
-        ExplicitHeight = 334
         object btnAddFile: TButton
           AlignWithMargins = True
           Left = 3
@@ -105,8 +99,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
           Color = 12910591
           ParentBackground = False
           TabOrder = 0
-          ExplicitWidth = 752
-          ExplicitHeight = 45
           object lnkFTSInfo: TLabel
             AlignWithMargins = True
             Left = 1
@@ -159,15 +151,11 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
         WordWrap = False
         Zoom = 100
         OnChange = OnSettingChange
-        ExplicitWidth = 641
-        ExplicitHeight = 328
       end
     end
     object tabSearchPaths: TTabSheet
       Caption = 'Search Paths'
       ImageIndex = 1
-      ExplicitWidth = 760
-      ExplicitHeight = 387
       object Panel2: TPanel
         Left = 779
         Top = 0
@@ -226,8 +214,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
         WordWrap = False
         Zoom = 100
         OnChange = OnSettingChange
-        ExplicitWidth = 594
-        ExplicitHeight = 328
       end
       object Panel3: TPanel
         AlignWithMargins = True
@@ -262,8 +248,8 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
             AlignWithMargins = True
             Left = 1
             Top = 1
-            Width = 929
-            Height = 43
+            Width = 402
+            Height = 39
             Margins.Left = 1
             Margins.Top = 1
             Margins.Right = 1
@@ -283,8 +269,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
             ParentFont = False
             Transparent = True
             WordWrap = True
-            ExplicitWidth = 402
-            ExplicitHeight = 39
           end
         end
       end
@@ -292,6 +276,8 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
     object tabModules: TTabSheet
       Caption = 'Modules'
       ImageIndex = 5
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 760
       ExplicitHeight = 387
       object edt_ModulesDefinitionFile: TLabeledEdit
@@ -311,8 +297,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
     object tabUnitScopes: TTabSheet
       Caption = 'Unit Scope Names'
       ImageIndex = 4
-      ExplicitWidth = 760
-      ExplicitHeight = 387
       object memUnitScopeNames: TRichEdit
         AlignWithMargins = True
         Left = 3
@@ -352,13 +336,13 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
         WordWrap = False
         Zoom = 100
         OnChange = OnSettingChange
-        ExplicitWidth = 754
-        ExplicitHeight = 381
       end
     end
     object tabScan: TTabSheet
       Caption = 'Scan'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 760
       ExplicitHeight = 387
       object chkLinkUnits: TCheckBox
@@ -386,6 +370,8 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
     object tabEnvironment: TTabSheet
       Caption = 'Environment'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 760
       ExplicitHeight = 387
       object chkLoadLastProject: TCheckBox
@@ -408,8 +394,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitTop = 421
-    ExplicitWidth = 774
     object lblStatus: TLabel
       AlignWithMargins = True
       Left = 3
@@ -440,7 +424,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
       ParentDoubleBuffered = False
       TabOrder = 0
       OnClick = btnOKClick
-      ExplicitLeft = 618
     end
     object btnCancel: TButton
       AlignWithMargins = True
@@ -454,7 +437,6 @@ object frmDependencyScannerSetting: TfrmDependencyScannerSetting
       Caption = '&Cancel'
       TabOrder = 1
       OnClick = btnCancelClick
-      ExplicitLeft = 696
     end
   end
   object OpenDialog1: TOpenDialog

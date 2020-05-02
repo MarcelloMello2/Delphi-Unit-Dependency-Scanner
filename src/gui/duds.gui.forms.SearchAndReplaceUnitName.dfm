@@ -1,4 +1,4 @@
-object frmSearchAndReplace: TfrmSearchAndReplace
+object frmSearchAndReplaceUnitName: TfrmSearchAndReplaceUnitName
   Left = 0
   Top = 0
   BorderStyle = bsDialog

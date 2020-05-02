@@ -59,21 +59,20 @@ uses
   duds.common.Refactoring,
   duds.common.Language,
   duds.common.Log,
+  duds.common.modules,
   duds.analyzer.model,
   duds.analyzer.FileScanner,
   duds.analyzer.DependencyAnalyzer,
-  duds.export.units.Gephi,
-  duds.export.units.GraphML,
-  duds.common.modules,
   duds.analyzer.ModulesAnalyzer,
   duds.export.modules.CSV,
   duds.export.modules.GraphML,
+  duds.export.units.Gephi,
+  duds.export.units.GraphML,
   duds.refactoring.FormatUses,
   duds.refactoring.RenameUnit,
   duds.refactoring.AddUnitToUses,
   duds.refactoring.PascalAnalyzerUsesReportProcessor,
   duds.refactoring.RemoveUnusedUnits,
-
   duds.gui.HourGlass,
   duds.gui.Utils,
   duds.gui.VirtualTreeview;
@@ -418,15 +417,12 @@ type
     property Modified: Boolean read FModified write SetModified;
   end;
 
-var
-  frmMain: TfrmMain;
-
 implementation
 
 uses
-  duds.gui.forms.Rename,
+  duds.gui.forms.RenameUnit,
   duds.gui.forms.Settings,
-  duds.gui.forms.FindReplace,
+  duds.gui.forms.SearchAndReplaceUnitName,
   duds.gui.forms.AddUnitToUses;
 
 const
@@ -1654,7 +1650,7 @@ begin
   begin
     aFileName := OpenDialogMultipleRenames.Filename;
 
-    with TfrmRenameUnit.Create(Self) do
+    with TfrmRenameUnitName.Create(Self) do
       try
         Width := Width + 300;
         Label1.Caption := 'Selected file';
@@ -1816,7 +1812,7 @@ begin
       begin
         if DelphiFile <> nil then
         begin
-          With TfrmRenameUnit.Create(Self) do
+          With TfrmRenameUnitName.Create(Self) do
             try
               edtNewName.Text := DelphiFile.UnitInfo.DelphiUnitName;
               Caption := Format(StrRenameS, [edtNewName.Text]);
@@ -1849,7 +1845,7 @@ begin
 
     rtSearchAndReplace:
       begin
-        With TfrmSearchAndReplace.Create(Self) do
+        With TfrmSearchAndReplaceUnitName.Create(Self) do
           try
             if DelphiFile <> nil then
             begin
@@ -2524,7 +2520,7 @@ end;
 
 procedure TfrmMain.actSettingsExecute(Sender: TObject);
 begin
-  With TfrmDependencyScannerSetting.Create(Self) do
+  With TfrmSettings.Create(Self) do
     try
       SaveProjectSettings;
 

@@ -50,7 +50,7 @@ uses
   duds.gui.Utils;
 
 type
-  TfrmDependencyScannerSetting = class(TForm)
+  TfrmSettings = class(TForm)
     pcSettings: TPageControl;
     Panel1: TPanel;
     tabRootFiles: TTabSheet;
@@ -126,9 +126,6 @@ type
     function Execute(const EnvironmentSettings: TEnvironmentSettings; const ProjectSettings: TProjectSettings): Boolean;
   end;
 
-var
-  frmDependencyScannerSetting: TfrmDependencyScannerSetting;
-
 implementation
 
 resourcestring
@@ -140,7 +137,7 @@ resourcestring
 
 {$R *.dfm}
 
-procedure TfrmDependencyScannerSetting.btnAddFileClick(Sender: TObject);
+procedure TfrmSettings.btnAddFileClick(Sender: TObject);
 var
   i: Integer;
 begin
@@ -160,7 +157,7 @@ begin
   end;
 end;
 
-procedure TfrmDependencyScannerSetting.btnAddPathClick(Sender: TObject);
+procedure TfrmSettings.btnAddPathClick(Sender: TObject);
 var
   aScrPt, aClientPt: TPoint ;
 begin
@@ -170,7 +167,7 @@ begin
   popDelphiPaths.Popup(aScrPt.X, aScrPt.Y) ;
 end;
 
-procedure TfrmDependencyScannerSetting.btnOKClick(Sender: TObject);
+procedure TfrmSettings.btnOKClick(Sender: TObject);
 begin
   if memRootFiles.Text = '' then
     ShowMessage(StrPleaseEnterAtLeas)
@@ -178,7 +175,7 @@ begin
     ModalResult := mrOK;
 end;
 
-procedure TfrmDependencyScannerSetting.btnScanForProjectsClick(Sender: TObject);
+procedure TfrmSettings.btnScanForProjectsClick(Sender: TObject);
 var
   ScannedFiles: TObjectList<TFileInfo>;
   i: Integer;
@@ -223,7 +220,7 @@ begin
   end;
 end;
 
-procedure TfrmDependencyScannerSetting.btnCancelClick(Sender: TObject);
+procedure TfrmSettings.btnCancelClick(Sender: TObject);
 begin
   if FBusy then
     FCancelled := TRUE
@@ -231,12 +228,12 @@ begin
     ModalResult := mrCancel;
 end;
 
-procedure TfrmDependencyScannerSetting.miDelphiXE3Click(Sender: TObject);
+procedure TfrmSettings.miDelphiXE3Click(Sender: TObject);
 begin
   AddDelphiSearchPaths(memSearchPaths.Lines, TMenuItem(Sender).Tag);
 end;
 
-procedure TfrmDependencyScannerSetting.EnableControls(DoEnable: Boolean);
+procedure TfrmSettings.EnableControls(DoEnable: Boolean);
 begin
   FCancelled := FALSE;
   FIgnoreAllErrors := FALSE;
@@ -250,7 +247,7 @@ begin
   lblStatus.Caption := '';
 end;
 
-function TfrmDependencyScannerSetting.Execute(
+function TfrmSettings.Execute(
   const EnvironmentSettings: TEnvironmentSettings; const ProjectSettings: TProjectSettings): Boolean;
 begin
   FEnvironmentSettings := EnvironmentSettings;
@@ -266,7 +263,7 @@ begin
     GUIToSettings;
 end;
 
-procedure TfrmDependencyScannerSetting.SettingsToGUI;
+procedure TfrmSettings.SettingsToGUI;
 begin
   (*chkLoadLastProject.Checked := FEnvironmentSettings.ReadBoolean('LoadLastProject', chkLoadLastProject.Checked);
   chkRunScanOnLoad.Checked := FEnvironmentSettings.ReadBoolean('RunScanOnLoad', chkLoadLastProject.Checked);
@@ -281,7 +278,7 @@ begin
   edt_ModulesDefinitionFile.Text := FProjectSettings.ModulesDefinitionFile;
 end;
 
-procedure TfrmDependencyScannerSetting.GUIToSettings;
+procedure TfrmSettings.GUIToSettings;
 begin
   (*FEnvironmentSettings.WriteBoolean('LoadLastProject', chkLoadLastProject.Checked);
   FEnvironmentSettings.WriteBoolean('RunScanOnLoad', chkLoadLastProject.Checked);
@@ -296,25 +293,25 @@ begin
   FProjectSettings.ModulesDefinitionFile := edt_ModulesDefinitionFile.Text;
 end;
 
-procedure TfrmDependencyScannerSetting.miWindowsPathsClick(Sender: TObject);
+procedure TfrmSettings.miWindowsPathsClick(Sender: TObject);
 begin
   if SelectDirectory(StrSelectAPath, '', FSearchPathBrowseDir, [sdNewFolder, sdNewUI], Self) then
     AddSearchPath(FSearchPathBrowseDir);
 end;
 
-procedure TfrmDependencyScannerSetting.OnSettingChange(Sender: TObject);
+procedure TfrmSettings.OnSettingChange(Sender: TObject);
 begin
   FModified := TRUE;
 end;
 
-procedure TfrmDependencyScannerSetting.FormCreate(Sender: TObject);
+procedure TfrmSettings.FormCreate(Sender: TObject);
 begin
   pcSettings.ActivePageIndex := 0;
 
   SetDelphiMenuItemVisibility;
 end;
 
-function TfrmDependencyScannerSetting.AddSearchPath(const SearchPath: String): Boolean;
+function TfrmSettings.AddSearchPath(const SearchPath: String): Boolean;
 
   procedure AddSearchPathRec(const RecSearchPath: String; var Added: Boolean);
   var
@@ -354,7 +351,7 @@ begin
   end;
 end;
 
-procedure TfrmDependencyScannerSetting.AddDelphiSearchPaths(SearchPaths: TStrings; Version: Integer);
+procedure TfrmSettings.AddDelphiSearchPaths(SearchPaths: TStrings; Version: Integer);
 var
   DelphiPaths: TStringList;
   i: Integer;
@@ -379,7 +376,7 @@ begin
   end;
 end;
 
-procedure TfrmDependencyScannerSetting.SetDelphiMenuItemVisibility;
+procedure TfrmSettings.SetDelphiMenuItemVisibility;
 var
   i: Integer;
 begin
@@ -388,7 +385,7 @@ begin
       popDelphiPaths.Items[i].Visible := IsDelphiVersionInstalled(popDelphiPaths.Items[i].Tag);
 end;
 
-function TfrmDependencyScannerSetting.AddGroupProjectRootFiles(const Filename: string): Boolean;
+function TfrmSettings.AddGroupProjectRootFiles(const Filename: string): Boolean;
 var
   XML: IXMLDocument;
   XMLNode: IXMLNode;
@@ -430,7 +427,7 @@ begin
   end;
 end;
 
-function TfrmDependencyScannerSetting.AddRootProjectFile(const Filename: String): Boolean;
+function TfrmSettings.AddRootProjectFile(const Filename: String): Boolean;
 var
   Extension: String;
 begin
@@ -455,7 +452,7 @@ begin
   end;
 end;
 
-procedure TfrmDependencyScannerSetting.AddProjectLibraryPaths(const Filename: String);
+procedure TfrmSettings.AddProjectLibraryPaths(const Filename: String);
 var
   XML: IXMLDocument;
   XMLNode, PathNode: IXMLNode;
@@ -503,7 +500,7 @@ begin
   end;
 end;
 
-procedure TfrmDependencyScannerSetting.edt_ModulesDefinitionFileChange(Sender:
+procedure TfrmSettings.edt_ModulesDefinitionFileChange(Sender:
     TObject);
 begin
   FModified := TRUE;

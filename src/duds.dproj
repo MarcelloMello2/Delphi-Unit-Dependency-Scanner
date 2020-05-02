@@ -147,15 +147,15 @@
         <DCCReference Include="common\duds.common.Refactoring.pas"/>
         <DCCReference Include="common\duds.common.Log.pas"/>
         <DCCReference Include="common\duds.common.Delphi.pas"/>
-        <DCCReference Include="duds.common.modules.pas"/>
+        <DCCReference Include="common\duds.common.modules.pas"/>
         <DCCReference Include="analyzer\duds.analyzer.model.pas"/>
         <DCCReference Include="analyzer\duds.analyzer.FileScanner.pas"/>
         <DCCReference Include="analyzer\duds.analyzer.DependencyAnalyzer.pas"/>
         <DCCReference Include="analyzer\duds.analyzer.ModulesAnalyzer.pas"/>
-        <DCCReference Include="duds.export.units.Gephi.pas"/>
-        <DCCReference Include="duds.export.units.GraphML.pas"/>
-        <DCCReference Include="duds.export.modules.CSV.pas"/>
-        <DCCReference Include="duds.export.modules.GraphML.pas"/>
+        <DCCReference Include="export\duds.export.units.Gephi.pas"/>
+        <DCCReference Include="export\duds.export.units.GraphML.pas"/>
+        <DCCReference Include="export\duds.export.modules.CSV.pas"/>
+        <DCCReference Include="export\duds.export.modules.GraphML.pas"/>
         <DCCReference Include="refactoring\duds.refactoring.RenameUnit.pas"/>
         <DCCReference Include="refactoring\duds.refactoring.AddUnitToUses.pas"/>
         <DCCReference Include="refactoring\duds.refactoring.FormatUsesHelper.pas"/>
@@ -168,15 +168,11 @@
         <DCCReference Include="gui\duds.gui.forms.Main.pas">
             <Form>frmMain</Form>
         </DCCReference>
-        <DCCReference Include="gui\duds.gui.forms.FindReplace.pas">
-            <Form>frmSearchAndReplace</Form>
-        </DCCReference>
         <DCCReference Include="gui\duds.gui.forms.Settings.pas">
-            <Form>frmDependencyScannerSetting</Form>
+            <Form>frmSettings</Form>
         </DCCReference>
-        <DCCReference Include="gui\duds.gui.forms.Rename.pas">
-            <Form>frmRenameUnit</Form>
-        </DCCReference>
+        <DCCReference Include="gui\duds.gui.forms.SearchAndReplaceUnitName.pas"/>
+        <DCCReference Include="gui\duds.gui.forms.RenameUnit.pas"/>
         <DCCReference Include="gui\duds.gui.forms.AddUnitToUses.pas">
             <Form>frmAddNewUnit</Form>
         </DCCReference>
