@@ -132,6 +132,54 @@
         </DelphiCompile>
         <DCCReference Include="3rdParty\DelphiAST\Source\SimpleParser\SimpleParser.Lexer.pas"/>
         <DCCReference Include="3rdParty\DelphiAST\Source\SimpleParser\SimpleParser.Lexer.Types.pas"/>
+        <DCCReference Include="common\duds.common.UnitInfo.pas"/>
+        <DCCReference Include="common\duds.common.UsedUnitInfo.pas"/>
+        <DCCReference Include="common\duds.common.UsesParser.pas"/>
+        <DCCReference Include="common\duds.common.Interfaces.pas"/>
+        <DCCReference Include="common\duds.common.Types.pas"/>
+        <DCCReference Include="common\duds.common.Language.pas"/>
+        <DCCReference Include="common\duds.common.Files.pas"/>
+        <DCCReference Include="common\duds.common.Strings.pas"/>
+        <DCCReference Include="common\duds.common.Helper.IniFile.pas"/>
+        <DCCReference Include="common\duds.common.Classes.pas"/>
+        <DCCReference Include="common\duds.common.Utils.pas"/>
+        <DCCReference Include="common\duds.common.Singleton.pas"/>
+        <DCCReference Include="common\duds.common.Refactoring.pas"/>
+        <DCCReference Include="common\duds.common.Log.pas"/>
+        <DCCReference Include="common\duds.common.Delphi.pas"/>
+        <DCCReference Include="duds.common.modules.pas"/>
+        <DCCReference Include="analyzer\duds.analyzer.model.pas"/>
+        <DCCReference Include="analyzer\duds.analyzer.FileScanner.pas"/>
+        <DCCReference Include="analyzer\duds.analyzer.DependencyAnalyzer.pas"/>
+        <DCCReference Include="analyzer\duds.analyzer.ModulesAnalyzer.pas"/>
+        <DCCReference Include="duds.export.units.Gephi.pas"/>
+        <DCCReference Include="duds.export.units.GraphML.pas"/>
+        <DCCReference Include="duds.export.modules.CSV.pas"/>
+        <DCCReference Include="duds.export.modules.GraphML.pas"/>
+        <DCCReference Include="refactoring\duds.refactoring.RenameUnit.pas"/>
+        <DCCReference Include="refactoring\duds.refactoring.AddUnitToUses.pas"/>
+        <DCCReference Include="refactoring\duds.refactoring.FormatUsesHelper.pas"/>
+        <DCCReference Include="refactoring\duds.refactoring.FormatUses.pas"/>
+        <DCCReference Include="refactoring\duds.refactoring.PascalAnalyzerUsesReportProcessor.pas"/>
+        <DCCReference Include="refactoring\duds.refactoring.RemoveUnusedUnits.pas"/>
+        <DCCReference Include="gui\duds.gui.HourGlass.pas"/>
+        <DCCReference Include="gui\duds.gui.Utils.pas"/>
+        <DCCReference Include="gui\duds.gui.VirtualTreeview.pas"/>
+        <DCCReference Include="gui\duds.gui.forms.Main.pas">
+            <Form>frmMain</Form>
+        </DCCReference>
+        <DCCReference Include="gui\duds.gui.forms.FindReplace.pas">
+            <Form>frmSearchAndReplace</Form>
+        </DCCReference>
+        <DCCReference Include="gui\duds.gui.forms.Settings.pas">
+            <Form>frmDependencyScannerSetting</Form>
+        </DCCReference>
+        <DCCReference Include="gui\duds.gui.forms.Rename.pas">
+            <Form>frmRenameUnit</Form>
+        </DCCReference>
+        <DCCReference Include="gui\duds.gui.forms.AddUnitToUses.pas">
+            <Form>frmAddNewUnit</Form>
+        </DCCReference>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

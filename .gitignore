@@ -28,7 +28,6 @@
 
 # Delphi compiler-generated binaries (safe to delete)
 *.exe
-!bin/Win32/Release/DependencyScanner.exe
 *.dll
 *.bpl
 *.bpi
