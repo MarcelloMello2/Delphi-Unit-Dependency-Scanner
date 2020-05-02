@@ -231,10 +231,10 @@ begin
   // -> consume all 'ptPoint' and 'ptIdentifier' tokens
 
   aLexer.InitAhead; // this proceeds to the next non-junk token automatically
-  if aLexer.AheadGenID = ptPoint then
+  if aLexer.AheadTokenID = ptPoint then
   begin
     aLexer.Next;
-    while (aLexer.GenID in [ptIdentifier, ptPoint]) do
+    while (aLexer.TokenID in [ptIdentifier, ptPoint]) do
     begin
       Result := Result + aLexer.Token;
       aLexer.Next;

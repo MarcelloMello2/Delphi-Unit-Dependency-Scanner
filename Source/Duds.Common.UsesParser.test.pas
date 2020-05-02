@@ -53,6 +53,9 @@ type
     procedure SimpleUnitWithDottyName;
 
     [Test]
+    procedure SimpleUnitWithDottyNamesUsingKeywords;
+
+    [Test]
     procedure DottyNamesAndSwitches;
 
     [Test]
@@ -277,6 +280,21 @@ begin
   GetUnits(code, UnitInfo);
   Assert.AreEqual('my.Dotty.Utils', UnitInfo.DelphiUnitName);
   CheckUsedUnits(UnitInfo, ['System.SysUtils', 'System.Classes'], [], [], [utInterface, utInterface]);
+end;
+
+procedure TUsesParserTest.SimpleUnitWithDottyNamesUsingKeywords;
+const
+  code = 'unit my.Dotty.Export.Utils; ' +
+         'interface ' +
+         '  uses Duds.Common.Helper.IniFile, Duds.Export.Gephi;' + // 'Helper' & 'Export' are Keywords
+         'implementation' +
+         'end.';
+var
+  UnitInfo: IUnitInfo;
+begin
+  GetUnits(code, UnitInfo);
+  Assert.AreEqual('my.Dotty.Export.Utils', UnitInfo.DelphiUnitName);
+  CheckUsedUnits(UnitInfo, ['Duds.Common.Helper.IniFile', 'Duds.Export.Gephi'], [], [], [utInterface, utInterface]);
 end;
 
 procedure TUsesParserTest.UnitWithSwitches;
