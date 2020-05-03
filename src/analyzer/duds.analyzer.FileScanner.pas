@@ -20,7 +20,6 @@ type
     fModel: TDudsModel;
 
     procedure ScanFoldersAndAddAllDelphiFiles(Dirs: TStrings);
-    function GetAbsolutePath(aRelativePath: string): string;
     function IsCommentedOut(path: string): Boolean;
 
   public
@@ -35,14 +34,6 @@ type
 implementation
 
 { TDudsFileScanner }
-
-function TDudsFileScanner.GetAbsolutePath(aRelativePath: string): string;
-begin
-  if TPath.IsRelativePath(aRelativePath) then
-    Result := TPath.GetFullPath(TPath.Combine(ExtractFilePath(FProjectFilename), aRelativePath))
-  else
-    Result := aRelativePath;
-end;
 
 procedure TDudsFileScanner.ScanFoldersAndAddAllDelphiFiles(Dirs: TStrings);
 var
@@ -105,7 +96,7 @@ begin
     // allow "commenting" out of a line
     if not RootFile.IsEmpty and not IsCommentedOut(RootFile) then
     begin
-      RootFileAbsolutePath := GetAbsolutePath(RootFile);
+      RootFileAbsolutePath := GetAbsolutePath(RootFile, fProjectFilename);
       if not FileExists(RootFileAbsolutePath) then
         TDudsLogger.GetInstance.Log(StrRootFileNotFound, [RootFileAbsolutePath], LogError)
       else
@@ -177,7 +168,7 @@ begin
         Inc(DefinedPaths);
 
         DoExpandPath       := HasExpandSign(DefinedPath); // has "expand" sign?
-        AbsoluteSearchPath := GetAbsolutePath(TrimExpandSign(DefinedPath));
+        AbsoluteSearchPath := GetAbsolutePath(TrimExpandSign(DefinedPath), fProjectFilename);
 
         if not DirectoryExists(AbsoluteSearchPath) then
           TDudsLogger.GetInstance.Log(StrSearchPathDoesNotExist, [AbsoluteSearchPath], LogError)

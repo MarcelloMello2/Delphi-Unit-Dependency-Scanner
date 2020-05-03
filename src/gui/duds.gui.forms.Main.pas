@@ -60,6 +60,7 @@ uses
   duds.common.Language,
   duds.common.Log,
   duds.common.modules,
+  duds.common.modulesSerializer,
   duds.analyzer.model,
   duds.analyzer.FileScanner,
   duds.analyzer.DependencyAnalyzer,
@@ -2303,7 +2304,9 @@ begin
       // step 1: read modules definition (if defined)
       if not FProjectSettings.ModulesDefinitionFile.IsEmpty then
       begin
-        TModulesSerializer.ReadFromJsonFile(FProjectSettings.ModulesDefinitionFile, FModel.Modules);
+        TModulesSerializer.ReadFromJsonFile(
+          GetAbsolutePath(FProjectSettings.ModulesDefinitionFile, FProjectFilename),
+          FModel.Modules);
         Log(StrModulesDefinitionLoaded, [FModel.Modules.Dictionary.Count]);
       end;
 

@@ -20,6 +20,7 @@ uses
   duds.common.Log                                    in '..\src\common\duds.common.Log.pas',
   duds.common.Delphi                                 in '..\src\common\duds.common.Delphi.pas',
   duds.common.modules                                in '..\src\common\duds.common.modules.pas',
+  duds.common.modulesSerializer                      in '..\src\common\duds.common.modulesSerializer.pas',
   duds.analyzer.model                                in '..\src\analyzer\duds.analyzer.model.pas',
   duds.analyzer.FileScanner                          in '..\src\analyzer\duds.analyzer.FileScanner.pas',
   duds.analyzer.DependencyAnalyzer                   in '..\src\analyzer\duds.analyzer.DependencyAnalyzer.pas',

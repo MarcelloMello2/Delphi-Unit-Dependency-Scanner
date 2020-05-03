@@ -15,6 +15,7 @@ uses
   duds.common.Log,
   duds.common.Interfaces,
   duds.common.modules,
+  duds.common.modulesSerializer,
   duds.analyzer.model;
 
 type

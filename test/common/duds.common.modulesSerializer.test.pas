@@ -1,4 +1,4 @@
-unit duds.common.modules.test;
+unit duds.common.modulesSerializer.test;
 
 interface
 
@@ -10,27 +10,24 @@ uses
 
   duds.common.Types,
   duds.common.Interfaces,
-  duds.common.modules;
+  duds.common.modules,
+  duds.common.modulesSerializer;
 
 type
   [TestFixture]
-  TDudsModulesSerializerTest = class(TObject)
-  private
-
+  TModulesSerializerTest = class(TObject)
   public
     [Test]
     procedure ReadFromJson_SimpleTest;
-
     [Test]
     procedure ReadFromJson_Dependencies;
-
+    [Test]
+    procedure ReadFromJson_RelativePaths;
   end;
 
 implementation
 
-{ TDudsModulesSerializerTest }
-
-procedure TDudsModulesSerializerTest.ReadFromJson_SimpleTest;
+procedure TModulesSerializerTest.ReadFromJson_SimpleTest;
 const
   json =
     '{' +
@@ -52,7 +49,7 @@ var
 begin
   aModulesList := TModulesList.Create;
   try
-    TModulesSerializer.ReadFromJson(json, aModulesList);
+    TModulesSerializer.ReadFromJson('', json, aModulesList);
     Assert.AreEqual(1, aModulesList.Dictionary.Count, 'modules in list');
 
     aModulesList.Dictionary.TryGetValue('delphi.rtl', aModule);
@@ -87,7 +84,7 @@ begin
   end;
 end;
 
-procedure TDudsModulesSerializerTest.ReadFromJson_Dependencies;
+procedure TModulesSerializerTest.ReadFromJson_Dependencies;
 const
   json =
     '{' +
@@ -111,11 +108,11 @@ var
 begin
   aModulesList := TModulesList.Create;
   try
-    TModulesSerializer.ReadFromJson(json, aModulesList);
+    TModulesSerializer.ReadFromJson('', json, aModulesList);
     Assert.AreEqual(2, aModulesList.Dictionary.Count, 'modules in list');
 
     aModulesList.Dictionary.TryGetValue('common', aCommonModule);
-    Assert.IsNotNull(aCommonModule, 'module ''main'' not found');
+    Assert.IsNotNull(aCommonModule, 'module ''common'' not found');
 
     aModulesList.Dictionary.TryGetValue('main', aMainModule);
     Assert.IsNotNull(aMainModule, 'module ''main'' not found');
@@ -131,6 +128,43 @@ begin
   finally
     aModulesList.Free;
   end;
+end;
+
+{ TModulesSerializerTest }
+
+procedure TModulesSerializerTest.ReadFromJson_RelativePaths;
+const
+  modulesFileName = 'C:\path\to\my\modules\file.json';
+  json =
+    '{' +
+    '    "modules": [' +
+    '        {' +
+    '            "name": "main",' +
+    '            "contains": {' +
+    '                "paths": ["..\\relative\\path\\to\\source"]' +
+    '            }' +
+    '        }' +
+    '    ]' +
+    '}';
+var
+  aModulesList: TModulesList;
+  aMainModule: TModule;
+begin
+  aModulesList := TModulesList.Create;
+  try
+    TModulesSerializer.ReadFromJson(modulesFileName, json, aModulesList);
+    Assert.AreEqual(1, aModulesList.Dictionary.Count, 'modules in list');
+
+    aModulesList.Dictionary.TryGetValue('main', aMainModule);
+    Assert.IsNotNull(aMainModule, 'module ''main'' not found');
+
+    Assert.AreEqual(1, aMainModule.Paths.Count, 'number of paths');
+    Assert.AreEqual('C:\path\to\my\relative\path\to\source\', aMainModule.Paths[0], 'absolute path');
+
+  finally
+    aModulesList.Free;
+  end;
+
 end;
 
 end.

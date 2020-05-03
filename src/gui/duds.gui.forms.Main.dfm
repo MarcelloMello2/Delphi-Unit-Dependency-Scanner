@@ -114,6 +114,10 @@ object frmMain: TfrmMain
           TabOrder = 0
           object tabTree: TTabSheet
             Caption = 'Units Tree'
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
             object Splitter2: TSplitter
               Left = 497
               Top = 0
@@ -269,6 +273,10 @@ object frmMain: TfrmMain
                 Visible = False
                 object tabParentFile: TTabSheet
                   Caption = 'Parent File'
+                  ExplicitLeft = 0
+                  ExplicitTop = 0
+                  ExplicitWidth = 0
+                  ExplicitHeight = 0
                   object memParentFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
@@ -702,7 +710,7 @@ object frmMain: TfrmMain
             Columns = <
               item
                 Position = 0
-                Width = 235
+                Width = 239
               end
               item
                 Position = 1

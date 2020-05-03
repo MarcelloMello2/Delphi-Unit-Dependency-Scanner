@@ -21,11 +21,31 @@
             }
         },
         {
-            "name": "3rdParty.DelphiAst",
+            "name": "3rdParty.DelphiAST",
             "origin": "3rdParty",
             "contains": {
                 "paths": [
-                    "C:\\path\\to\\my\\3rdParty\\printing\\library"
+                    "..\\src\\3rdParty\\DelphiAST\\Source\\SimpleParser"
+                ]
+            }
+        },
+        {
+            "name": "3rdParty.SynEdit",
+            "origin": "3rdParty",
+            "contains": {
+                "units": [
+                    "SynEditHighlighter",
+                    "SynHighlighterPas",
+                    "SynEdit"
+                ]
+            }
+        },
+        {
+            "name": "3rdParty.VirtualTree",
+            "origin": "3rdParty",
+            "contains": {
+                "units": [
+                    "VirtualTrees"
                 ]
             }
         },
@@ -33,45 +53,113 @@
             "name": "duds.common",
             "origin": "own",
             "dependencies": [
+                "delphi.rtl",
+                "3rdParty.DelphiAST"
+            ],
+            "contains": {
+                "paths": [
+                    "..\\src\\common"
+                ]
+            }
+        },
+        {
+            "name": "duds.analyzer",
+            "origin": "own",
+            "dependencies": [
+                "duds.common"
+            ],
+            "contains": {
+                "paths": [
+                    "..\\src\\analyzer"
+                ]
+            }
+        },
+        {
+            "name": "duds.refactoring",
+            "origin": "own",
+            "dependencies": [
+                "duds.common"
+            ],
+            "contains": {
+                "paths": [
+                    "..\\src\\refactoring"
+                ]
+            }
+        },
+        {
+            "name": "duds.export",
+            "origin": "own",
+            "dependencies": [
+                "duds.common"
+            ],
+            "contains": {
+                "paths": [
+                    "..\\src\\export"
+                ]
+            }
+        },        
+        {
+            "name": "duds.gui",
+            "origin": "own",
+            "dependencies": [
+                "delphi.vcl",
+                "3rdParty.SynEdit",
+                "3rdParty.VirtualTree",                
+                "duds.analyzer",
+                "duds.refactoring",
+                "duds.export"
+            ],
+            "contains": {
+                "paths": [
+                    "..\\src\\gui"
+                ]
+            }
+        },      
+        {
+            "name": "3rdParty.DUnitX",
+            "origin": "3rdParty",
+            "usage": "test",
+            "dependencies": [
                 "delphi.rtl"
             ],
             "contains": {
                 "units": [
-                    "MyCommonUnit",
-                    "anotherCommonUnit"
+                    "DUnitX.Loggers.Console",
+                    "DUnitX.Loggers.XML.NUnit",
+                    "DUnitX.TestFramework"
                 ]
             }
         },
         {
-            "name": "core.common.test",
-            "origin": "own",
+            "name": "3rdParty.TestInsight",
+            "origin": "3rdParty",
             "usage": "test",
-            "dependencies": [
-                "core.common"
-            ]
-        },        
-        {
-            "name": "core.ciphers",
-            "origin": "own",
-            "dependencies": [
-                "core.common"
-            ],
             "contains": {
                 "units": [
-                    "cipherUnit1",
-                    "cipherUnit2"
+                    "TestInsight.DUnitX"
                 ]
             }
-        },
+        },        
         {
-            "name": "myProduct",
+            "name": "duds.test",
             "origin": "own",
-            "dependencies": [
-                "delphi.vcl",
-                "3rdParty.printing",
-                "core.common",
-                "core.ciphers"
-            ]
+            "usage": "test",
+            "dependencies": [                
+                "3rdParty.DUnitX",
+                "3rdParty.TestInsight",                
+                "duds.analyzer",
+                "duds.refactoring",
+                "duds.export"
+            ],
+            "contains": {
+                "paths": [
+                    "..\\test\\common",
+                    "..\\test\\analyzer",
+                    "..\\test\\export",
+                    "..\\test\\refactoring",
+                    "..\\test\\gui"
+                ]
+            }
         }
     ]
 }

@@ -148,6 +148,7 @@
         <DCCReference Include="common\duds.common.Log.pas"/>
         <DCCReference Include="common\duds.common.Delphi.pas"/>
         <DCCReference Include="common\duds.common.modules.pas"/>
+        <DCCReference Include="common\duds.common.modulesSerializer.pas"/>
         <DCCReference Include="analyzer\duds.analyzer.model.pas"/>
         <DCCReference Include="analyzer\duds.analyzer.FileScanner.pas"/>
         <DCCReference Include="analyzer\duds.analyzer.DependencyAnalyzer.pas"/>
@@ -165,17 +166,11 @@
         <DCCReference Include="gui\duds.gui.HourGlass.pas"/>
         <DCCReference Include="gui\duds.gui.Utils.pas"/>
         <DCCReference Include="gui\duds.gui.VirtualTreeview.pas"/>
-        <DCCReference Include="gui\duds.gui.forms.Main.pas">
-            <Form>frmMain</Form>
-        </DCCReference>
-        <DCCReference Include="gui\duds.gui.forms.Settings.pas">
-            <Form>frmSettings</Form>
-        </DCCReference>
+        <DCCReference Include="gui\duds.gui.forms.Main.pas"/>
+        <DCCReference Include="gui\duds.gui.forms.Settings.pas"/>
         <DCCReference Include="gui\duds.gui.forms.SearchAndReplaceUnitName.pas"/>
         <DCCReference Include="gui\duds.gui.forms.RenameUnit.pas"/>
-        <DCCReference Include="gui\duds.gui.forms.AddUnitToUses.pas">
-            <Form>frmAddNewUnit</Form>
-        </DCCReference>
+        <DCCReference Include="gui\duds.gui.forms.AddUnitToUses.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -229,13 +224,19 @@
                 </Source>
             </Delphi.Personality>
             <Deployment Version="3">
-                <DeployFile LocalName="..\bin\Win32\Debug\duds.exe" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="build\bin\Win32\Debug\duds.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>duds.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
                 <DeployFile LocalName="..\bin\Win32\Release\duds.exe" Configuration="Release" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>duds.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="build\bin\Win32\Debug\duds.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>duds.exe</RemoteName>
                         <Overwrite>true</Overwrite>

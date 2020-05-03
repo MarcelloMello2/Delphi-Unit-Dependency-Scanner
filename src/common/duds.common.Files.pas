@@ -30,7 +30,7 @@ unit duds.common.Files;
 interface
 
 uses
-  System.Classes, System.SysUtils, Generics.Collections,
+  System.Classes, System.SysUtils, Generics.Collections, IoUtils,
 
   WinApi.Windows, Winapi.ShLwApi,
 
@@ -41,6 +41,7 @@ function ExpandFileNameRelBaseDir(const FileName, BaseDir: string): string;
 function ExtractFilenameNoExt(Filename: String): String;
 function ScanFiles(const Path, Filter: String; Recursive: Boolean; IncludeDirectories: Boolean; IncludePaths: Boolean): TObjectList<TFileInfo>;
 function FileTime2DateTime(FileTime: TFileTime): TDateTime;
+function GetAbsolutePath(aRelativePath: string; aBasePath: string): string;
 
 implementation
 
@@ -158,6 +159,14 @@ begin
 
   while FullFilter <> '' do
     ScanFilesRec(Path, NextBlock(FullFilter, ';'));
+end;
+
+function GetAbsolutePath(aRelativePath: string; aBasePath: string): string;
+begin
+  if TPath.IsRelativePath(aRelativePath) then
+    Result := TPath.GetFullPath(TPath.Combine(ExtractFilePath(aBasePath), aRelativePath))
+  else
+    Result := aRelativePath;
 end;
 
 end.

@@ -32,6 +32,7 @@ uses
   duds.analyzer.model,
   duds.common.Classes,
   duds.common.modules,
+  duds.common.modulesSerializer,
   duds.analyzer.ModulesAnalyzer,
   duds.common.UnitInfo,
   duds.common.UsedUnitInfo,
@@ -236,7 +237,7 @@ begin
     AddModuleToJson(modules, c3rdParty_Ciphers_ModuleName, [c3rdParty_Ciphers_Unit1, c3rdParty_Ciphers_Unit2]);
     AddModuleToJson(modules, cCoreCommon_Module,           [cCoreCommon_Unit_Text, cCoreCommon_Unit_Array]);
 
-    TModulesSerializer.ReadFromJson(jsonObj.ToJSON, FModel.Modules);
+    TModulesSerializer.ReadFromJson('', jsonObj.ToJSON, FModel.Modules);
   finally
     jsonObj.Free;
   end;

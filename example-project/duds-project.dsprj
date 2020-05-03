@@ -1,6 +1,6 @@
 [Settings]
 LinkUnits=1
-ModulesDefinitionFile=
+ModulesDefinitionFile=.\duds-project.modules.json
 [RootFiles]
 0=..\src\duds.dpr
 1=..\test\duds.test.dpr

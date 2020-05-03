@@ -29,6 +29,7 @@ uses
   duds.common.Log                                    in '..\src\common\duds.common.Log.pas',
   duds.common.Delphi                                 in '..\src\common\duds.common.Delphi.pas',
   duds.common.modules                                in '..\src\common\duds.common.modules.pas',
+  duds.common.modulesSerializer                      in '..\src\common\duds.common.modulesSerializer.pas',
   duds.analyzer.model                                in '..\src\analyzer\duds.analyzer.model.pas',
   duds.analyzer.FileScanner                          in '..\src\analyzer\duds.analyzer.FileScanner.pas',
   duds.analyzer.DependencyAnalyzer                   in '..\src\analyzer\duds.analyzer.DependencyAnalyzer.pas',
@@ -46,7 +47,7 @@ uses
 
   duds.common.UsesParser.SimpleLexer.test            in '..\test\common\duds.common.UsesParser.SimpleLexer.test.pas',
   duds.common.UsesParser.test                        in '..\test\common\duds.common.UsesParser.test.pas',
-  duds.common.modules.test                           in '..\test\common\duds.common.modules.test.pas',
+  duds.common.modulesSerializer.test                 in '..\test\common\duds.common.modulesSerializer.test.pas',
   duds.refactoring.FormatUsesHelper.test             in '..\test\refactoring\duds.refactoring.FormatUsesHelper.test.pas',
   duds.refactoring.FormatUses.test                   in '..\test\refactoring\duds.refactoring.FormatUses.test.pas',
   duds.refactoring.RemoveUnusedUnits.test            in '..\test\refactoring\duds.refactoring.RemoveUnusedUnits.test.pas';
