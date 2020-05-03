@@ -168,7 +168,7 @@ begin
 
   for CurrentModule in FModel.Modules.OrderedModules do
   begin
-    for dependendModule in CurrentModule.Dependencies do
+    for dependendModule in CurrentModule.DefinedDependencies do
     begin
       edgeNode := xmlGraph.AddChild('edge');
       edgeNode.Attributes['id']     := 'e' + IntToStr(edgeID);

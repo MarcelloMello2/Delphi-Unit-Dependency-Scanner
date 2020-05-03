@@ -13,7 +13,7 @@ uses
 
 type
   // key in this dictionary is the modules name (must be unique)
-  TModulesList = class
+  TModulesDefinition = class
   private
     fDictionary: TObjectDictionary<String, TModule>;               // this dictionary owns the TModule instances!
     fUnitsToModulesSearchlist: TObjectDictionary<string, TModule>;
@@ -44,16 +44,16 @@ type
 
 implementation
 
-{ TModulesList }
+{ TModulesDefinition }
 
-procedure TModulesList.AddModule(Module: TModule);
+procedure TModulesDefinition.AddModule(Module: TModule);
 begin
   fDictionary.Add(Module.Name, Module);
   fOrderedModules.Add(Module);
   Module.ID := fOrderedModules.Count; // save unique id in TModule for easy usage in e.g. export to graphml
 end;
 
-procedure TModulesList.Clear;
+procedure TModulesDefinition.Clear;
 begin
   fUnitsToModulesSearchlist.Clear;
   fPathsToModulesSearchlist.Clear;
@@ -62,7 +62,7 @@ begin
   fDictionary.Clear;
 end;
 
-constructor TModulesList.Create;
+constructor TModulesDefinition.Create;
 begin
   fDictionary     := TObjectDictionary<String, TModule>.Create([doOwnsValues]);
 
@@ -74,7 +74,7 @@ begin
   fUnknownModule := nil;
 end;
 
-procedure TModulesList.CreateUnknownModule;
+procedure TModulesDefinition.CreateUnknownModule;
 begin
   if Assigned(fUnknownModule) then
     raise Exception.Create('unknown module already created');
@@ -85,7 +85,7 @@ begin
   AddModule(fUnknownModule);
 end;
 
-destructor TModulesList.Destroy;
+destructor TModulesDefinition.Destroy;
 begin
   fUnitsToModulesSearchlist.Free;
   fPathsToModulesSearchlist.Free;
@@ -94,7 +94,7 @@ begin
   inherited;
 end;
 
-procedure TModulesList.ClearModulesAnalysisData;
+procedure TModulesDefinition.ClearModulesAnalysisData;
 var
   aModule: TModule;
 begin
@@ -102,7 +102,7 @@ begin
     aModule.AnalysisData.Clear;
 end;
 
-procedure TModulesList.ReBuildFastSearchList;
+procedure TModulesDefinition.ReBuildFastSearchList;
 var
   aModule: TModule;
   currentUnit: string;
@@ -133,7 +133,7 @@ begin
     end;
 end;
 
-function TModulesList.FindModuleForUnit(UnitInfo: IUnitInfo; out Module: TModule): Boolean;
+function TModulesDefinition.FindModuleForUnit(UnitInfo: IUnitInfo; out Module: TModule): Boolean;
 var
   aModule: TModule;
   i: Integer;
@@ -152,7 +152,7 @@ begin
     aPathWithOutUnitName := IncludeTrailingPathDelimiter(ExtractFilePath(UnitInfo.Filename)).ToLower;
   end;
 
-  // check if unit name is defined in a module
+  // priority 1: check if unit name is defined in a module
   if fUnitsToModulesSearchlist.TryGetValue(aUnitNameLowerCase, aModule) then
   begin
      Module := aModule;
@@ -160,7 +160,7 @@ begin
      exit;
   end;
 
-  // check if path it defined in a module
+  // priority 2: check if path it defined in a module
   if aPathWithOutUnitName <> '' then
     if fPathsToModulesSearchlist.TryGetValue(aPathWithOutUnitName, aModule) then
     begin

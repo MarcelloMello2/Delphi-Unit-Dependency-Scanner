@@ -1,4 +1,4 @@
-unit duds.analyzer.DependencyAnalyzer;
+unit duds.analyzer.UnitsAnalyzer;
 
 interface
 
@@ -21,22 +21,15 @@ uses
   duds.common.UsesParser;
 
 type
-  TDudsDependencyAnalyzer = class(TObject)
+  TUnitsAnalyzer = class(TObject)
   private
     FModel: TDudsModel;
     FOnLog: TLogProcedure;
     fAlreadyLoggedMissingIncludes: TStringList;
     FProjectSettings: TProjectSettings;
-    FParsedFileCount: Integer;
-    FFMXFormCount: Integer;
-    FVCLFormCount: Integer;
-    FScannedUsesCount: Integer;
+
     FScanDepth: Integer;
-    FDeepestScanDepth: Integer;
-    fLinesOfCode: Integer;
-    FSemiCircularFiles: Integer;
-    FCircularFiles: Integer;
-    FFilesNotInPath: Integer;
+
 
     FCancelled: Boolean;
 
@@ -55,57 +48,38 @@ type
     property OnLog: TLogProcedure read FOnLog    write FOnLog;
     property ProjectSettings: TProjectSettings read FProjectSettings write FProjectSettings;
 
-    property ParsedFileCount: Integer read FParsedFileCount;
-    property FMXFormCount: Integer read FFMXFormCount;
-    property VCLFormCount: Integer read FVCLFormCount;
-    property ScannedUsesCount: Integer read FScannedUsesCount;
-    property DeepestScanDepth: Integer read FDeepestScanDepth;
-    property LinesOfCode: Integer read fLinesOfCode;
-    property SemiCircularFiles: Integer read FSemiCircularFiles;
-    property CircularFiles: Integer read FCircularFiles;
-    property FilesNotInPath: Integer read FFilesNotInPath;
-
     property Cancelled: Boolean read FCancelled write FCancelled;
 
   end;
 
 implementation
 
-{ TDudsDependencyAnalyzer }
+{ TUnitsAnalyzer }
 
-constructor TDudsDependencyAnalyzer.Create;
+constructor TUnitsAnalyzer.Create;
 begin
-  FParsedFileCount   := 0;
-  FFMXFormCount      := 0;
-  FVCLFormCount      := 0;
-  FScannedUsesCount  := 0;
   FScanDepth         := 0;
-  FDeepestScanDepth  := 0;
-  fLinesOfCode       := 0;
-  FSemiCircularFiles := 0;
-  FCircularFiles     := 0;
-  FFilesNotInPath    := 0;
   fAlreadyLoggedMissingIncludes := TStringList.Create(TDuplicates.dupError, true, false);
 end;
 
-destructor TDudsDependencyAnalyzer.Destroy;
+destructor TUnitsAnalyzer.Destroy;
 begin
   fAlreadyLoggedMissingIncludes.Free;
   inherited;
 end;
 
-procedure TDudsDependencyAnalyzer.Log(const Msg: String; const Severity: Integer);
+procedure TUnitsAnalyzer.Log(const Msg: String; const Severity: Integer);
 begin
   if Assigned(FOnLog) then
     FOnLog('Dependency Analyzer: ' + Msg, Severity);
 end;
 
-procedure TDudsDependencyAnalyzer.Log(const Msg: String; const Args: array of const; const Severity: Integer);
+procedure TUnitsAnalyzer.Log(const Msg: String; const Args: array of const; const Severity: Integer);
 begin
   Log(Format(Msg, Args), Severity);
 end;
 
-procedure TDudsDependencyAnalyzer.AddParsedDelphiFile(UnitInfo: IUnitInfo; IsRootFile: Boolean; InPath: Boolean);
+procedure TUnitsAnalyzer.AddParsedDelphiFile(UnitInfo: IUnitInfo; IsRootFile: Boolean; InPath: Boolean);
 var
   DelphiFile: TDelphiFile;
 begin
@@ -121,7 +95,7 @@ begin
   DelphiFile.InSearchPath := InPath;
 end;
 
-procedure TDudsDependencyAnalyzer.AnalyzeUnitOrProjectFile(Unitname: string; IsRootFile: Boolean);
+procedure TUnitsAnalyzer.AnalyzeUnitOrProjectFile(Unitname: string; IsRootFile: Boolean);
 var
   Filename: String;
   FoundFileInPaths: Boolean;
@@ -135,11 +109,11 @@ begin
 
   if not FCancelled then
   begin
-    Inc(FScannedUsesCount);
+    Inc(fModel.Stats.Units.ScannedUsesCount);
     Inc(FScanDepth);
 
-    if FScanDepth > FDeepestScanDepth then
-      FDeepestScanDepth := FScanDepth;
+    if FScanDepth > fModel.Stats.Units.DeepestScanDepth then
+      fModel.Stats.Units.DeepestScanDepth := FScanDepth;
 
     // Did we already parse this file? (also try unit scopes, so that we e.g. find `System.Classes` when
     // we search for `Classes` and already parsed `System.Classes` before
@@ -175,13 +149,13 @@ begin
 
           AddParsedDelphiFile(UnitInfo, IsRootFile, TRUE);
 
-          fLinesOfCode := fLinesOfCode + UnitInfo.LinesOfCode;
-          Inc(FParsedFileCount);
+          Inc(fModel.Stats.Units.LinesOfCode, UnitInfo.LinesOfCode);
+          Inc(fModel.Stats.Units.ParsedFileCount);
 
           if FileExists(ChangeFileExt(UnitInfo.Filename, '.dfm')) then
-            Inc(FVCLFormCount)
+            Inc(fModel.Stats.Units.VCLFormCount)
           else if FileExists(ChangeFileExt(UnitInfo.Filename, '.fmx')) then
-            Inc(FFMXFormCount);
+            Inc(fModel.Stats.Units.FMXFormCount);
         except
           on e: Exception do
             TDudsLogger.GetInstance.Log(StrUnableToParseS, [Filename, e.Message], LogError);
@@ -195,10 +169,10 @@ begin
       end else
       // we don't have the file on disk...
       begin
-        Inc(FFilesNotInPath);
+        Inc(fModel.Stats.Units.FilesNotInPath);
 
         // create an empty "parsed file" for the file that was not found on disk (still needed for the "UsedCount" counter)
-        UnitInfo := TUnitInfo.Create;
+        UnitInfo                := TUnitInfo.Create;
         UnitInfo.DelphiUnitName := Unitname;
         AddParsedDelphiFile(UnitInfo, IsRootFile, FALSE);
       end;
@@ -213,7 +187,7 @@ begin
     Dec(FScanDepth);
 end;
 
-procedure TDudsDependencyAnalyzer.ScanRootFilesAndBuildUsesLists;
+procedure TUnitsAnalyzer.ScanRootFilesAndBuildUsesLists;
 var
   RootFile: string;
 begin
@@ -222,7 +196,7 @@ begin
   for RootFile in fModel.RootFiles do
     AnalyzeUnitOrProjectFile(ExtractFilenameNoExt(RootFile), True);
 
-  TDudsLogger.GetInstance.Log(StrDFilesWithATo, [FormatCardinal(FModel.ParsedDelphiFiles.Count), FormatCardinal(fLinesOfCode)]);
+  TDudsLogger.GetInstance.Log(StrDFilesWithATo, [FormatCardinal(FModel.ParsedDelphiFiles.Count), FormatCardinal(fModel.Stats.Units.LinesOfCode)]);
 end;
 
 end.

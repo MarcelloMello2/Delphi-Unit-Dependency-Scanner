@@ -81,16 +81,16 @@ begin
     AddToken(Result, format(StrDDays, [Days]), ' ');
 
   if (Hours > 0) or (Days > 0) then
-    AddToken(Result, format('%dh', [Hours]), ' ');
+    AddToken(Result, format('%d h', [Hours]), ' ');
 
   if (Minutes > 0) or (Days > 0) or (Hours > 0) then
-    AddToken(Result, format('%dm', [Minutes]), ' ');
+    AddToken(Result, format('%d m', [Minutes]), ' ');
 
   if (Secs > 0) or (Days > 0) or (Hours > 0)  or (Minutes > 0) then
-    AddToken(Result, format('%ds', [Secs]), ' ');
+    AddToken(Result, format('%d s', [Secs]), ' ');
 
   if Result = '' then
-    Result := '0s';
+    Result := '0 s';
 end;
 
 function CompareInteger(const A, B: Integer): Integer;

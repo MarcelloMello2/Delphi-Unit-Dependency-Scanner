@@ -90,7 +90,8 @@ type
     fPaths: TStringList;
     fOrigin: TModuleOrigin;
     fUsage: TModuleUsage;
-    fDependencies: TObjectList<TModule>;
+    fDefinedDependencies: TObjectList<TModule>;
+    fAllowedDependencies: TObjectList<TModule>;
     fAnalysisData: TModuleAnalysisData;
 
   protected
@@ -105,11 +106,17 @@ type
     constructor Create;
     destructor Destroy; override;
 
+
     property ID: Integer read fID write fID;
     property Name: string read GetName write SetName;
     property Origin: TModuleOrigin read fOrigin write fOrigin;
     property Usage: TModuleUsage read fUsage write fUsage;
-    property Dependencies: TObjectList<TModule> read fDependencies write fDependencies;
+
+    { dependencies - as defined in modules definition file }
+    property DefinedDependencies: TObjectList<TModule> read fDefinedDependencies write fDefinedDependencies;
+
+    { AllowedDependencies = (directly) defined dependencies + all indirectly defined dependencies }
+    property AllowedDependencies: TObjectList<TModule> read fAllowedDependencies write fAllowedDependencies;
     property Paths: TStringList read GetPaths write SetPaths;
     property Units: TStringList read GetUnits write SetUnits;
 
@@ -151,7 +158,8 @@ implementation
 
 constructor TModule.Create;
 begin
-  fDependencies := TObjectList<TModule>.Create(false);
+  fDefinedDependencies := TObjectList<TModule>.Create(false);
+  fAllowedDependencies := TObjectList<TModule>.Create(false);
   fUnits := TStringList.Create(TDuplicates.dupError, true, false);
   fPaths := TStringList.Create(TDuplicates.dupError, true, false);
   fAnalysisData := TModuleAnalysisData.Create;
@@ -161,7 +169,8 @@ destructor TModule.Destroy;
 begin
   FreeAndNil(fUnits);
   FreeAndNil(fPaths);
-  FreeAndNil(fDependencies);
+  FreeAndNil(fAllowedDependencies);
+  FreeAndNil(fDefinedDependencies);
   FreeAndNil(fAnalysisData);
   inherited;
 end;

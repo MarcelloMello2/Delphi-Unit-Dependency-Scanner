@@ -126,7 +126,8 @@
                 "units": [
                     "DUnitX.Loggers.Console",
                     "DUnitX.Loggers.XML.NUnit",
-                    "DUnitX.TestFramework"
+                    "DUnitX.TestFramework",
+                    "DUnitX.Assert"
                 ]
             }
         },

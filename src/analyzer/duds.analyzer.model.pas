@@ -5,18 +5,19 @@ interface
 uses
   System.Classes, System.SysUtils, System.Generics.Collections,
 
-  duds.common.Classes, duds.common.modules;
+  duds.common.Classes, duds.common.modules, duds.analyzer.Stats;
 
 type
   TDudsModel = class(TObject)
   private
-    fModules: TModulesList;
+    fModules: TModulesDefinition;
     fRootFiles: TStringList;
 
     FFiles: TDictionary<String, String>;
     FParsedDelphiRootFiles: TObjectList<TDelphiFile>;
     FParsedDelphiFiles: TObjectDictionary<String, TDelphiFile>;
     FDelphiFileList: TObjectList<TDelphiFile>;
+    fStats: TAnalyzerStats;
 
   public
     constructor Create;
@@ -32,12 +33,13 @@ type
     function FindParsedDelphiUnit(const DelphiUnitName: string;
                                   UnitScopeNames: TStringList): TDelphiFile;
 
-    property Modules: TModulesList read fModules;
+    property Modules: TModulesDefinition read fModules;
     property RootFiles: TStringList read fRootFiles;
     property Files: TDictionary<String, String> read FFiles;
     property ParsedDelphiRootFiles: TObjectList<TDelphiFile> read FParsedDelphiRootFiles;
     property ParsedDelphiFiles: TObjectDictionary<String, TDelphiFile> read FParsedDelphiFiles;
     property DelphiFileList: TObjectList<TDelphiFile> read FDelphiFileList;
+    property Stats: TAnalyzerStats read fStats write fStats;
   end;
 
 implementation
@@ -52,27 +54,30 @@ begin
   FDelphiFileList.Clear;
   fModules.Clear;
   fRootFiles.Clear;
+  fStats.Clear;
 end;
 
 constructor TDudsModel.Create;
 begin
   inherited Create;
-  fModules               := TModulesList.Create;
+  fModules               := TModulesDefinition.Create;
   fRootFiles             := TStringList.Create(TDuplicates.dupError, false, false); // not sorted, to keep project settings order
   FFiles                 := TDictionary<String, String>.Create;
   FParsedDelphiRootFiles := TObjectList<TDelphiFile>.Create(FALSE);
   FParsedDelphiFiles     := TObjectDictionary<String, TDelphiFile>.Create([doOwnsValues]);
   FDelphiFileList        := TObjectList<TDelphiFile>.Create(FALSE);
+  fStats                 := TAnalyzerStats.Create;
 end;
 
 destructor TDudsModel.Destroy;
 begin
-  FreeAndNil(fModules);
-  FreeAndNil(fRootFiles);
-  FreeAndNil(FFiles);
-  FreeAndNil(FParsedDelphiRootFiles);
-  FreeAndNil(FParsedDelphiFiles);
-  FreeAndNil(FDelphiFileList);
+  fModules.Free;
+  fRootFiles.Free;
+  FFiles.Free;
+  FParsedDelphiRootFiles.Free;
+  FParsedDelphiFiles.Free;
+  FDelphiFileList.Free;
+  fStats.Free;
   inherited;
 end;
 

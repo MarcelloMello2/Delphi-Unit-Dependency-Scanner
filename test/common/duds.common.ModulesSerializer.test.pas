@@ -1,4 +1,4 @@
-unit duds.common.modulesSerializer.test;
+unit duds.common.ModulesSerializer.test;
 
 interface
 
@@ -44,10 +44,10 @@ const
     '    ]' +
     '}';
 var
-  aModulesList: TModulesList;
+  aModulesList: TModulesDefinition;
   aModule: TModule;
 begin
-  aModulesList := TModulesList.Create;
+  aModulesList := TModulesDefinition.Create;
   try
     TModulesSerializer.ReadFromJson('', json, aModulesList);
     Assert.AreEqual(1, aModulesList.Dictionary.Count, 'modules in list');
@@ -102,11 +102,11 @@ const
     '    ]' +
     '}';
 var
-  aModulesList: TModulesList;
+  aModulesList: TModulesDefinition;
   aCommonModule: TModule;
   aMainModule: TModule;
 begin
-  aModulesList := TModulesList.Create;
+  aModulesList := TModulesDefinition.Create;
   try
     TModulesSerializer.ReadFromJson('', json, aModulesList);
     Assert.AreEqual(2, aModulesList.Dictionary.Count, 'modules in list');
@@ -122,9 +122,9 @@ begin
     Assert.AreEqual(2, aMainModule.ID, 'module id');
 
     // check dependencies
-    Assert.AreEqual(1, aMainModule.Dependencies.Count, 'dependencies count in main module');
+    Assert.AreEqual(1, aMainModule.DefinedDependencies.Count, 'dependencies count in main module');
 
-    Assert.AreEqual(aCommonModule, aMainModule.Dependencies[0], 'dependency to core module');
+    Assert.AreEqual(aCommonModule, aMainModule.DefinedDependencies[0], 'dependency to core module');
   finally
     aModulesList.Free;
   end;
@@ -147,10 +147,10 @@ const
     '    ]' +
     '}';
 var
-  aModulesList: TModulesList;
+  aModulesList: TModulesDefinition;
   aMainModule: TModule;
 begin
-  aModulesList := TModulesList.Create;
+  aModulesList := TModulesDefinition.Create;
   try
     TModulesSerializer.ReadFromJson(modulesFileName, json, aModulesList);
     Assert.AreEqual(1, aModulesList.Dictionary.Count, 'modules in list');

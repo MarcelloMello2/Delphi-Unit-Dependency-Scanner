@@ -21,9 +21,9 @@ type
     cModuleUsageJSONEnumValues  : array[TModuleUsage] of string = ('undefined', 'production', 'test');
 
     class procedure ReadFromJsonFile(aModulesFileName: string; aModulesList:
-        TModulesList);
+        TModulesDefinition);
     class procedure ReadFromJson(aModulesFileName, aContent: string; aModulesList:
-        TModulesList);
+        TModulesDefinition);
 
   end;
 
@@ -32,7 +32,7 @@ implementation
 { TModulesSerializer }
 
 class procedure TModulesSerializer.ReadFromJson(aModulesFileName, aContent:
-    string; aModulesList: TModulesList);
+    string; aModulesList: TModulesDefinition);
 
   function GetModuleOriginEnum(value: string): TModuleOrigin;
   var
@@ -122,7 +122,7 @@ begin
         begin
           aDependencyModuleName := aDependenciesArray.Items[j].Value;
           if aModulesList.Dictionary.TryGetValue(aDependencyModuleName, aReferencedModule) then
-            aNewModule.Dependencies.Add(aReferencedModule)
+            aNewModule.DefinedDependencies.Add(aReferencedModule)
           else
             raise Exception.CreateFmt('Module "%s" references module "%s" as dependency. Reference could not be resolved, module not found. ' +
                                       'Module must be defined before in order the be able to reference it.', [aNewModule.Name, aDependencyModuleName]);
@@ -166,7 +166,7 @@ begin
 end;
 
 class procedure TModulesSerializer.ReadFromJsonFile(aModulesFileName: string;
-    aModulesList: TModulesList);
+    aModulesList: TModulesDefinition);
 var
   aContent: string;
 begin

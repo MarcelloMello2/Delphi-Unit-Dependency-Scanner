@@ -63,8 +63,9 @@ uses
   duds.common.modulesSerializer,
   duds.analyzer.model,
   duds.analyzer.FileScanner,
-  duds.analyzer.DependencyAnalyzer,
+  duds.analyzer.UnitsAnalyzer,
   duds.analyzer.ModulesAnalyzer,
+  duds.analyzer.Facade,
   duds.export.modules.CSV,
   duds.export.modules.GraphML,
   duds.export.units.Gephi,
@@ -333,30 +334,19 @@ type
 
   private
     FModel: TDudsModel;
-    FDependencyAnalyzer: TDudsDependencyAnalyzer;
+    FStats: TStringList; // TODO: this should be moved inside fModel.Stats.Units
+    fAnalyzerFacade: TAnalyzerFacade;
     FTreeNodeObjects: TObjectList<TNodeObject>;
     FSearchText: String;
-    FLineCount: Integer;
-    FStats: TStringList;
-    FScannedUsesCount: Integer;
-    FSemiCircularFiles: Integer;
-    FCircularFiles: Integer;
-    FScanDepth: Integer;
-    FCancelled: Boolean;
     FStartTime: TDateTime;
+    FCancelled: Boolean;
     FBusy: Boolean;
     FpnlLogHeight: Integer;
     FEnvironmentSettings: TEnvironmentSettings;
     FProjectSettings: TProjectSettings;
-    FProjectFilename: String;
+    fProjectFilename: String;
     FLoadLastProject: Boolean;
     FModified: Boolean;
-    FParsedFileCount: Integer;
-    FFMXFormCount: Integer;
-    FVCLFormCount: Integer;
-    FFilesNotInPath: Integer;
-    FNextStatusUpdate: TDateTime;
-    FDeepestScanDepth: Integer;
     FClosing: Boolean;
     FShowSearchTermParents: Boolean;
     FRunScanOnLoad: Boolean;
@@ -370,7 +360,7 @@ type
     procedure SetNodeVisibility(VT: TVirtualStringTree; Node: PVirtualNode; DelphiFile: TDelphiFile);
     function GetLinkedNode(Node: PVirtualNode): PVirtualNode;
     procedure UpdateTreeControls(Node: PVirtualNode);
-    procedure UpdateStats(ForceUpdate: Boolean);
+    procedure UpdateStats;
     procedure UpdateListControls(Node: PVirtualNode);
     procedure ShowHideControls;
     procedure LoadSettings;
@@ -397,12 +387,11 @@ type
     procedure ClearGUIAndModelAndCloseControls;
     function CheckNotRunning: Boolean;
     procedure ResetSettings;
-    procedure ClearStats;
     function GetFocusedDelphiFile: TDelphiFile;
     procedure ExportToXML(const VT: TVirtualStringTree; const Filename: String);
 
-    procedure Log(const Msg: String; const Severity: Integer = LogInfo); overload;
-    procedure Log(const Msg: String; const Args: array of const; const Severity: Integer = LogInfo); overload;
+    procedure Log(const Msg: String; const Severity: Integer); overload;
+    procedure Log(const Msg: String; const Args: array of const; const Severity: Integer); overload;
 
     function GetID(const Node: PVirtualNode): Integer;
     procedure SetID(const Node: PVirtualNode; const ID: Integer);
@@ -563,7 +552,7 @@ begin
   vtModules.NodeDataSize := SizeOf(TNodeData);
 
   FModel := TDudsModel.Create;
-  FDependencyAnalyzer := nil;
+  fAnalyzerFacade  := nil;
   FTreeNodeObjects := TObjectList<TNodeObject>.Create(TRUE);
   FStats := TStringList.Create;
 
@@ -599,7 +588,8 @@ begin
   UpdateLogEntries;
 end;
 
-procedure TfrmMain.Log(const Msg: String; const Args: array of const; const Severity: Integer);
+procedure TfrmMain.Log(const Msg: String; const Args: array of const; const
+    Severity: Integer);
 begin
   Log(Format(Msg, Args), Severity);
 end;
@@ -610,7 +600,7 @@ begin
 
   if FProjectSettings.LoadFromFile(Filename) then
   begin
-    if (FProjectFilename <> '') and (RunScanAfterLoad) and (FRunScanOnLoad) and (FProjectSettings.RootFiles.Count > 0)
+    if (fProjectFilename <> '') and (RunScanAfterLoad) and (FRunScanOnLoad) and (FProjectSettings.RootFiles.Count > 0)
     then
       actStartScan.Execute;
 
@@ -629,21 +619,22 @@ procedure TfrmMain.LoadSettings;
 begin
   if FEnvironmentSettings.LoadFromFile(GetSettingsFilename) then
   begin
-    pnlLog.Height := FEnvironmentSettings.StatusLogHeight;
-    pnlTree.Width := FEnvironmentSettings.TreeWidth;
-    pnlList.Width := FEnvironmentSettings.ListWidth;
+    pnlLog.Height                 := FEnvironmentSettings.StatusLogHeight;
+    pnlTree.Width                 := FEnvironmentSettings.TreeWidth;
+    pnlList.Width                 := FEnvironmentSettings.ListWidth;
     actShowUnitsNotInPath.Checked := FEnvironmentSettings.ShowUnitsNotInPath;
-    FLoadLastProject := FEnvironmentSettings.LoadLastProject;
-    FProjectFilename := FEnvironmentSettings.ProjectFilename;
-    FRunScanOnLoad := FEnvironmentSettings.RunScanOnLoad;
 
-    Left := FEnvironmentSettings.WindowLeft;
-    Top := FEnvironmentSettings.WindowTop;
-    Width := FEnvironmentSettings.WindowWidth;
-    Height := FEnvironmentSettings.WindowHeight;
-    PanelFooter.Height := FEnvironmentSettings.UnitPatchHeight;
+    FLoadLastProject              := FEnvironmentSettings.LoadLastProject;
+    fProjectFilename              := FEnvironmentSettings.ProjectFilename;
+    FRunScanOnLoad                := FEnvironmentSettings.RunScanOnLoad;
 
-    WindowState := TWindowState(FEnvironmentSettings.WindowState);
+    Left                          := FEnvironmentSettings.WindowLeft;
+    Top                           := FEnvironmentSettings.WindowTop;
+    Width                         := FEnvironmentSettings.WindowWidth;
+    Height                        := FEnvironmentSettings.WindowHeight;
+    PanelFooter.Height            := FEnvironmentSettings.UnitPatchHeight;
+
+    WindowState                   := TWindowState(FEnvironmentSettings.WindowState);
   end;
 end;
 
@@ -748,7 +739,7 @@ begin
   FEnvironmentSettings.ListWidth          := pnlList.Width;
   FEnvironmentSettings.ShowUnitsNotInPath := actShowUnitsNotInPath.Checked;
   FEnvironmentSettings.LoadLastProject    := FLoadLastProject;
-  FEnvironmentSettings.ProjectFilename    := FProjectFilename;
+  FEnvironmentSettings.ProjectFilename    := fProjectFilename;
   FEnvironmentSettings.RunScanOnLoad      := FRunScanOnLoad;
 
   FEnvironmentSettings.WindowLeft         := Left;
@@ -1413,7 +1404,7 @@ procedure TfrmMain.actCloseProjectExecute(Sender: TObject);
 begin
   if (CheckNotRunning) and (CheckSaveProject) then
   begin
-    FProjectFilename := '';
+    fProjectFilename := '';
 
     ClearGUIAndModelAndCloseControls;
   end;
@@ -1518,39 +1509,38 @@ begin
   actShowUnitsNotInPath.Enabled     := (not FBusy) and (not actShowOnlyUnknownModules.Checked);
   actShowOnlyUnknownModules.Enabled := not FBusy;
 
-  actSaveChanges.Enabled := (not FBusy) and ((memParentFile.Modified) or (memSelectedFile.Modified) or
-    (memListFile.Modified));
+  actSaveChanges.Enabled            := (not FBusy) and ((memParentFile.Modified) or (memSelectedFile.Modified) or (memListFile.Modified));
 
-  actRename.Enabled := (not FBusy) and (DelphiFile <> nil) and (DelphiFile.InSearchPath);
+  actRename.Enabled                 := (not FBusy) and (DelphiFile <> nil) and (DelphiFile.InSearchPath);
 
-  actApplyRenameList.Enabled := actRename.Enabled;
-  actAddUnitToUses.Enabled := actRename.Enabled;
+  actApplyRenameList.Enabled        := actRename.Enabled;
+  actAddUnitToUses.Enabled          := actRename.Enabled;
 
-  actSearchAndReplace.Enabled := (not FBusy) and (vtUnitsTree.RootNodeCount > 0);
+  actSearchAndReplace.Enabled       := (not FBusy) and (vtUnitsTree.RootNodeCount > 0);
 
-  actExpandAll.Enabled := (not FBusy) and (pcView.ActivePage = tabTree) and (vtUnitsTree.RootNodeCount > 0);
-  actCollapseAll.Enabled := (not FBusy) and (pcView.ActivePage = tabTree) and (vtUnitsTree.RootNodeCount > 0);
-  actExpand.Enabled := (not FBusy) and (vtUnitsTree.FocusedNode <> nil);
-  actCollapse.Enabled := (not FBusy) and (vtUnitsTree.FocusedNode <> nil);
-  actLoadProject.Enabled := not FBusy;
-  actSaveProject.Enabled := (not FBusy) and (FProjectFilename <> '');
-  actSaveProjectAs.Enabled := not FBusy;
-  actSettings.Enabled := not FBusy;
-  actCloseProject.Enabled := (pnlMain.Visible) or (FProjectFilename <> '');
-  actShowFile.Enabled := DelphiFile <> nil;
-  actSaveToXML.Enabled := not FBusy;
-  actSaveToGephiCSV.Enabled := not FBusy;
-  actSaveToGraphML.Enabled := not FBusy;
-  actSaveCircularRefs.Enabled := not FBusy;
+  actExpandAll.Enabled              := (not FBusy) and (pcView.ActivePage = tabTree) and (vtUnitsTree.RootNodeCount > 0);
+  actCollapseAll.Enabled            := (not FBusy) and (pcView.ActivePage = tabTree) and (vtUnitsTree.RootNodeCount > 0);
+  actExpand.Enabled                 := (not FBusy) and (vtUnitsTree.FocusedNode <> nil);
+  actCollapse.Enabled               := (not FBusy) and (vtUnitsTree.FocusedNode <> nil);
+  actLoadProject.Enabled            := not FBusy;
+  actSaveProject.Enabled            := (not FBusy) and (fProjectFilename <> '');
+  actSaveProjectAs.Enabled          := not FBusy;
+  actSettings.Enabled               := not FBusy;
+  actCloseProject.Enabled           := (pnlMain.Visible) or (fProjectFilename <> '');
+  actShowFile.Enabled               := DelphiFile <> nil;
+  actSaveToXML.Enabled              := not FBusy;
+  actSaveToGephiCSV.Enabled         := not FBusy;
+  actSaveToGraphML.Enabled          := not FBusy;
+  actSaveCircularRefs.Enabled       := not FBusy;
 end;
 
 procedure TfrmMain.actLoadProjectExecute(Sender: TObject);
 begin
   if openDialog_Project.Execute and CheckSaveProject then
   begin
-    if LoadProjectSettings(openDialog_Project.Filename) then
+    if LoadProjectSettings(openDialog_Project.Filename, False) then
     begin
-      FProjectFilename := openDialog_Project.Filename;
+      fProjectFilename := openDialog_Project.Filename;
 
       SetFormCaption;
     end;
@@ -1561,7 +1551,7 @@ procedure TfrmMain.actNewProjectExecute(Sender: TObject);
 begin
   if CheckNotRunning and CheckSaveProject then
   begin
-    FProjectFilename := '';
+    fProjectFilename := '';
 
     ClearGUIAndModelAndCloseControls;
 
@@ -1573,7 +1563,7 @@ end;
 
 procedure TfrmMain.ResetSettings;
 begin
-  FProjectFilename := '';
+  fProjectFilename := '';
   FProjectSettings.Clear;
 end;
 
@@ -1618,8 +1608,8 @@ procedure TfrmMain.SetFormCaption;
 begin
   Caption := StrUnitDependencyScan;
 
-  if FProjectFilename <> '' then
-    Caption := Caption + ' - ' + ExtractFilenameNoExt(FProjectFilename);
+  if fProjectFilename <> '' then
+    Caption := Caption + ' - ' + ExtractFilenameNoExt(fProjectFilename);
 
   if Modified then
     Caption := Caption + '*';
@@ -1713,7 +1703,6 @@ begin
 
               // the refactoring changed the model, so we need to rebuild the gui from the model
               FillGUIFromModel;
-              UpdateStats(TRUE);
             finally
               FreeAndNil(AddUnitToUsesRefactoring);
             end;
@@ -2153,9 +2142,9 @@ procedure TfrmMain.FillGUIFromModel;
 
       case NodeObject.CircularReference of
         crSemiCircular:
-          Inc(FSemiCircularFiles);
+          Inc(fModel.Stats.Units.SemiCircularFiles);
         crCircular:
-          Inc(FCircularFiles);
+          Inc(fModel.Stats.Units.CircularFiles);
       end;
 
       // Recursively add used units as tree nodes
@@ -2181,8 +2170,8 @@ procedure TfrmMain.FillGUIFromModel;
     DelphiFile, RootFile: TDelphiFile;
   begin
     // Reset stats
-    FSemiCircularFiles := 0;
-    FCircularFiles     := 0;
+    fModel.Stats.Units.SemiCircularFiles := 0;
+    fModel.Stats.Units.CircularFiles     := 0;
 
     // Reset "Base Nodes" (to be able to re-run this method without re-building the model
     for DelphiFile in FModel.DelphiFileList do
@@ -2236,7 +2225,7 @@ begin
   memParentFile.Clear;
   memSelectedFile.Clear;
 
-  Log(StrTransferingToGUI);
+  Log(StrTransferingToGUI, LogInfo);
 
   vtUnitsTree.BeginUpdate;
   vtUnitsList.BeginUpdate;
@@ -2253,6 +2242,8 @@ begin
 
     if vtUnitsList.FocusedNode = nil then
       vtUnitsList.SelectNodeEx(vtUnitsList.GetFirst);
+
+    UpdateStats;
   finally
     vtUnitsTree.AutoFitColumns(False, smaUseColumnOption, 2, 10);
     vtUnitsList.AutoFitColumns(False, smaUseColumnOption, 1, 6);
@@ -2269,11 +2260,6 @@ begin
 end;
 
 procedure TfrmMain.actStartScanExecute(Sender: TObject);
-var
-  FileScanner: TDudsFileScanner;
-
-  aUnitsTotal: integer;
-  aUnitsInModules: integer;
 begin
   if FProjectSettings.RootFiles.Count = 0 then
   begin
@@ -2298,62 +2284,23 @@ begin
 
       RichEditUnitPath.Clear;
       RichEditUnitPath.SelText := 'Loading...';
-      UpdateStats(TRUE);
+
       Refresh;
 
-      // step 1: read modules definition (if defined)
-      if not FProjectSettings.ModulesDefinitionFile.IsEmpty then
-      begin
-        TModulesSerializer.ReadFromJsonFile(
-          GetAbsolutePath(FProjectSettings.ModulesDefinitionFile, FProjectFilename),
-          FModel.Modules);
-        Log(StrModulesDefinitionLoaded, [FModel.Modules.Dictionary.Count]);
-      end;
-
-      // step 2: scanning the disk for files (rootfiles & search paths)
-      FileScanner := TDudsFileScanner.Create;
+      // step 1: load modules, scan files, analyze dependencies etc. (non-visual part)
+      fAnalyzerFacade := TAnalyzerFacade.Create;
       try
-        FileScanner.Model           := fModel;
-        FileScanner.ProjectSettings := FProjectSettings;
-        FileScanner.ProjectFilename := FProjectFilename;
-        FileScanner.ScanRootFileFolders;
-        FileScanner.ExpandAndScanSearchPaths;
-        Log(StrDFilesFound, [FormatCardinal(fModel.Files.Count)]);
+        fAnalyzerFacade.Model           := fModel;
+        fAnalyzerFacade.OnLog           := Self.Log;
+        fAnalyzerFacade.ProjectSettings := fProjectSettings;
+        fAnalyzerFacade.ProjectFilename := fProjectFilename;
+
+        fAnalyzerFacade.Execute;
       finally
-        FreeAndNil(FileScanner);
+        FreeAndNil(fAnalyzerFacade);
       end;
 
-      // step 3: recursively parsing the root files for all used units
-      if not FCancelled then
-      begin
-        FDependencyAnalyzer := TDudsDependencyAnalyzer.Create;
-        try
-          FDependencyAnalyzer.Model           := FModel;
-          FDependencyAnalyzer.OnLog           := Self.Log;
-          FDependencyAnalyzer.ProjectSettings := FProjectSettings;
-          FDependencyAnalyzer.ScanRootFilesAndBuildUsesLists;
-
-          FParsedFileCount   := FDependencyAnalyzer.ParsedFileCount;
-          FScannedUsesCount  := FDependencyAnalyzer.ScannedUsesCount;
-          FDeepestScanDepth  := FDependencyAnalyzer.DeepestScanDepth;
-          FFMXFormCount      := FDependencyAnalyzer.FMXFormCount;
-          FVCLFormCount      := FDependencyAnalyzer.VCLFormCount;
-          FLineCount         := FDependencyAnalyzer.LinesOfCode;
-          FSemiCircularFiles := FDependencyAnalyzer.SemiCircularFiles;
-          FCircularFiles     := FDependencyAnalyzer.CircularFiles;
-          FFilesNotInPath    := FDependencyAnalyzer.FilesNotInPath;
-        finally
-          FreeAndNil(FDependencyAnalyzer);
-        end;
-      end;
-
-      // step 4: Identify modules for each .pas unit
-      //   at this point, all unit that were "seen" (by root files, search paths
-      //   or parsing units) are identified
-      TModulesAnalyzer.MapUnitsToModules(FModel, aUnitsTotal, aUnitsInModules);
-      Log(StrModulesIdentified, [FormatCardinal(aUnitsInModules), FormatCardinal(aUnitsTotal)]);
-
-      // step 5: fill gui trees with data
+      // step 2: fill gui trees & stats
       if not FCancelled then
         FillGUIFromModel;
     finally
@@ -2365,7 +2312,6 @@ begin
       ShowHideControls;
       UpdateLogEntries;
 
-      UpdateStats(TRUE);
       UpdateTreeControls(vtUnitsTree.FocusedNode);
     end;
   end;
@@ -2392,8 +2338,8 @@ end;
 procedure TfrmMain.actStopScanExecute(Sender: TObject);
 begin
   FCancelled := TRUE;
-  if Assigned(FDependencyAnalyzer) then
-     FDependencyAnalyzer.Cancelled := FCancelled;
+  if Assigned(fAnalyzerFacade) then
+     fAnalyzerFacade.Cancelled := FCancelled;
 
   actStopScan.Enabled := FALSE;
 end;
@@ -2426,7 +2372,7 @@ end;
 
 procedure TfrmMain.actSaveToGephiCSVExecute(Sender: TObject);
 begin
-  saveDialog_Units_GephiCSV.FileName := ChangeFileExt(FProjectFilename, '.units.gephi.csv');
+  saveDialog_Units_GephiCSV.FileName := ChangeFileExt(fProjectFilename, '.units.gephi.csv');
 
   if saveDialog_Units_GephiCSV.Execute then
     ExportToGephi(FModel, actShowUnitsNotInPath.Checked, saveDialog_Units_GephiCSV.Filename);
@@ -2434,7 +2380,7 @@ end;
 
 procedure TfrmMain.actSaveToGraphMLExecute(Sender: TObject);
 begin
-  saveDialog_Units_GraphML.FileName := ChangeFileExt(FProjectFilename, '.units.graphml');
+  saveDialog_Units_GraphML.FileName := ChangeFileExt(fProjectFilename, '.units.graphml');
 
   if saveDialog_Units_GraphML.Execute then
     ExportToGraphML(FModel, actShowUnitsNotInPath.Checked, saveDialog_Units_GraphML.Filename);
@@ -2442,7 +2388,7 @@ end;
 
 procedure TfrmMain.actSaveToXMLExecute(Sender: TObject);
 begin
-  saveDialog_Units_XML.FileName := ChangeFileExt(FProjectFilename, '.units.xml');
+  saveDialog_Units_XML.FileName := ChangeFileExt(fProjectFilename, '.units.xml');
 
   if saveDialog_Units_XML.Execute then
   begin
@@ -2457,7 +2403,7 @@ procedure TfrmMain.actExportModulesToCSVExecute(Sender: TObject);
 var
   aExportModulesToCSV: TExportModulesToCSV;
 begin
-  saveDialog_Modules_CSV.FileName := ChangeFileExt(FProjectFilename, '.modules.csv');
+  saveDialog_Modules_CSV.FileName := ChangeFileExt(fProjectFilename, '.modules.csv');
 
   if saveDialog_Modules_CSV.Execute then
   begin
@@ -2479,7 +2425,7 @@ procedure TfrmMain.actExportModulesToGraphMLExecute(Sender: TObject);
 var
   aExportModulesToGraphML: TExportModulesToGraphML;
 begin
-  saveDialog_Modules_GraphML.FileName := ChangeFileExt(FProjectFilename, '.modules.graphml');
+  saveDialog_Modules_GraphML.FileName := ChangeFileExt(fProjectFilename, '.modules.graphml');
 
   if saveDialog_Modules_GraphML.Execute then
   begin
@@ -2499,12 +2445,11 @@ end;
 
 function TfrmMain.SaveProject: Boolean;
 begin
-  if FProjectFilename = '' then
+  if fProjectFilename = '' then
     Result := SaveProjectAs
   else
   begin
-    SaveProjectSettings(FProjectFilename);
-
+    SaveProjectSettings(fProjectFilename);
     Result := TRUE;
   end;
 end;
@@ -2515,9 +2460,8 @@ begin
 
   if Result then
   begin
-    FProjectFilename := saveDialog_Project.Filename;
-
-    SaveProjectSettings(FProjectFilename);
+    fProjectFilename := saveDialog_Project.Filename;
+    SaveProjectSettings(fProjectFilename);
   end;
 end;
 
@@ -2761,9 +2705,9 @@ begin
   tmrLoaded.Enabled := FALSE;
 
   if FLoadLastProject then
-    if not LoadProjectSettings(FProjectFilename) then
+    if not LoadProjectSettings(fProjectFilename) then
     begin
-      FProjectFilename := '';
+      fProjectFilename := '';
       ClearGUIAndModelAndCloseControls;
     end;
 
@@ -2788,20 +2732,6 @@ begin
   RichEditUnitPath.Height := ScaleDimension(RichEditUnitPath.Height, PixelsPerInch);
 end;
 
-procedure TfrmMain.ClearStats;
-begin
-  FScannedUsesCount  := 0;
-  FSemiCircularFiles := 0;
-  FCircularFiles     := 0;
-  FParsedFileCount   := 0;
-  FLineCount         := 0;
-  FDeepestScanDepth  := 0;
-  FScanDepth         := 0;
-  FFMXFormCount      := 0;
-  FVCLFormCount      := 0;
-  FFilesNotInPath    := 0;
-end;
-
 procedure TfrmMain.edtSearchTreeChange(Sender: TObject);
 begin
   SearchUnitsTree(edtSearchTree.Text, TRUE);
@@ -2824,8 +2754,7 @@ begin
     Key := #00;
 end;
 
-procedure TfrmMain.UpdateStats(ForceUpdate: Boolean);
-
+procedure TfrmMain.UpdateStats;
 var
   Index: Integer;
 
@@ -2840,39 +2769,28 @@ var
   end;
 
 begin
-  if (not(FClosing)) and ((ForceUpdate) or (FNextStatusUpdate = 0) or (now > FNextStatusUpdate)) then
-  begin
-    FNextStatusUpdate := now + (50 * OneMilliSecond);
+  Index := 0;
 
-    Index := 0;
+  AddStat(StrTime,                          SecondsToTimeString(SecondsBetween(now, FStartTime)));
+  AddStat(StrSearchPathFiles,               FormatCardinal(FModel.Files.Count));
+  AddStat(StrTotalUsedUnitsAndProjectFiles, FormatCardinal(FModel.ParsedDelphiFiles.Count));
+  AddStat(StrNotInSearchPathFiles,          FormatCardinal(fModel.Stats.Units.FilesNotInPath));
+  AddStat(StrParsedFiles,                   FormatCardinal(fModel.Stats.Units.ParsedFileCount));
+  AddStat(StrScannedUsesCount,              FormatCardinal(fModel.Stats.Units.ScannedUsesCount));
+  AddStat(StrDeepestScanDepth,              FormatCardinal(fModel.Stats.Units.DeepestScanDepth));
+  AddStat(StrTotalLinesOfCode,              FormatCardinal(fModel.Stats.Units.LinesOfCode));
 
-    AddStat(StrTime, SecondsToTimeString(SecondsBetween(now, FStartTime)));
-    AddStat(StrSearchPathFiles, FormatCardinal(FModel.Files.Count));
-    AddStat(StrScannedUsesCount, FormatCardinal(FScannedUsesCount));
+  AddStat(StrFCircularFiles,                FormatCardinal(fModel.Stats.Units.CircularFiles));
+  AddStat(StrSemiCircularFiles,             FormatCardinal(fModel.Stats.Units.SemiCircularFiles));
 
-    AddStat(StrFilesFound, FormatCardinal(FModel.ParsedDelphiFiles.Count));
-    AddStat(StrNotInSearchPathFiles, FormatCardinal(FFilesNotInPath));
-    AddStat(StrParsedFiles, FormatCardinal(FParsedFileCount));
+  AddStat(StrVCLFormCount,                  FormatCardinal(fModel.Stats.Units.VCLFormCount));
+  AddStat(StrFMXFormCount,                  FormatCardinal(fModel.Stats.Units.FMXFormCount));
 
-    AddStat(StrSemiCircularFiles, FormatCardinal(FSemiCircularFiles));
-    AddStat(StrFCircularFiles, FormatCardinal(FCircularFiles));
+  while Index < FStats.Count do
+    FStats.Delete(pred(FStats.Count));
 
-    AddStat(StrVCLFormCount, FormatCardinal(FVCLFormCount));
-    AddStat(StrFMXFormCount, FormatCardinal(FFMXFormCount));
-    AddStat(StrTotalLines, FormatCardinal(FLineCount));
-    AddStat(StrDeepestScanDepth, FDeepestScanDepth);
-
-    if FBusy then
-    begin
-      AddStat(StrScanDepth, FScanDepth);
-    end;
-
-    while Index < FStats.Count do
-      FStats.Delete(pred(FStats.Count));
-
-    vtStats.RootNodeCount := FStats.Count;
-    vtStats.Invalidate;
-  end;
+  vtStats.RootNodeCount := FStats.Count;
+  vtStats.Invalidate;
 end;
 
 procedure TfrmMain.vtModulesGetText(Sender: TBaseVirtualTree; Node:

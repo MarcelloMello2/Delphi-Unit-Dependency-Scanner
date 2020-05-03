@@ -114,10 +114,6 @@ object frmMain: TfrmMain
           TabOrder = 0
           object tabTree: TTabSheet
             Caption = 'Units Tree'
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object Splitter2: TSplitter
               Left = 497
               Top = 0
@@ -273,10 +269,6 @@ object frmMain: TfrmMain
                 Visible = False
                 object tabParentFile: TTabSheet
                   Caption = 'Parent File'
-                  ExplicitLeft = 0
-                  ExplicitTop = 0
-                  ExplicitWidth = 0
-                  ExplicitHeight = 0
                   object memParentFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
@@ -313,10 +305,6 @@ object frmMain: TfrmMain
                 object tabSelectedFile: TTabSheet
                   Caption = 'Selected File'
                   ImageIndex = 1
-                  ExplicitLeft = 0
-                  ExplicitTop = 0
-                  ExplicitWidth = 0
-                  ExplicitHeight = 0
                   object memSelectedFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
@@ -356,10 +344,6 @@ object frmMain: TfrmMain
           object tabList: TTabSheet
             Caption = 'Units List'
             ImageIndex = 1
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object Splitter3: TSplitter
               Left = 497
               Top = 0
@@ -450,10 +434,6 @@ object frmMain: TfrmMain
                 TabOrder = 0
                 object tabUsedBy: TTabSheet
                   Caption = 'Used By Units'
-                  ExplicitLeft = 0
-                  ExplicitTop = 0
-                  ExplicitWidth = 0
-                  ExplicitHeight = 0
                   object edtSearchUsedByList: TEdit
                     AlignWithMargins = True
                     Left = 0
@@ -511,10 +491,6 @@ object frmMain: TfrmMain
                 object tabUsesList: TTabSheet
                   Caption = 'Uses Units'
                   ImageIndex = 2
-                  ExplicitLeft = 0
-                  ExplicitTop = 0
-                  ExplicitWidth = 0
-                  ExplicitHeight = 0
                   object edtSearchUsesList: TEdit
                     AlignWithMargins = True
                     Left = 0
@@ -572,10 +548,6 @@ object frmMain: TfrmMain
                 object tabSource: TTabSheet
                   Caption = 'Source'
                   ImageIndex = 1
-                  ExplicitLeft = 0
-                  ExplicitTop = 0
-                  ExplicitWidth = 0
-                  ExplicitHeight = 0
                   object memListFile: TSynEdit
                     AlignWithMargins = True
                     Left = 0
@@ -615,10 +587,6 @@ object frmMain: TfrmMain
           object Modules: TTabSheet
             Caption = 'Modules'
             ImageIndex = 2
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
             object vtModules: TVirtualStringTree
               AlignWithMargins = True
               Left = 3
@@ -710,9 +678,11 @@ object frmMain: TfrmMain
             Columns = <
               item
                 Position = 0
-                Width = 239
+                Width = 235
               end
               item
+                Alignment = taRightJustify
+                Margin = 10
                 Position = 1
                 Width = 80
               end>

@@ -17,6 +17,8 @@ uses
 type
   TModulesAnalyzer = class
   public
+    // procedure Analyze; // not "class" => "MapUnits" then "AnalyzeDependencies"
+
     class procedure MapUnitsToModules(Model: TDudsModel; out UnitsTotal, UnitsMapped: Integer);
 
   end;

@@ -30,11 +30,10 @@ resourcestring
   StrSemiCircularFiles = 'Semi Circular References';
   StrFCircularFiles = 'Circular References';
   StrParsedFiles = 'Unique Parsed Files';
-  StrFilesFound = 'Total Used Units & Project Files';
-  StrTotalLines = 'Total Lines of Code (incl. Project Files)';
+  StrTotalUsedUnitsAndProjectFiles = 'Total Used Units & Project Files';
+  StrTotalLinesOfCode = 'Total Lines of Code (incl. Project Files)';
   StrSearchPathFiles = 'Search Path Files';
   StrNotInSearchPathFiles = 'Not in Search Path Files';
-  StrScanDepth = 'Current Scan Depth';
   StrSFoundInMultip = '"%s" found in multiple search paths. "%s" will be used and "%s" ignored';
   StrTime = 'Elapsed Time';
   StrUnitDependencyScan = 'Delphi Unit Dependency Scanner';

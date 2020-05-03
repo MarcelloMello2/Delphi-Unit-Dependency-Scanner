@@ -108,10 +108,12 @@
         <DCCReference Include="..\src\common\duds.common.Delphi.pas"/>
         <DCCReference Include="..\src\common\duds.common.modules.pas"/>
         <DCCReference Include="..\src\common\duds.common.modulesSerializer.pas"/>
+        <DCCReference Include="..\src\analyzer\duds.analyzer.Stats.pas"/>
         <DCCReference Include="..\src\analyzer\duds.analyzer.model.pas"/>
         <DCCReference Include="..\src\analyzer\duds.analyzer.FileScanner.pas"/>
-        <DCCReference Include="..\src\analyzer\duds.analyzer.DependencyAnalyzer.pas"/>
+        <DCCReference Include="..\src\analyzer\duds.analyzer.UnitsAnalyzer.pas"/>
         <DCCReference Include="..\src\analyzer\duds.analyzer.ModulesAnalyzer.pas"/>
+        <DCCReference Include="..\src\analyzer\duds.analyzer.Facade.pas"/>
         <DCCReference Include="..\src\export\duds.export.units.Gephi.pas"/>
         <DCCReference Include="..\src\export\duds.export.units.GraphML.pas"/>
         <DCCReference Include="..\src\export\duds.export.modules.CSV.pas"/>
@@ -124,7 +126,8 @@
         <DCCReference Include="..\src\refactoring\duds.refactoring.RemoveUnusedUnits.pas"/>
         <DCCReference Include="common\duds.common.UsesParser.SimpleLexer.test.pas"/>
         <DCCReference Include="common\duds.common.UsesParser.test.pas"/>
-        <DCCReference Include="common\duds.common.modules.test.pas"/>
+        <DCCReference Include="common\duds.common.ModulesSerializer.test.pas"/>
+        <DCCReference Include="analyzer\duds.analyzer.ModulesAnalyzer.test.pas"/>
         <DCCReference Include="refactoring\duds.refactoring.FormatUsesHelper.test.pas"/>
         <DCCReference Include="refactoring\duds.refactoring.FormatUses.test.pas"/>
         <DCCReference Include="refactoring\duds.refactoring.RemoveUnusedUnits.test.pas"/>
@@ -169,7 +172,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="..\bin\Win32\Debug\duds.test.exe" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="build\bin\Win32\Debug\duds.test.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>duds_test.exe</RemoteName>
                         <Overwrite>true</Overwrite>
