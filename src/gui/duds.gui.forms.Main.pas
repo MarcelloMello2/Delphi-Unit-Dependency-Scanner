@@ -339,7 +339,7 @@ type
     FTreeNodeObjects: TObjectList<TNodeObject>;
     FSearchText: String;
     FStartTime: TDateTime;
-    FCancelled: Boolean;
+    fCancelled: Boolean;
     FBusy: Boolean;
     FpnlLogHeight: Integer;
     FEnvironmentSettings: TEnvironmentSettings;
@@ -2270,7 +2270,7 @@ begin
   begin
     ClearGUIAndModelAndCloseControls;
     FStartTime := now;
-    FCancelled := FALSE;
+    fCancelled := False;
 
     actStartScan.Visible := FALSE;
     actStopScan.Visible := TRUE;
@@ -2301,7 +2301,7 @@ begin
       end;
 
       // step 2: fill gui trees & stats
-      if not FCancelled then
+      if not fCancelled then
         FillGUIFromModel;
     finally
       FBusy := FALSE;
@@ -2337,11 +2337,12 @@ end;
 
 procedure TfrmMain.actStopScanExecute(Sender: TObject);
 begin
-  FCancelled := TRUE;
+  fCancelled := True;
   if Assigned(fAnalyzerFacade) then
-     fAnalyzerFacade.Cancelled := FCancelled;
+     fAnalyzerFacade.Cancelled := fCancelled;
 
   actStopScan.Enabled := FALSE;
+  Log('Progress cancelled by user', LogError);
 end;
 
 procedure TfrmMain.actSaveChangesExecute(Sender: TObject);

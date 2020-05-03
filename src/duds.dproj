@@ -173,6 +173,7 @@
         <DCCReference Include="gui\duds.gui.forms.SearchAndReplaceUnitName.pas"/>
         <DCCReference Include="gui\duds.gui.forms.RenameUnit.pas"/>
         <DCCReference Include="gui\duds.gui.forms.AddUnitToUses.pas"/>
+        <DCCReference Include="analyzer\duds.analyzer.CustomAnalyzer.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

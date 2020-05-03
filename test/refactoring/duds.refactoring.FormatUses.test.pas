@@ -70,7 +70,7 @@ type
   [TestFixture]
   TFormatUsesRefactoringTestWithModel = class(TBaseFormatUsesRefactoringTest)
   private
-    FModel: TDudsModel;
+    fModel: TDudsModel;
 
     procedure LoadMockDelphiFiles;
     procedure LoadMockModulesDefinition;
@@ -167,19 +167,26 @@ end;
 
 procedure TFormatUsesRefactoringTestWithModel.Setup;
 var
-  aUnitsTotal, aUnitsInModules: integer;
+  aModulesAnalyzer: TModulesAnalyzer;
 begin
-  FModel := TDudsModel.Create;
+  fModel := TDudsModel.Create;
 
   LoadMockModulesDefinition;
   LoadMockDelphiFiles;
-  TModulesAnalyzer.MapUnitsToModules(FModel, aUnitsTotal, aUnitsInModules);
+
+  aModulesAnalyzer := TModulesAnalyzer.Create;
+  try
+    aModulesAnalyzer.Model := fModel;
+    aModulesAnalyzer.MapUnitsToModules;
+  finally
+    aModulesAnalyzer.Free;
+  end;
 end;
 
 procedure TFormatUsesRefactoringTestWithModel.TearDown;
 begin
 
-  FreeAndNil(FModel);
+  FreeAndNil(fModel);
 end;
 
 const
@@ -237,7 +244,7 @@ begin
     AddModuleToJson(modules, c3rdParty_Ciphers_ModuleName, [c3rdParty_Ciphers_Unit1, c3rdParty_Ciphers_Unit2]);
     AddModuleToJson(modules, cCoreCommon_Module,           [cCoreCommon_Unit_Text, cCoreCommon_Unit_Array]);
 
-    TModulesSerializer.ReadFromJson('', jsonObj.ToJSON, FModel.Modules);
+    TModulesSerializer.ReadFromJson('', jsonObj.ToJSON, fModel.Modules);
   finally
     jsonObj.Free;
   end;
@@ -263,7 +270,7 @@ procedure TFormatUsesRefactoringTestWithModel.LoadMockDelphiFiles;
     aUnitInfo.DelphiUnitName         := DelphiUnitname;
     aUnitInfo.DelphiUnitNamePosition := 0;
 
-    aDelphiFile              := FModel.CreateDelphiFile(aUnitInfo.DelphiUnitName, false);
+    aDelphiFile              := fModel.CreateDelphiFile(aUnitInfo.DelphiUnitName, false);
     aDelphiFile.UnitInfo     := aUnitInfo;
     aDelphiFile.InSearchPath := not aUnitInfo.Filename.IsEmpty;
   end;

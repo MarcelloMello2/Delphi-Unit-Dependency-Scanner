@@ -18,37 +18,24 @@ uses
 
   duds.common.UnitInfo,
   duds.common.UsedUnitInfo,
-  duds.common.UsesParser;
+  duds.common.UsesParser, duds.analyzer.CustomAnalyzer;
 
 type
-  TUnitsAnalyzer = class(TObject)
+  TUnitsAnalyzer = class(TCustomAnalyzer)
   private
-    FModel: TDudsModel;
-    FOnLog: TLogProcedure;
     fAlreadyLoggedMissingIncludes: TStringList;
-    FProjectSettings: TProjectSettings;
-
     FScanDepth: Integer;
-
-
-    FCancelled: Boolean;
-
-    procedure Log(const Msg: String; const Severity: Integer = LogInfo); overload;
-    procedure Log(const Msg: String; const Args: array of const; const Severity: Integer); overload;
-
     procedure AnalyzeUnitOrProjectFile(Unitname: string; IsRootFile: Boolean);
     procedure AddParsedDelphiFile(UnitInfo: IUnitInfo; IsRootFile: Boolean; InPath: Boolean);
+
+  protected
+    function GetLogAreaName: string; override;
+
   public
     constructor Create;
     destructor Destroy; override;
 
     procedure ScanRootFilesAndBuildUsesLists;
-
-    property Model: TDudsModel read FModel write FModel;
-    property OnLog: TLogProcedure read FOnLog    write FOnLog;
-    property ProjectSettings: TProjectSettings read FProjectSettings write FProjectSettings;
-
-    property Cancelled: Boolean read FCancelled write FCancelled;
 
   end;
 
@@ -68,15 +55,9 @@ begin
   inherited;
 end;
 
-procedure TUnitsAnalyzer.Log(const Msg: String; const Severity: Integer);
+function TUnitsAnalyzer.GetLogAreaName: string;
 begin
-  if Assigned(FOnLog) then
-    FOnLog('Dependency Analyzer: ' + Msg, Severity);
-end;
-
-procedure TUnitsAnalyzer.Log(const Msg: String; const Args: array of const; const Severity: Integer);
-begin
-  Log(Format(Msg, Args), Severity);
+  Result := 'Units Analysis';
 end;
 
 procedure TUnitsAnalyzer.AddParsedDelphiFile(UnitInfo: IUnitInfo; IsRootFile: Boolean; InPath: Boolean);
@@ -107,7 +88,7 @@ var
 begin
   Application.ProcessMessages;
 
-  if not FCancelled then
+  if not fCancelled then
   begin
     Inc(fModel.Stats.Units.ScannedUsesCount);
     Inc(FScanDepth);
@@ -158,12 +139,12 @@ begin
             Inc(fModel.Stats.Units.FMXFormCount);
         except
           on e: Exception do
-            TDudsLogger.GetInstance.Log(StrUnableToParseS, [Filename, e.Message], LogError);
+            Log(StrUnableToParseS, [Filename, e.Message], LogError);
         end;
 
         if Parsed then
           for UsedUnitInfo in UnitInfo.UsedUnits do
-            if not FCancelled then
+            if not fCancelled then
               AnalyzeUnitOrProjectFile(UsedUnitInfo.DelphiUnitName, FALSE);
 
       end else
@@ -191,12 +172,13 @@ procedure TUnitsAnalyzer.ScanRootFilesAndBuildUsesLists;
 var
   RootFile: string;
 begin
-  TDudsLogger.GetInstance.Log(StrParsingFiles);
+  Log(StrParsingFiles);
 
   for RootFile in fModel.RootFiles do
     AnalyzeUnitOrProjectFile(ExtractFilenameNoExt(RootFile), True);
 
-  TDudsLogger.GetInstance.Log(StrDFilesWithATo, [FormatCardinal(FModel.ParsedDelphiFiles.Count), FormatCardinal(fModel.Stats.Units.LinesOfCode)]);
+  if not fCancelled then
+    Log(StrDFilesWithATo, [FormatCardinal(FModel.ParsedDelphiFiles.Count), FormatCardinal(fModel.Stats.Units.LinesOfCode)], LogInfo);
 end;
 
 end.

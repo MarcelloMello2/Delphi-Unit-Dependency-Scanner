@@ -30,6 +30,7 @@ uses
   duds.common.Delphi                                 in '..\src\common\duds.common.Delphi.pas',
   duds.common.modules                                in '..\src\common\duds.common.modules.pas',
   duds.common.modulesSerializer                      in '..\src\common\duds.common.modulesSerializer.pas',
+  duds.analyzer.CustomAnalyzer                       in '..\src\analyzer\duds.analyzer.CustomAnalyzer.pas',  
   duds.analyzer.Stats                                in '..\src\analyzer\duds.analyzer.Stats.pas',
   duds.analyzer.model                                in '..\src\analyzer\duds.analyzer.model.pas',
   duds.analyzer.FileScanner                          in '..\src\analyzer\duds.analyzer.FileScanner.pas',

@@ -10,30 +10,31 @@ uses
   duds.common.Classes,
   duds.analyzer.model,
   duds.common.Log,
-  duds.common.Language;
+  duds.common.Language, duds.analyzer.CustomAnalyzer, duds.common.Utils;
 
 type
-  TDudsFileScanner = class(TObject)
+  TDudsFileScanner = class(TCustomAnalyzer)
   private
-    fProjectFilename: string;
-    fProjectSettings: TProjectSettings;
-    fModel: TDudsModel;
-
     procedure ScanFoldersAndAddAllDelphiFiles(Dirs: TStrings);
     function IsCommentedOut(path: string): Boolean;
+
+  protected
+    function GetLogAreaName: string; override;
 
   public
     procedure ScanRootFileFolders;
     procedure ExpandAndScanSearchPaths;
 
-    property Model: TDudsModel                 read fModel           write fModel;
-    property ProjectSettings: TProjectSettings read fProjectSettings write fProjectSettings;
-    property ProjectFilename: string           read fProjectFilename write fProjectFilename;
   end;
 
 implementation
 
 { TDudsFileScanner }
+
+function TDudsFileScanner.GetLogAreaName: string;
+begin
+  Result := 'File Scanner';
+end;
 
 procedure TDudsFileScanner.ScanFoldersAndAddAllDelphiFiles(Dirs: TStrings);
 var
@@ -64,8 +65,7 @@ begin
             if Model.SearchUnitByNameWithScopes(DelphiUnitName, ExistingFilename, FProjectSettings.UnitScopeNames) then
             begin
               if not SameText(ExistingFilename, ScannedFiles[i].Filename) then
-                TDudsLogger.GetInstance.Log(StrSFoundInMultip, [ExtractFilenameNoExt(ScannedFiles[i].Filename),
-                  ExistingFilename, ScannedFiles[i].Filename], LogWarning);
+                Log(StrSFoundInMultip, [ExtractFilenameNoExt(ScannedFiles[i].Filename), ExistingFilename, ScannedFiles[i].Filename], LogWarning);
             end
             else
               Model.Files.Add(DelphiUnitName, ScannedFiles[i].Filename);
@@ -88,7 +88,7 @@ var
   RootFile,
   RootFileAbsolutePath: string;
 begin
-  TDudsLogger.GetInstance.Log(StrScanningDSearchRootFiles, [fProjectSettings.RootFiles.Count]);
+  Log(StrScanningDSearchRootFiles, [fProjectSettings.RootFiles.Count], LogInfo);
 
   // step 1: calc absolute paths from root files defined in project settings
   for RootFile in FProjectSettings.RootFiles do
@@ -98,12 +98,12 @@ begin
     begin
       RootFileAbsolutePath := GetAbsolutePath(RootFile, fProjectFilename);
       if not FileExists(RootFileAbsolutePath) then
-        TDudsLogger.GetInstance.Log(StrRootFileNotFound, [RootFileAbsolutePath], LogError)
+        Log(StrRootFileNotFound, [RootFileAbsolutePath], LogError)
       else
         if fModel.RootFiles.IndexOf(RootFileAbsolutePath) = -1 then
           fModel.RootFiles.Add(RootFileAbsolutePath)
         else
-          TDudsLogger.GetInstance.Log(StrRootFileDuplicateFound, [RootFileAbsolutePath], LogError);
+          Log(StrRootFileDuplicateFound, [RootFileAbsolutePath], LogError);
     end;
 
   // step 2: scan the root file folders
@@ -139,9 +139,9 @@ var
       aExpandedPathsLookup.Add(aNewPath);
     end else
       if aExpandingFromPath.IsEmpty then
-        TDudsLogger.GetInstance.Log(StrDuplicateSearchPathFound, [aNewPath], LogError)
+        Log(StrDuplicateSearchPathFound, [aNewPath], LogError)
       else
-        TDudsLogger.GetInstance.Log(StrDuplicateSearchPathFoundByExpanding, [aNewPath, aExpandingFromPath], LogError);
+        Log(StrDuplicateSearchPathFoundByExpanding, [aNewPath, aExpandingFromPath], LogError);
   end;
 
 var
@@ -171,7 +171,7 @@ begin
         AbsoluteSearchPath := GetAbsolutePath(TrimExpandSign(DefinedPath), fProjectFilename);
 
         if not DirectoryExists(AbsoluteSearchPath) then
-          TDudsLogger.GetInstance.Log(StrSearchPathDoesNotExist, [AbsoluteSearchPath], LogError)
+          Log(StrSearchPathDoesNotExist, [AbsoluteSearchPath], LogError)
         else begin
           AddPathCheckDuplicates(AbsoluteSearchPath);
           if DoExpandPath then
@@ -189,14 +189,15 @@ begin
       end;
     end;
 
-    TDudsLogger.GetInstance.Log(StrScanningDSearchSearchPaths,
-      [aExpandedPaths.Count, DefinedPaths]);
+    Log(StrScanningDSearchSearchPaths, [aExpandedPaths.Count, DefinedPaths], LogInfo);
 
     ScanFoldersAndAddAllDelphiFiles(aExpandedPaths);
   finally
     aExpandedPaths.Free;
     aExpandedPathsLookup.Free;
   end;
+
+  Log(StrDFilesFound, [FormatCardinal(fModel.Files.Count)], LogInfo);
 end;
 
 end.

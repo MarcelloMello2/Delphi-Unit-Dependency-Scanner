@@ -12,14 +12,16 @@ uses
   duds.common.Log,
   duds.analyzer.model,
   duds.common.Classes,
-  duds.common.modules;
+  duds.common.modules, duds.analyzer.CustomAnalyzer, duds.common.Utils;
 
 type
-  TModulesAnalyzer = class
-  public
-    // procedure Analyze; // not "class" => "MapUnits" then "AnalyzeDependencies"
+  TModulesAnalyzer = class(TCustomAnalyzer)
+  protected
+    function GetLogAreaName: string; override;
 
-    class procedure MapUnitsToModules(Model: TDudsModel; out UnitsTotal, UnitsMapped: Integer);
+  public
+    procedure MapUnitsToModules;
+    procedure AnalyzeDependencies;
 
   end;
 
@@ -27,30 +29,39 @@ implementation
 
 { TModulesAnalyzer }
 
-class procedure TModulesAnalyzer.MapUnitsToModules(Model: TDudsModel; out UnitsTotal, UnitsMapped: Integer);
+function TModulesAnalyzer.GetLogAreaName: string;
+begin
+  Result := 'Modules Analysis';
+end;
+
+procedure TModulesAnalyzer.MapUnitsToModules;
 var
   aDelphiFile: TDelphiFile;
   i: integer;
   aModule: TModule;
+  UnitsTotal, UnitsMappedToModules: Integer;
 begin
-  Model.Modules.ClearModulesAnalysisData;
-  Model.Modules.ReBuildFastSearchList;
-  Model.Modules.CreateUnknownModule;
+  fModel.Modules.ClearModulesAnalysisData;
+  fModel.Modules.ReBuildFastSearchList;
+  fModel.Modules.CreateUnknownModule;
 
   UnitsTotal := 0;
-  UnitsMapped := 0;
-  for i := 0 to pred(Model.DelphiFileList.Count) do
+  UnitsMappedToModules := 0;
+  for i := 0 to pred(fModel.DelphiFileList.Count) do
   begin
-    aDelphiFile := Model.DelphiFileList[i];
+    if fCancelled then
+      break;
+
+    aDelphiFile := fModel.DelphiFileList[i];
     if (aDelphiFile.UnitInfo.DelphiFileType = ftPAS) or (not aDelphiFile.InSearchPath) then  // files that are not in search path do not get a filetype but should be '.pas'...
     begin
       Inc(UnitsTotal);
 
       // try to find a matching module
-      if Model.Modules.FindModuleForUnit(aDelphiFile.UnitInfo, aModule) then
-        Inc(UnitsMapped)
+      if fModel.Modules.FindModuleForUnit(aDelphiFile.UnitInfo, aModule) then
+        Inc(UnitsMappedToModules)
       else
-        aModule := Model.Modules.UnknownModule;
+        aModule := fModel.Modules.UnknownModule;
 
       aDelphiFile.UnitInfo.Module := aModule;
 
@@ -61,6 +72,17 @@ begin
       aModule.AnalysisData.LinesOfCode   := aModule.AnalysisData.LinesOfCode   + aDelphiFile.UnitInfo.LinesOfCode;
     end;
   end;
+
+  Log(StrModulesIdentified, [FormatCardinal(UnitsMappedToModules), FormatCardinal(UnitsTotal)], LogInfo);
 end;
+
+procedure TModulesAnalyzer.AnalyzeDependencies;
+begin
+  if fCancelled then
+    exit;
+   // TODO
+end;
+
+
 
 end.

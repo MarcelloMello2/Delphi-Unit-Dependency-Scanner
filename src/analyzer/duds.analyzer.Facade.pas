@@ -4,39 +4,25 @@ interface
 
 uses
   System.SysUtils,
+  System.Generics.Defaults,
   duds.common.log,
   duds.common.Classes,
   duds.common.Files,
   duds.analyzer.model, duds.common.modulesSerializer,
   duds.common.Language, duds.analyzer.FileScanner, duds.common.Utils,
-  duds.analyzer.UnitsAnalyzer, duds.analyzer.ModulesAnalyzer;
+  duds.analyzer.UnitsAnalyzer, duds.analyzer.ModulesAnalyzer,
+  duds.analyzer.CustomAnalyzer;
 
 type
-  TAnalyzerFacade = class
+  TAnalyzerFacade = class(TCustomAnalyzer)
   private
-    fModel: TDudsModel;
-    fProjectSettings: TProjectSettings;
-    fOnLog: TLogProcedure;
-    fProjectFilename: string;
-    fCancelled: Boolean;
+    fCurrentAnalyzer: TCustomAnalyzer;
 
-    fUnitsAnalyzer: TUnitsAnalyzer;
-
-    procedure Log(const Msg: String; const Severity: Integer = LogInfo); overload;
-    procedure Log(const Msg: String; const Args: array of const; const Severity: Integer); overload;
-    procedure SetCancelled(const Value: Boolean);
-
+    procedure SetCancelled(const Value: Boolean); override;
+    function CreateAnalyzer<T: TCustomAnalyzer, constructor>: T;
+    procedure ReleaseAnalyzer(Analyzer: TCustomAnalyzer);
   public
-
-
     procedure Execute;
-
-    property Model: TDudsModel                 read fModel           write fModel;
-    property OnLog: TLogProcedure              read fOnLog           write fOnLog;
-    property ProjectSettings: TProjectSettings read fProjectSettings write fProjectSettings;
-    property ProjectFilename: string           read fProjectFilename write fProjectFilename;
-
-    property Cancelled: Boolean read fCancelled write SetCancelled;
 
   end;
 
@@ -44,31 +30,30 @@ implementation
 
 { TAnalyzerFacade }
 
-procedure TAnalyzerFacade.Log(const Msg: String; const Severity: Integer =
-    LogInfo);
-begin
-  if Assigned(FOnLog) then
-    FOnLog(Msg, Severity);
-end;
-
-procedure TAnalyzerFacade.Log(const Msg: String; const Args: array of const;
-    const Severity: Integer);
-begin
-  Log(Format(Msg, Args), Severity);
-end;
-
 procedure TAnalyzerFacade.SetCancelled(const Value: Boolean);
 begin
-  fCancelled := Value;
-  if Assigned(fUnitsAnalyzer) then
-    fUnitsAnalyzer.Cancelled := Value;
+  inherited;
+  if Assigned(fCurrentAnalyzer) then
+    fCurrentAnalyzer.Cancelled := Value;
+end;
+
+function TAnalyzerFacade.CreateAnalyzer<T>(): T;
+begin
+  Result := T.Create;
+  fCurrentAnalyzer := Result;
+end;
+
+procedure TAnalyzerFacade.ReleaseAnalyzer(Analyzer: TCustomAnalyzer);
+begin
+  fCurrentAnalyzer := nil;
+  Analyzer.Free;
 end;
 
 procedure TAnalyzerFacade.Execute;
 var
   aFileScanner: TDudsFileScanner;
-  aUnitsTotal: integer;
-  aUnitsInModules: integer;
+  aUnitsAnalyzer: TUnitsAnalyzer;
+  aModulesAnalyzer: TModulesAnalyzer;
 begin
   // step 1: read modules definition (if defined)
   if not fProjectSettings.ModulesDefinitionFile.IsEmpty then
@@ -80,48 +65,45 @@ begin
   end;
 
   // step 2: scanning the disk for files (rootfiles & search paths)
-  aFileScanner := TDudsFileScanner.Create;
-  try
-    aFileScanner.Model           := fModel;
-    aFileScanner.ProjectSettings := fProjectSettings;
-    aFileScanner.ProjectFilename := fProjectFilename;
-    aFileScanner.ScanRootFileFolders;
-    aFileScanner.ExpandAndScanSearchPaths;
-    Log(StrDFilesFound, [FormatCardinal(fModel.Files.Count)], LogInfo);
-  finally
-    FreeAndNil(aFileScanner);
+  if not fCancelled then
+  begin
+    aFileScanner := CreateAnalyzer<TDudsFileScanner>;
+    try
+      aFileScanner.InitByCustomAnalyzer(Self);
+      aFileScanner.ScanRootFileFolders;
+      aFileScanner.ExpandAndScanSearchPaths;
+    finally
+      ReleaseAnalyzer(aFileScanner);
+    end;
   end;
 
   // step 3: recursively parsing the root files for all used units
   if not fCancelled then
   begin
-    fUnitsAnalyzer := TUnitsAnalyzer.Create;
+    aUnitsAnalyzer := CreateAnalyzer<TUnitsAnalyzer>;
     try
-      fUnitsAnalyzer.Model           := fModel;
-      fUnitsAnalyzer.OnLog           := fOnLog;
-      fUnitsAnalyzer.ProjectSettings := fProjectSettings;
-
-      fUnitsAnalyzer.ScanRootFilesAndBuildUsesLists;
-
-//      FParsedFileCount   := fUnitsAnalyzer.ParsedFileCount;
-//      FScannedUsesCount  := fUnitsAnalyzer.ScannedUsesCount;
-//      FDeepestScanDepth  := fUnitsAnalyzer.DeepestScanDepth;
-//      FFMXFormCount      := fUnitsAnalyzer.FMXFormCount;
-//      FVCLFormCount      := fUnitsAnalyzer.VCLFormCount;
-//      FLineCount         := fUnitsAnalyzer.LinesOfCode;
-//      FSemiCircularFiles := fUnitsAnalyzer.SemiCircularFiles;
-//      FCircularFiles     := fUnitsAnalyzer.CircularFiles;
-//      FFilesNotInPath    := fUnitsAnalyzer.FilesNotInPath;
+      aUnitsAnalyzer.InitByCustomAnalyzer(Self);
+      aUnitsAnalyzer.ScanRootFilesAndBuildUsesLists;
     finally
-      FreeAndNil(fUnitsAnalyzer);
+      ReleaseAnalyzer(aUnitsAnalyzer);
     end;
   end;
 
   // step 4: Identify modules for each .pas unit
   //   at this point, all unit that were "seen" (by root files, search paths
   //   or parsing units) are identified
-  TModulesAnalyzer.MapUnitsToModules(fModel, aUnitsTotal, aUnitsInModules);
-  Log(StrModulesIdentified, [FormatCardinal(aUnitsInModules), FormatCardinal(aUnitsTotal)], LogInfo);
+  // step 3: recursively parsing the root files for all used units
+  if not fCancelled then
+  begin
+    aModulesAnalyzer := CreateAnalyzer<TModulesAnalyzer>;
+    try
+      aModulesAnalyzer.InitByCustomAnalyzer(Self);
+      aModulesAnalyzer.MapUnitsToModules;
+      aModulesAnalyzer.AnalyzeDependencies;
+    finally
+      ReleaseAnalyzer(aModulesAnalyzer);
+    end;
+  end;
 end;
 
 end.
