@@ -1,25 +1,51 @@
 {
     "modules": [
         {
-            "name": "delphi.rtl",
+            "name": "delphi.rtl.common",
             "origin": "delphi",
             "contains": {
                 "paths": [
                     "C:\\Program Files (x86)\\Embarcadero\\Studio\\20.0\\source\\rtl\\common",
-                    "C:\\Program Files (x86)\\Embarcadero\\Studio\\20.0\\source\\rtl\\sys",
-                    "C:\\Program Files (x86)\\Embarcadero\\Studio\\20.0\\source\\rtl\\win"
+                    "C:\\Program Files (x86)\\Embarcadero\\Studio\\20.0\\source\\rtl\\sys"
                 ]
             }
         },
         {
+            "name": "delphi.rtl.win",
+            "origin": "delphi",
+            "contains": {
+                "paths": [                    
+                    "C:\\Program Files (x86)\\Embarcadero\\Studio\\20.0\\source\\rtl\\win"
+                ]
+            }
+        },   
+        {
+            "name": "delphi.non-visual",
+            "origin": "delphi",
+            "dependencies": [
+                "delphi.rtl.common",
+                "delphi.rtl.win"
+            ]
+        },             
+        {
             "name": "delphi.vcl",
             "origin": "delphi",
+            "dependencies": [
+                "delphi.non-visual"
+            ],
             "contains": {
                 "paths": [
                     "C:\\Program Files (x86)\\Embarcadero\\Studio\\20.0\\source\\vcl"
                 ]
             }
         },
+        {
+            "name": "delphi.gui",
+            "origin": "delphi",
+            "dependencies": [
+                "delphi.vcl"
+            ]
+        },        
         {
             "name": "3rdParty.DelphiAST",
             "origin": "3rdParty",
@@ -53,7 +79,7 @@
             "name": "duds.common",
             "origin": "own",
             "dependencies": [
-                "delphi.rtl",
+                "delphi.non-visual",
                 "3rdParty.DelphiAST"
             ],
             "contains": {
@@ -97,14 +123,14 @@
                     "..\\src\\export"
                 ]
             }
-        },        
+        },
         {
             "name": "duds.gui",
             "origin": "own",
             "dependencies": [
-                "delphi.vcl",
+                "delphi.gui",
                 "3rdParty.SynEdit",
-                "3rdParty.VirtualTree",                
+                "3rdParty.VirtualTree",
                 "duds.analyzer",
                 "duds.refactoring",
                 "duds.export"
@@ -114,13 +140,13 @@
                     "..\\src\\gui"
                 ]
             }
-        },      
+        },
         {
             "name": "3rdParty.DUnitX",
             "origin": "3rdParty",
             "usage": "test",
             "dependencies": [
-                "delphi.rtl"
+                "delphi.non-visual"
             ],
             "contains": {
                 "units": [
@@ -140,14 +166,14 @@
                     "TestInsight.DUnitX"
                 ]
             }
-        },        
+        },
         {
             "name": "duds.test",
             "origin": "own",
             "usage": "test",
-            "dependencies": [                
+            "dependencies": [
                 "3rdParty.DUnitX",
-                "3rdParty.TestInsight",                
+                "3rdParty.TestInsight",
                 "duds.analyzer",
                 "duds.refactoring",
                 "duds.export"

@@ -99,7 +99,7 @@ begin
     try
       aModulesAnalyzer.InitByCustomAnalyzer(Self);
       aModulesAnalyzer.MapUnitsToModules;
-      aModulesAnalyzer.AnalyzeDependencies;
+      aModulesAnalyzer.Execute;
     finally
       ReleaseAnalyzer(aModulesAnalyzer);
     end;

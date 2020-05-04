@@ -79,7 +79,7 @@ begin
   if Assigned(fUnknownModule) then
     raise Exception.Create('unknown module already created');
 
-  fUnknownModule      := TModule.Create;
+  fUnknownModule      := TModule.Create(true);
   fUnknownModule.Name := 'unknown module';
 
   AddModule(fUnknownModule);

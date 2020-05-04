@@ -86,6 +86,7 @@ type
   private
     fID: Integer;
     fName: string;
+    fIsUnknownModule: Boolean;
     fUnits: TStringList;
     fPaths: TStringList;
     fOrigin: TModuleOrigin;
@@ -103,12 +104,13 @@ type
     procedure SetPaths(const Value: TStringList);
 
   public
-    constructor Create;
+    constructor Create(IsUnknownModule: Boolean = false);
     destructor Destroy; override;
 
 
     property ID: Integer read fID write fID;
     property Name: string read GetName write SetName;
+    property IsUnknownModule: Boolean read fIsUnknownModule;
     property Origin: TModuleOrigin read fOrigin write fOrigin;
     property Usage: TModuleUsage read fUsage write fUsage;
 
@@ -156,8 +158,9 @@ implementation
 
 { TModule }
 
-constructor TModule.Create;
+constructor TModule.Create(IsUnknownModule: Boolean = false);
 begin
+  fIsUnknownModule     := IsUnknownModule;
   fDefinedDependencies := TObjectList<TModule>.Create(false);
   fAllowedDependencies := TObjectList<TModule>.Create(false);
   fUnits := TStringList.Create(TDuplicates.dupError, true, false);
