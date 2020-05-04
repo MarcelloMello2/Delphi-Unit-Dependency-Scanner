@@ -68,21 +68,81 @@ type
   end;
 
   TModule = class;
+
+  IUnitInfo = interface
+  ['{F8DDA5FC-AF2B-4B35-A662-F15120502477}']
+    function GetDelphiUnitName: String;
+    function GetDelphiFileType: TDelphiFileType;
+    function GetFilename: String;
+    function GetLinesOfCode: Integer;
+    function GetDelphiUnitNamePosition: Integer;
+    function GetUsedUnits: TList<IUsedUnitInfo>;
+    function GetPreviousUnitName: String;
+    function GetModule: TModule;
+
+    procedure SetDelphiUnitName(const Value: String);
+    procedure SetDelphiFileType(const Value: TDelphiFileType);
+    procedure SetFilename(const Value: String);
+    procedure SetLinesOfCode(const Value: Integer);
+    procedure SetDelphiUnitNamePosition(const Value: Integer);
+    procedure SetPreviousUnitName(const Value: String);
+    procedure SetModule(const Value: TModule);
+
+    property DelphiUnitName: String read GetDelphiUnitName write SetDelphiUnitName;
+    property Filename: String read GetFilename write SetFilename;
+    property LinesOfCode: Integer read GetLinesOfCode write SetLinesOfCode;
+    property DelphiUnitNamePosition: Integer read GetDelphiUnitNamePosition write SetDelphiUnitNamePosition;
+    property DelphiFileType: TDelphiFileType read GetDelphiFileType write SetDelphiFileType;
+    property UsedUnits: TList<IUsedUnitInfo> read GetUsedUnits;
+    property PreviousUnitName: String read GetPreviousUnitName write SetPreviousUnitName;
+    property Module: TModule read GetModule write SetModule;
+  end;
+
+  TUsedModuleData = class // Details about how a Module B (the "used" module) is used by Module A
+  private
+    fDependencyViolation: Boolean;
+    fIncomingEdgesCount: Integer;
+    fUsingUnitsNames: TStringList;
+    fUsedUnitsNames: TStringList;
+
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    property DependencyViolation: Boolean read fDependencyViolation write fDependencyViolation;
+    property IncomingEdgesCount: Integer  read fIncomingEdgesCount  write fIncomingEdgesCount;
+
+    property UsingUnitsNames: TStringList  read fUsingUnitsNames    write fUsingUnitsNames;  // Which units in A are using a unit in B
+
+    property UsedUnitsNames: TStringList  read fUsedUnitsNames      write fUsedUnitsNames;   // Which units in B are used by a unit in A
+
+
+  end;
+
   TModuleAnalysisData = class // pojo
   private
-    fAllowedDependencies: TObjectList<TModule>;
     fLinesOfCode: Integer;
     fNumberOfFiles: Integer;
     fNumberOfFilesNotInPath: Integer;
+
+    fAllowedDependencies: TObjectList<TModule>;
+    fActualDependencies : TObjectDictionary<TModule, TUsedModuleData>;
 
   public
     constructor Create;
     destructor Destroy; override;
 
     procedure Clear;
+    procedure AddActualDependency(UsingUnitInfo: IUnitInfo; UsedModule: TModule;
+        UsedUnitInfo: IUnitInfo);
+
 
     { AllowedDependencies = (directly) defined dependencies + all indirectly defined dependencies }
     property AllowedDependencies: TObjectList<TModule>   read fAllowedDependencies write fAllowedDependencies;
+
+    { Actual dependencies with detailled usage data }
+    property ActualDependencies: TObjectDictionary<TModule, TUsedModuleData> read fActualDependencies;
+
     property LinesOfCode: Integer            read fLinesOfCode            write fLinesOfCode;
     property NumberOfFiles: Integer          read fNumberOfFiles          write fNumberOfFiles;
     property NumberOfFilesNotInPath: Integer read fNumberOfFilesNotInPath write fNumberOfFilesNotInPath;
@@ -126,35 +186,6 @@ type
     property Units: TStringList read GetUnits write SetUnits;
 
     property AnalysisData: TModuleAnalysisData read fAnalysisData write fAnalysisData;
-  end;
-
-  IUnitInfo = interface
-  ['{F8DDA5FC-AF2B-4B35-A662-F15120502477}']
-    function GetDelphiUnitName: String;
-    function GetDelphiFileType: TDelphiFileType;
-    function GetFilename: String;
-    function GetLinesOfCode: Integer;
-    function GetDelphiUnitNamePosition: Integer;
-    function GetUsedUnits: TList<IUsedUnitInfo>;
-    function GetPreviousUnitName: String;
-    function GetModule: TModule;
-
-    procedure SetDelphiUnitName(const Value: String);
-    procedure SetDelphiFileType(const Value: TDelphiFileType);
-    procedure SetFilename(const Value: String);
-    procedure SetLinesOfCode(const Value: Integer);
-    procedure SetDelphiUnitNamePosition(const Value: Integer);
-    procedure SetPreviousUnitName(const Value: String);
-    procedure SetModule(const Value: TModule);
-
-    property DelphiUnitName: String read GetDelphiUnitName write SetDelphiUnitName;
-    property Filename: String read GetFilename write SetFilename;
-    property LinesOfCode: Integer read GetLinesOfCode write SetLinesOfCode;
-    property DelphiUnitNamePosition: Integer read GetDelphiUnitNamePosition write SetDelphiUnitNamePosition;
-    property DelphiFileType: TDelphiFileType read GetDelphiFileType write SetDelphiFileType;
-    property UsedUnits: TList<IUsedUnitInfo> read GetUsedUnits;
-    property PreviousUnitName: String read GetPreviousUnitName write SetPreviousUnitName;
-    property Module: TModule read GetModule write SetModule;
   end;
 
 implementation
@@ -213,12 +244,14 @@ end;
 
 constructor TModuleAnalysisData.Create;
 begin
-  fAllowedDependencies := TObjectList<TModule>.Create(false);
+  fAllowedDependencies      := TObjectList<TModule>.Create(false);
+  fActualDependencies := TObjectDictionary<TModule, TUsedModuleData>.Create([doOwnsValues]);
 end;
 
 destructor TModuleAnalysisData.Destroy;
 begin
-  FreeAndNil(fAllowedDependencies);
+  fAllowedDependencies.Free;
+  fActualDependencies.Free;
   inherited;
 end;
 
@@ -228,6 +261,43 @@ begin
   fNumberOfFiles          := 0;
   fNumberOfFilesNotInPath := 0;
   fAllowedDependencies.Clear;
+  fActualDependencies.Clear;
+end;
+
+procedure TModuleAnalysisData.AddActualDependency(UsingUnitInfo: IUnitInfo; UsedModule: TModule; UsedUnitInfo: IUnitInfo);
+var
+  aUsedModuleData : TUsedModuleData;
+begin
+
+  if not fActualDependencies.TryGetValue(UsedModule, aUsedModuleData) then
+  begin
+    aUsedModuleData                     := TUsedModuleData.Create;
+    aUsedModuleData.DependencyViolation := not fAllowedDependencies.Contains(UsedModule);
+
+    fActualDependencies.Add(UsedModule, aUsedModuleData);
+  end;
+
+  // how many differnt units use the "used module"?
+  aUsedModuleData.UsingUnitsNames.Add(UsingUnitInfo.DelphiUnitName);
+
+  // how many different units of the "used modules" are being used?
+  aUsedModuleData.UsedUnitsNames.Add(UsedUnitInfo.DelphiUnitName);
+end;
+
+{ TUsedModuleData }
+
+constructor TUsedModuleData.Create;
+begin
+  inherited Create;
+  fUsingUnitsNames := TStringList.Create(TDuplicates.dupIgnore, true, false); // <- ignore duplicates
+  fUsedUnitsNames  := TStringList.Create(TDuplicates.dupIgnore, true, false); // <- ignore duplicates
+end;
+
+destructor TUsedModuleData.Destroy;
+begin
+  fUsingUnitsNames.Free;
+  fUsedUnitsNames.Free;
+  inherited Destroy;
 end;
 
 end.

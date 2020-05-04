@@ -26,6 +26,10 @@ type
     fFileName: string;
     fOriginsToExport: TModuleOrigins;
 
+    procedure AddEdge(xmlGraph: IXMLNode; edgeID: Integer; CurrentModule,
+        DependendModule: TModule; aUsedModuleData: TUsedModuleData);
+    procedure AddEdgeLabel(edge: IXMLNode; DependencyViolation: Boolean;
+        NumerOfUnits: Integer; position: string);
     procedure AppendModuleNodes(xmlGraph: IXMLNode);
     procedure AppendDependencies(xmlGraph: IXMLNode);
 
@@ -60,14 +64,20 @@ begin
 end;
 
 const
-  cNodeKey = 'd0';
-  cEdgeKey = 'd1';
+  cNodeKey     = 'd0';
+  cEdgeKey     = 'd1';
+  cEdgeHintKey = 'd2';
 
 const
                                                               {moUndefined,  moDelphi, mo3rdParty,  moOwn}
   cModuleOriginLightColors   : array[TModuleOrigin] of string = ('#CCCCCC', '#FFB565', '#A6D8E7', '#AADB1E');
   cModuleOriginMediumColors  : array[TModuleOrigin] of string = ('#CCCCCC', '#FF8400', '#49AFD9', '#60B515');
   cModuleOriginDarkColors    : array[TModuleOrigin] of string = ('#313131', '#AA4500', '#003D79', '#1D5100');
+
+  cDependencyAllowedColor     = '#808080';
+  cDependencyViolationColor   = '#FF0000';
+
+  cBackgroundColor = '#FFFFFF';
 
 procedure TExportModulesToGraphML.ExportModules;
 var
@@ -76,28 +86,34 @@ var
   graphml, Key, graph: IXMLNode;
 begin
   // Internally GraphML is an XML document
-  Xml := TXMLDocument.Create(nil);
-  Xml.Active := TRUE;
-  Xml.Version := '1.0';
-  Xml.Encoding := 'UTF-8';
-  Xml.StandAlone := 'no';
-  Xml.Options := [doNodeAutoIndent];
+  Xml                             := TXMLDocument.Create(nil);
+  Xml.Active                      := TRUE;
+  Xml.Version                     := '1.0';
+  Xml.Encoding                    := 'UTF-8';
+  Xml.StandAlone                  := 'no';
+  Xml.Options                     := [doNodeAutoIndent];
 
-  graphml := Xml.AddChild('graphml');
-  graphml.Attributes['xmlns:y'] := 'http://www.yworks.com/xml/graphml';
+  graphml                         := Xml.AddChild('graphml');
+  graphml.Attributes['xmlns:y']   := 'http://www.yworks.com/xml/graphml';
   graphml.Attributes['xmlns:yed'] := 'http://www.yworks.com/xml/yed/3';
 
-  Key := graphml.AddChild('key');
-  Key.Attributes['id'] := cNodeKey;
-  Key.Attributes['for'] := 'node';
-  Key.Attributes['yfiles.type'] := 'nodegraphics';
+  Key                             := graphml.AddChild('key');
+  Key.Attributes['id']            := cNodeKey;
+  Key.Attributes['for']           := 'node';
+  Key.Attributes['yfiles.type']   := 'nodegraphics';
 
-  Key := graphml.AddChild('key');
-  Key.Attributes['id'] := 'd1';
-  Key.Attributes['for'] := 'edge';
-  Key.Attributes['yfiles.type'] := 'edgegraphics';
+  Key                             := graphml.AddChild('key');
+  Key.Attributes['id']            := cEdgeKey;
+  Key.Attributes['for']           := 'edge';
+  Key.Attributes['yfiles.type']   := 'edgegraphics';
 
-  graph := graphml.AddChild('graph');
+  Key                             := graphml.AddChild('key');
+  Key.Attributes['id']            := cEdgeHintKey;
+  Key.Attributes['for']           := 'edge';
+  Key.Attributes['attr.name']     := 'description';
+  Key.Attributes['attr.type']     := 'string';
+
+  graph                           := graphml.AddChild('graph');
   graph.Attributes['edgedefault'] := 'directed';
 
   AppendModuleNodes(graph);
@@ -173,35 +189,126 @@ begin
     end;
 end;
 
-procedure TExportModulesToGraphML.AppendDependencies(xmlGraph: IXMLNode);
+procedure TExportModulesToGraphML.AddEdgeLabel(edge: IXMLNode;
+  DependencyViolation: Boolean; NumerOfUnits: Integer; position: string);
+var
+  edgeLabelOutgoing: IXMLNode;
+begin
+  // label for the edge with number of outgoing units
+  edgeLabelOutgoing                                        := edge.AddChild('y:EdgeLabel');
+  edgeLabelOutgoing.Attributes['modelName']                := 'three_center';     // put the label over the edge
+  edgeLabelOutgoing.Attributes['modelPosition']            := position;           // position at the edge "source" or "target"
+  edgeLabelOutgoing.Attributes['backgroundColor']          := cBackgroundColor;   // background color for better readability of the edge-label
+
+  edgeLabelOutgoing.Text := FormatCardinal(NumerOfUnits);
+
+  if DependencyViolation then
+  begin
+    edgeLabelOutgoing.Attributes['backgroundColor'] := cDependencyViolationColor;
+    edgeLabelOutgoing.Attributes['textColor']       := cBackgroundColor;
+  end;
+end;
+
+procedure TExportModulesToGraphML.AddEdge(xmlGraph: IXMLNode; edgeID: Integer; CurrentModule, DependendModule: TModule; aUsedModuleData: TUsedModuleData);
 var
   edgeNode: IXMLNode;
+  edgeGraphics: IXMLNode;
+  edge: IXMLNode;
+  edgeStyle: IXMLNode;
+  edgeLabelOutgoing: IXMLNode;
+  DependencyViolation: Boolean;
+  DependencyViolationText: string;
+  OutGoingUnitsCount: Integer;
+  IncomingUnitsCount: Integer;
+  edgeHint: IXMLNode;
+begin
+  // prepare data from module usage
+  OutGoingUnitsCount  := 0;
+  IncomingUnitsCount  := 0;
+  DependencyViolation     := false;
+  DependencyViolationText := '';
+  if Assigned(aUsedModuleData) then
+  begin
+    OutGoingUnitsCount      := aUsedModuleData.UsingUnitsNames.Count;
+    IncomingUnitsCount      := aUsedModuleData.UsedUnitsNames.Count;
+    DependencyViolation     := aUsedModuleData.DependencyViolation;
+    DependencyViolationText := 'outgoing' +
+                               slineBreak +
+                               '--------' +
+                               slineBreak +
+                               aUsedModuleData.UsingUnitsNames.Text + sLineBreak + sLineBreak +
+                               'incoming' +
+                               slineBreak +
+                               '--------' +
+                               slineBreak +
+                               aUsedModuleData.UsedUnitsNames.Text;
+  end;
+
+  // produce the edge
+  edgeNode := xmlGraph.AddChild('edge');
+  edgeNode.Attributes['id']     := 'e' + IntToStr(edgeID);
+  edgeNode.Attributes['source'] := 'n' + IntToStr(CurrentModule.ID);
+  edgeNode.Attributes['target'] := 'n' + IntToStr(DependendModule.ID);
+
+  // edge description -> add a description text to the edge line (that will appear as hint in yEd)
+  edgeHint                         := edgeNode.AddChild('data');
+  edgeHint.Attributes['key']       := cEdgeHintKey;
+  edgeHint.Attributes['xml:space'] := 'preserve';
+  edgeHint.Text                    := DependencyViolationText;
+
+  // edge graphics
+  edgeGraphics                                     := edgeNode.AddChild('data');
+  edgeGraphics.Attributes['key']                   := cEdgeKey;
+  edge                                             := edgeGraphics.AddChild('y:edge');
+  edge.AddChild('y:Arrows').Attributes['target']   := 'standard';
+
+  // styling for the edge
+  edgeStyle                                        := edge.AddChild('y:LineStyle');
+  if DependencyViolation then
+    edgeStyle.Attributes['color']                  := cDependencyViolationColor
+  else
+    edgeStyle.Attributes['color']                  := cDependencyAllowedColor;
+
+  // add labels to the edge (showing incoming and outgoing units count)
+  AddEdgeLabel(edge, DependencyViolation, OutGoingUnitsCount, 'scentr');
+  AddEdgeLabel(edge, DependencyViolation, IncomingUnitsCount, 'tcentr');
+end;
+
+procedure TExportModulesToGraphML.AppendDependencies(xmlGraph: IXMLNode);
+var
   edgeID: Integer;
-  edgeData: IXMLNode;
-  polyLineEdge: IXMLNode;
   CurrentModule: TModule;
   DependendModule: TModule;
+  aUsedModuleData: TUsedModuleData;
 begin
   edgeID := 0;
 
   for CurrentModule in FModel.Modules.OrderedModules do
+  begin
+
+    // add defined dependencies
     for DependendModule in CurrentModule.DefinedDependencies do
       if ModuleIsPartOfExport(CurrentModule) and ModuleIsPartOfExport(DependendModule)  then
       begin
-        edgeNode := xmlGraph.AddChild('edge');
-        edgeNode.Attributes['id']     := 'e' + IntToStr(edgeID);
-        edgeNode.Attributes['source'] := 'n' + IntToStr(CurrentModule.ID);
-        edgeNode.Attributes['target'] := 'n' + IntToStr(DependendModule.ID);
-
-        edgeData := edgeNode.AddChild('data');
-        edgeData.Attributes['key'] := 'd1';
-        polyLineEdge := edgeData.AddChild('y:PolyLineEdge');
-
-        polyLineEdge.AddChild('y:LineStyle').Attributes['color'] := '#808080';
-        polyLineEdge.AddChild('y:Arrows').Attributes['target']   := 'standard';
+        CurrentModule.AnalysisData.ActualDependencies.TryGetValue(DependendModule, aUsedModuleData);
+        AddEdge(xmlGraph, edgeID, CurrentModule, DependendModule, aUsedModuleData);
 
         Inc(edgeID);
       end;
+
+    // add dependency violations
+    for DependendModule in CurrentModule.AnalysisData.ActualDependencies.Keys do
+    begin
+      aUsedModuleData := CurrentModule.AnalysisData.ActualDependencies.Items[DependendModule];
+      if ModuleIsPartOfExport(CurrentModule) and ModuleIsPartOfExport(DependendModule)  then
+        if aUsedModuleData.DependencyViolation then
+        begin
+          AddEdge(xmlGraph, edgeID, CurrentModule, DependendModule, aUsedModuleData);
+          Inc(edgeID);
+        end;
+    end;
+
+  end;
 end;
 
 end.

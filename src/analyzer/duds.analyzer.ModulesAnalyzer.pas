@@ -180,21 +180,19 @@ begin
             end;
 
             // Save all actual dependencies between modules - What do we want to know?
-            //   - Is there a dependency between A and B?
-            //   - Which units cause the dependency?
-            //   - How strong is the dependency between A and B? (e.g. how many units does A use from B)
-            //   - Is this dependency a violation?
-
+            //    - Is there a dependency between A and B?
+            //    - Which units cause the dependency?
+            //    - How strong is the dependency between A and B? (e.g. how many units does A use from B)
+            //    - Is this dependency a violation?
             // -> to get fast answers for these questions, we need to save details and sums
 
-            // Details:
+            // details
             //    (Module A, Unit x) uses (Module B, Unit y) => save these details in Module A
 
-            // Summary
+            // sums
             //    (Module A) (allowed/non-allowed) uses (Module B) because of (5) units from (Module B) beeing used by (Module A)
 
-
-  //        CurrentModule.AddActualDependency(CurrentDelphiFile, UsedModule, UsedDelphiFile);
+            CurrentModule.AnalysisData.AddActualDependency(CurrentDelphiFile.UnitInfo, UsedModule, UsedDelphiFile.UnitInfo);
           end;
 
         end;

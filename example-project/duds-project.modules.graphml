@@ -16,10 +16,10 @@
       <data key="d4"/>
       <data key="d5">
         <y:ShapeNode>
-          <y:Geometry height="62.0" width="137.0" x="0.0" y="216.0"/>
+          <y:Geometry height="80.0" width="137.0" x="0.0" y="275.0"/>
           <y:Fill color="#49AFD9" transparent="false"/>
           <y:BorderStyle color="#003D79" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="117.0" x="10.0" xml:space="preserve" y="5.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;3rdParty.DelphiAST &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 2&lt;br&gt;&lt;/br&gt;LoC: 2.819  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="117.0" x="10.0" xml:space="preserve" y="14.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;3rdParty.DelphiAST &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 2&lt;br&gt;&lt;/br&gt;LoC: 2.819  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
           <y:Shape type="rectangle"/>
         </y:ShapeNode>
       </data>
@@ -28,10 +28,10 @@
       <data key="d4"/>
       <data key="d5">
         <y:ShapeNode>
-          <y:Geometry height="62.0" width="125.0" x="342.00000000000006" y="0.0"/>
+          <y:Geometry height="80.0" width="125.0" x="510.25" y="90.0"/>
           <y:Fill color="#49AFD9" transparent="false"/>
           <y:BorderStyle color="#003D79" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="105.0" x="10.0" xml:space="preserve" y="5.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;3rdParty.SynEdit &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 3&lt;br&gt;&lt;/br&gt;&lt;font style="color:red"&gt;Files not in Path: 3&lt;/font&gt;  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="105.0" x="10.0" xml:space="preserve" y="14.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;3rdParty.SynEdit &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 3&lt;br&gt;&lt;/br&gt;&lt;font style="color:red"&gt;Files not in Path: 3&lt;/font&gt;  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
           <y:Shape type="rectangle"/>
         </y:ShapeNode>
       </data>
@@ -40,10 +40,10 @@
       <data key="d4"/>
       <data key="d5">
         <y:ShapeNode>
-          <y:Geometry height="62.0" width="142.0" x="333.50000000000006" y="72.0"/>
+          <y:Geometry height="80.0" width="142.0" x="501.75" y="0.0"/>
           <y:Fill color="#49AFD9" transparent="false"/>
           <y:BorderStyle color="#003D79" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="122.0" x="10.0" xml:space="preserve" y="5.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;3rdParty.VirtualTree &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 1&lt;br&gt;&lt;/br&gt;&lt;font style="color:red"&gt;Files not in Path: 1&lt;/font&gt;  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="122.0" x="10.0" xml:space="preserve" y="14.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;3rdParty.VirtualTree &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 1&lt;br&gt;&lt;/br&gt;&lt;font style="color:red"&gt;Files not in Path: 1&lt;/font&gt;  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
           <y:Shape type="rectangle"/>
         </y:ShapeNode>
       </data>
@@ -52,10 +52,10 @@
       <data key="d4"/>
       <data key="d5">
         <y:ShapeNode>
-          <y:Geometry height="62.0" width="108.0" x="167.00000000000006" y="216.0"/>
+          <y:Geometry height="80.0" width="108.0" x="167.0" y="275.0"/>
           <y:Fill color="#60B515" transparent="false"/>
           <y:BorderStyle color="#1D5100" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="88.0" x="10.0" xml:space="preserve" y="5.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;duds.common &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 17&lt;br&gt;&lt;/br&gt;LoC: 2.031  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="88.0" x="10.0" xml:space="preserve" y="14.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;duds.common &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 17&lt;br&gt;&lt;/br&gt;LoC: 2.088  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
           <y:Shape type="rectangle"/>
         </y:ShapeNode>
       </data>
@@ -64,10 +64,10 @@
       <data key="d4"/>
       <data key="d5">
         <y:ShapeNode>
-          <y:Geometry height="62.0" width="106.0" x="351.50000000000006" y="288.0"/>
+          <y:Geometry height="80.0" width="106.0" x="325.0" y="275.0"/>
           <y:Fill color="#60B515" transparent="false"/>
           <y:BorderStyle color="#1D5100" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="86.0" x="10.0" xml:space="preserve" y="5.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;duds.analyzer &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 7&lt;br&gt;&lt;/br&gt;LoC: 778  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="86.0" x="10.0" xml:space="preserve" y="14.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;duds.analyzer &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 7&lt;br&gt;&lt;/br&gt;LoC: 780  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
           <y:Shape type="rectangle"/>
         </y:ShapeNode>
       </data>
@@ -76,10 +76,10 @@
       <data key="d4"/>
       <data key="d5">
         <y:ShapeNode>
-          <y:Geometry height="62.0" width="121.0" x="344.00000000000006" y="216.0"/>
+          <y:Geometry height="80.0" width="121.0" x="512.25" y="230.0"/>
           <y:Fill color="#60B515" transparent="false"/>
           <y:BorderStyle color="#1D5100" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="101.0" x="10.0" xml:space="preserve" y="5.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;duds.refactoring &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 6&lt;br&gt;&lt;/br&gt;LoC: 1.445  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="101.0" x="10.0" xml:space="preserve" y="14.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;duds.refactoring &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 6&lt;br&gt;&lt;/br&gt;LoC: 1.447  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
           <y:Shape type="rectangle"/>
         </y:ShapeNode>
       </data>
@@ -88,10 +88,10 @@
       <data key="d4"/>
       <data key="d5">
         <y:ShapeNode>
-          <y:Geometry height="62.0" width="95.0" x="357.00000000000006" y="144.0"/>
+          <y:Geometry height="80.0" width="95.0" x="525.25" y="320.0"/>
           <y:Fill color="#60B515" transparent="false"/>
           <y:BorderStyle color="#1D5100" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="75.0" x="10.0" xml:space="preserve" y="5.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;duds.export &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 4&lt;br&gt;&lt;/br&gt;LoC: 357  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="75.0" x="10.0" xml:space="preserve" y="14.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;duds.export &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 4&lt;br&gt;&lt;/br&gt;LoC: 442  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
           <y:Shape type="rectangle"/>
         </y:ShapeNode>
       </data>
@@ -100,10 +100,10 @@
       <data key="d4"/>
       <data key="d5">
         <y:ShapeNode>
-          <y:Geometry height="62.0" width="84.0" x="564.325" y="84.4"/>
+          <y:Geometry height="80.0" width="84.0" x="735.75" y="160.0"/>
           <y:Fill color="#60B515" transparent="false"/>
           <y:BorderStyle color="#1D5100" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="64.0" x="10.0" xml:space="preserve" y="5.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;duds.gui &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 8&lt;br&gt;&lt;/br&gt;LoC: 3.014  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="64.0" x="10.0" xml:space="preserve" y="14.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;duds.gui &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 8&lt;br&gt;&lt;/br&gt;LoC: 3.014  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
           <y:Shape type="rectangle"/>
         </y:ShapeNode>
       </data>
@@ -112,10 +112,10 @@
       <data key="d4"/>
       <data key="d5">
         <y:ShapeNode>
-          <y:Geometry height="62.0" width="125.0" x="342.00000000000006" y="432.0"/>
+          <y:Geometry height="80.0" width="125.0" x="510.25" y="460.0"/>
           <y:Fill color="#A6D8E7" transparent="false"/>
           <y:BorderStyle color="#003D79" type="dashed" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="105.0" x="10.0" xml:space="preserve" y="5.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;3rdParty.DUnitX &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 4&lt;br&gt;&lt;/br&gt;&lt;font style="color:red"&gt;Files not in Path: 4&lt;/font&gt;  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="105.0" x="10.0" xml:space="preserve" y="14.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;3rdParty.DUnitX &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 4&lt;br&gt;&lt;/br&gt;&lt;font style="color:red"&gt;Files not in Path: 4&lt;/font&gt;  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
           <y:Shape type="rectangle"/>
         </y:ShapeNode>
       </data>
@@ -124,10 +124,10 @@
       <data key="d4"/>
       <data key="d5">
         <y:ShapeNode>
-          <y:Geometry height="62.0" width="142.0" x="333.50000000000006" y="360.0"/>
+          <y:Geometry height="80.0" width="142.0" x="501.75" y="550.0"/>
           <y:Fill color="#A6D8E7" transparent="false"/>
           <y:BorderStyle color="#003D79" type="dashed" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="122.0" x="10.0" xml:space="preserve" y="5.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;3rdParty.TestInsight &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 1&lt;br&gt;&lt;/br&gt;&lt;font style="color:red"&gt;Files not in Path: 1&lt;/font&gt;  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="122.0" x="10.0" xml:space="preserve" y="14.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;3rdParty.TestInsight &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 1&lt;br&gt;&lt;/br&gt;&lt;font style="color:red"&gt;Files not in Path: 1&lt;/font&gt;  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
           <y:Shape type="rectangle"/>
         </y:ShapeNode>
       </data>
@@ -136,317 +136,613 @@
       <data key="d4"/>
       <data key="d5">
         <y:ShapeNode>
-          <y:Geometry height="62.0" width="84.0" x="564.325" y="347.6"/>
+          <y:Geometry height="80.0" width="84.0" x="735.75" y="390.0"/>
           <y:Fill color="#AADB1E" transparent="false"/>
           <y:BorderStyle color="#1D5100" type="dashed" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="64.0" x="10.0" xml:space="preserve" y="5.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;duds.test &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 7&lt;br&gt;&lt;/br&gt;LoC: 1.217  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
-          <y:Shape type="rectangle"/>
-        </y:ShapeNode>
-      </data>
-    </node>
-    <node id="n11">
-      <data key="d4"/>
-      <data key="d5">
-        <y:ShapeNode>
-          <y:Geometry height="62.0" width="132.0" x="0.0" y="539.0"/>
-          <y:Fill color="#CCCCCC" transparent="false"/>
-          <y:BorderStyle color="#313131" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="112.0" x="10.0" xml:space="preserve" y="5.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;unknown module &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 51&lt;br&gt;&lt;/br&gt;&lt;font style="color:red"&gt;Files not in Path: 51&lt;/font&gt;  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="52.0" horizontalTextPosition="center" iconTextGap="4" modelName="internal" modelPosition="c" textColor="#000000" verticalTextPosition="bottom" visible="true" width="64.0" x="10.0" xml:space="preserve" y="14.0">&lt;html&gt;  &lt;div&gt;  &lt;b&gt;duds.test &lt;/b&gt;&lt;br&gt;&lt;/br&gt;Files: 7&lt;br&gt;&lt;/br&gt;LoC: 1.217  &lt;/div&gt;&lt;/html&gt;</y:NodeLabel>
           <y:Shape type="rectangle"/>
         </y:ShapeNode>
       </data>
     </node>
     <edge id="e0" source="n3" target="n0">
-      <data key="d8"/>
+      <data key="d8" xml:space="preserve"><![CDATA[outgoing
+--------
+duds.common.UsesParser
+
+
+incoming
+--------
+SimpleParser.Lexer
+SimpleParser.Lexer.Types
+]]></data>
       <data key="d9">
         <y:PolyLineEdge>
           <y:Path sx="-54.0" sy="0.0" tx="68.5" ty="0.0"/>
           <y:LineStyle color="#808080" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="scentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-20.3076171875" xml:space="preserve" y="-9.3505859375">1<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="tcentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-20.3076171875" xml:space="preserve" y="-9.3505859375">2<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
     <edge id="e1" source="n4" target="n3">
-      <data key="d8"/>
+      <data key="d8" xml:space="preserve"><![CDATA[outgoing
+--------
+duds.analyzer.CustomAnalyzer
+duds.analyzer.Facade
+duds.analyzer.FileScanner
+duds.analyzer.model
+duds.analyzer.ModulesAnalyzer
+duds.analyzer.UnitsAnalyzer
+
+
+incoming
+--------
+duds.common.Classes
+duds.common.Files
+duds.common.Interfaces
+duds.common.Language
+duds.common.Log
+duds.common.modules
+duds.common.modulesSerializer
+duds.common.Types
+duds.common.UnitInfo
+duds.common.UsedUnitInfo
+duds.common.UsesParser
+duds.common.Utils
+]]></data>
       <data key="d9">
         <y:PolyLineEdge>
-          <y:Path sx="-53.0" sy="0.0" tx="54.0" ty="20.666666666666686">
-            <y:Point x="341.50000000000006" y="319.0"/>
-            <y:Point x="338.44873046875006" y="318.59895833333337"/>
-            <y:Point x="331.74853515625006" y="315.390625"/>
-            <y:Point x="324.85693359375006" y="308.97395833333337"/>
-            <y:Point x="318.50048828125006" y="299.34895833333337"/>
-            <y:Point x="312.99951171875006" y="287.31770833333337"/>
-            <y:Point x="306.64306640625006" y="277.69270833333337"/>
-            <y:Point x="299.75146484375006" y="271.27604166666663"/>
-            <y:Point x="293.05126953125006" y="268.06770833333337"/>
-            <y:Point x="290.00000000000006" y="267.6666666666667"/>
-          </y:Path>
+          <y:Path sx="-53.0" sy="0.0" tx="54.0" ty="0.0"/>
           <y:LineStyle color="#808080" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="scentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-20.75" xml:space="preserve" y="-9.3505859375">6<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="tcentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="17.34765625" x="-39.826171875" xml:space="preserve" y="-9.3505859375">12<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
     <edge id="e2" source="n5" target="n3">
-      <data key="d8"/>
+      <data key="d8" xml:space="preserve"><![CDATA[outgoing
+--------
+duds.refactoring.AddUnitToUses
+duds.refactoring.FormatUses
+duds.refactoring.FormatUsesHelper
+duds.refactoring.RemoveUnusedUnits
+duds.refactoring.RenameUnit
+
+
+incoming
+--------
+duds.common.Classes
+duds.common.Files
+duds.common.Interfaces
+duds.common.Language
+duds.common.Log
+duds.common.Refactoring
+duds.common.Strings
+duds.common.Types
+duds.common.UnitInfo
+duds.common.UsedUnitInfo
+]]></data>
       <data key="d9">
         <y:PolyLineEdge>
-          <y:Path sx="-60.5" sy="0.0" tx="54.0" ty="0.0"/>
-          <y:LineStyle color="#808080" type="line" width="1.0"/>
-          <y:Arrows source="none" target="standard"/>
-          <y:BendStyle smoothed="false"/>
-        </y:PolyLineEdge>
-      </data>
-    </edge>
-    <edge id="e3" source="n6" target="n3">
-      <data key="d8"/>
-      <data key="d9">
-        <y:PolyLineEdge>
-          <y:Path sx="-47.5" sy="0.0" tx="54.0" ty="-20.666666666666657">
-            <y:Point x="347.00000000000006" y="175.0"/>
-            <y:Point x="343.90576171875006" y="175.40104166666666"/>
-            <y:Point x="336.86181640625006" y="178.609375"/>
-            <y:Point x="329.28271484375006" y="185.02604166666669"/>
-            <y:Point x="321.89501953125006" y="194.65104166666669"/>
-            <y:Point x="315.10498046875006" y="206.68229166666669"/>
-            <y:Point x="307.71728515625006" y="216.30729166666669"/>
-            <y:Point x="300.13818359375006" y="222.72395833333337"/>
-            <y:Point x="293.09423828125006" y="225.93229166666669"/>
-            <y:Point x="290.00000000000006" y="226.33333333333334"/>
+          <y:Path sx="-60.5" sy="-20.0" tx="54.0" ty="-26.666666666666686">
+            <y:Point x="497.25" y="250.0"/>
+            <y:Point x="491.078125" y="249.84375"/>
+            <y:Point x="477.5625" y="248.59375"/>
+            <y:Point x="468.072265625" y="246.9140625"/>
+            <y:Point x="455.587890625" y="245.9765625"/>
+            <y:Point x="423.4140625" y="245.15625"/>
+            <y:Point x="384.7265625" y="245.08463541666663"/>
+            <y:Point x="369.5390625" y="245.76171875"/>
+            <y:Point x="356.1640625" y="247.11588541666663"/>
+            <y:Point x="344.6015625" y="249.14713541666663"/>
+            <y:Point x="334.8515625" y="251.85546875"/>
+            <y:Point x="326.9140625" y="255.24088541666663"/>
+            <y:Point x="320.7890625" y="259.30338541666663"/>
+            <y:Point x="316.4765625" y="264.04296875"/>
+            <y:Point x="312.31933593750006" y="271.74479166666663"/>
+            <y:Point x="306.1376953125" y="279.86979166666663"/>
+            <y:Point x="299.4482421875" y="285.2864583333333"/>
+            <y:Point x="292.9541015625" y="287.99479166666663"/>
+            <y:Point x="290.0" y="288.3333333333333"/>
           </y:Path>
           <y:LineStyle color="#808080" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="scentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-17.3701171875" xml:space="preserve" y="-9.3505859375">5<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="tcentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="17.34765625" x="-233.83203125" xml:space="preserve" y="28.982747395833314">10<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e4" source="n7" target="n1">
-      <data key="d8"/>
+    <edge id="e3" source="n5" target="n4">
+      <data key="d8" xml:space="preserve"><![CDATA[outgoing
+--------
+duds.refactoring.AddUnitToUses
+duds.refactoring.FormatUses
+duds.refactoring.FormatUsesHelper
+duds.refactoring.RemoveUnusedUnits
+duds.refactoring.RenameUnit
+
+
+incoming
+--------
+duds.analyzer.model
+]]></data>
       <data key="d9">
         <y:PolyLineEdge>
-          <y:Path sx="-42.0" sy="-24.799999999999997" tx="62.5" ty="0.0">
-            <y:Point x="554.325" y="90.60000000000001"/>
-            <y:Point x="552.7930541992188" y="90.48359375000001"/>
-            <y:Point x="549.2902954101563" y="89.55234375"/>
-            <y:Point x="543.10927734375" y="86.40937500000001"/>
-            <y:Point x="533.61455078125" y="78.95937500000001"/>
-            <y:Point x="523.35341796875" y="67.78437500000001"/>
-            <y:Point x="512.9715820312501" y="53.81562500000001"/>
-            <y:Point x="502.71044921875006" y="42.64062500000001"/>
-            <y:Point x="493.2157226562501" y="35.190625000000004"/>
-            <y:Point x="487.0347045898438" y="32.04765625000001"/>
-            <y:Point x="483.5319458007813" y="31.116406250000004"/>
-            <y:Point x="482.00000000000006" y="31.0"/>
+          <y:Path sx="-60.5" sy="20.0" tx="53.0" ty="-10.0">
+            <y:Point x="497.25" y="290.0"/>
+            <y:Point x="494.2861328125" y="290.1171875"/>
+            <y:Point x="487.7138671875" y="291.0546875"/>
+            <y:Point x="480.8681640625" y="292.9296875"/>
+            <y:Point x="474.4521484375" y="295.7421875"/>
+            <y:Point x="468.7978515625" y="299.2578125"/>
+            <y:Point x="462.3818359375" y="302.0703125"/>
+            <y:Point x="455.5361328125" y="303.9453125"/>
+            <y:Point x="448.9638671875" y="304.8828125"/>
+            <y:Point x="446.0" y="305.0"/>
+          </y:Path>
+          <y:LineStyle color="#FF0000" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" backgroundColor="#FF0000" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="scentr" preferredPlacement="anywhere" ratio="0.5" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-17.3701171875" xml:space="preserve" y="-9.3505859375">5<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FF0000" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="tcentr" preferredPlacement="anywhere" ratio="0.5" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-74.4951171875" xml:space="preserve" y="5.6494140625">1<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e4" source="n6" target="n3">
+      <data key="d8" xml:space="preserve"><![CDATA[outgoing
+--------
+duds.export.modules.CSV
+duds.export.modules.GraphML
+duds.export.units.Gephi
+duds.export.units.GraphML
+
+
+incoming
+--------
+duds.common.Classes
+duds.common.Files
+duds.common.Interfaces
+duds.common.Language
+duds.common.Log
+duds.common.modules
+duds.common.modulesSerializer
+duds.common.Strings
+duds.common.Types
+duds.common.Utils
+]]></data>
+      <data key="d9">
+        <y:PolyLineEdge>
+          <y:Path sx="-47.5" sy="20.0" tx="54.0" ty="26.66666666666663">
+            <y:Point x="510.25" y="380.0"/>
+            <y:Point x="503.671875" y="380.15625"/>
+            <y:Point x="486.90625" y="381.40625"/>
+            <y:Point x="466.3828125" y="383.59375"/>
+            <y:Point x="423.8203125" y="384.84375"/>
+            <y:Point x="384.7265625" y="384.91536458333337"/>
+            <y:Point x="369.5390625" y="384.23828125"/>
+            <y:Point x="356.1640625" y="382.88411458333337"/>
+            <y:Point x="344.6015625" y="380.8528645833333"/>
+            <y:Point x="334.8515625" y="378.14453125"/>
+            <y:Point x="326.9140625" y="374.7591145833333"/>
+            <y:Point x="320.7890625" y="370.69661458333326"/>
+            <y:Point x="316.4765625" y="365.95703125"/>
+            <y:Point x="312.31933593750006" y="358.25520833333326"/>
+            <y:Point x="306.1376953125" y="350.13020833333326"/>
+            <y:Point x="299.4482421875" y="344.71354166666663"/>
+            <y:Point x="292.9541015625" y="342.0052083333333"/>
+            <y:Point x="290.0" y="341.66666666666663"/>
           </y:Path>
           <y:LineStyle color="#808080" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="scentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-17.3701171875" xml:space="preserve" y="-9.3505859375">4<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="tcentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="17.34765625" x="-246.83203125" xml:space="preserve" y="-47.68391927083337">10<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e5" source="n7" target="n2">
-      <data key="d8"/>
+    <edge id="e5" source="n6" target="n4">
+      <data key="d8" xml:space="preserve"><![CDATA[outgoing
+--------
+duds.export.modules.CSV
+duds.export.modules.GraphML
+duds.export.units.Gephi
+duds.export.units.GraphML
+
+
+incoming
+--------
+duds.analyzer.model
+]]></data>
       <data key="d9">
         <y:PolyLineEdge>
-          <y:Path sx="-42.0" sy="-12.399999999999999" tx="71.0" ty="0.0"/>
-          <y:LineStyle color="#808080" type="line" width="1.0"/>
+          <y:Path sx="-47.5" sy="-20.0" tx="53.0" ty="10.0">
+            <y:Point x="510.25" y="340.0"/>
+            <y:Point x="507.1845703125" y="339.8828125"/>
+            <y:Point x="499.7998046875" y="338.9453125"/>
+            <y:Point x="491.3291015625" y="337.0703125"/>
+            <y:Point x="482.4755859375" y="334.2578125"/>
+            <y:Point x="473.7744140625" y="330.7421875"/>
+            <y:Point x="464.9208984375" y="327.9296875"/>
+            <y:Point x="456.4501953125" y="326.0546875"/>
+            <y:Point x="449.0654296875" y="325.1171875"/>
+            <y:Point x="446.0" y="325.0"/>
+          </y:Path>
+          <y:LineStyle color="#FF0000" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" backgroundColor="#FF0000" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="scentr" preferredPlacement="anywhere" ratio="0.5" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-17.3701171875" xml:space="preserve" y="-9.3505859375">4<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FF0000" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="tcentr" preferredPlacement="anywhere" ratio="0.5" textColor="#FFFFFF" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-87.4951171875" xml:space="preserve" y="-24.3505859375">1<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e6" source="n7" target="n4">
-      <data key="d8"/>
+    <edge id="e6" source="n7" target="n1">
+      <data key="d8" xml:space="preserve"><![CDATA[outgoing
+--------
+duds.gui.forms.Main
+
+
+incoming
+--------
+SynEdit
+SynEditHighlighter
+SynHighlighterPas
+]]></data>
       <data key="d9">
         <y:PolyLineEdge>
-          <y:Path sx="-42.0" sy="24.80000000000001" tx="53.0" ty="-15.5">
-            <y:Point x="554.325" y="140.20000000000002"/>
-            <y:Point x="552.7891479492188" y="140.51894531250002"/>
-            <y:Point x="549.2551391601563" y="143.0705078125"/>
-            <y:Point x="545.1804077148438" y="148.17363281250002"/>
-            <y:Point x="540.6557739257813" y="155.8283203125"/>
-            <y:Point x="535.7720581054688" y="166.03457031250002"/>
-            <y:Point x="530.6200805664063" y="178.79238281250002"/>
-            <y:Point x="522.58779296875" y="202.71328125000002"/>
-            <y:Point x="514.4073486328125" y="231.73730468750003"/>
-            <y:Point x="508.66354980468753" y="249.59824218749998"/>
-            <y:Point x="502.7207275390625" y="264.9076171874999"/>
-            <y:Point x="496.7136474609375" y="277.6654296874999"/>
-            <y:Point x="490.77707519531253" y="287.8716796875"/>
-            <y:Point x="485.04577636718756" y="295.52636718749994"/>
-            <y:Point x="479.65451660156253" y="300.6294921874999"/>
-            <y:Point x="474.7380615234375" y="303.18105468749997"/>
-            <y:Point x="472.50000000000006" y="303.5"/>
+          <y:Path sx="-42.0" sy="-16.0" tx="62.5" ty="0.0">
+            <y:Point x="720.75" y="184.0"/>
+            <y:Point x="717.7021484375" y="183.578125"/>
+            <y:Point x="710.4580078125" y="180.203125"/>
+            <y:Point x="702.2685546875" y="173.453125"/>
+            <y:Point x="693.8369140625" y="163.328125"/>
+            <y:Point x="687.6776733398438" y="153.73046875"/>
+            <y:Point x="683.1506958007812" y="147.82421875"/>
+            <y:Point x="678.2286987304688" y="142.76171875"/>
+            <y:Point x="673.0493774414062" y="138.54296875"/>
+            <y:Point x="665.09912109375" y="133.796875"/>
+            <y:Point x="657.3444213867188" y="130.94921875"/>
+            <y:Point x="652.5127563476562" y="130.10546875"/>
+            <y:Point x="650.25" y="130.0"/>
           </y:Path>
           <y:LineStyle color="#808080" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="scentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-17.3701171875" xml:space="preserve" y="-9.3505859375">1<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="tcentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-93.7451171875" xml:space="preserve" y="-63.3505859375">3<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e7" source="n7" target="n5">
-      <data key="d8"/>
+    <edge id="e7" source="n7" target="n2">
+      <data key="d8" xml:space="preserve"><![CDATA[outgoing
+--------
+duds.gui.forms.Main
+duds.gui.VirtualTreeview
+
+
+incoming
+--------
+VirtualTrees
+]]></data>
       <data key="d9">
         <y:PolyLineEdge>
-          <y:Path sx="-42.0" sy="12.400000000000006" tx="60.5" ty="-15.5">
-            <y:Point x="554.325" y="127.80000000000001"/>
-            <y:Point x="552.7891479492188" y="128.0025390625"/>
-            <y:Point x="549.2551391601563" y="129.6228515625"/>
-            <y:Point x="545.1804077148438" y="132.8634765625"/>
-            <y:Point x="540.6557739257813" y="137.7244140625"/>
-            <y:Point x="533.22392578125" y="148.05390624999998"/>
-            <y:Point x="522.58779296875" y="167.49765624999998"/>
-            <y:Point x="517.1625" y="179.65"/>
-            <y:Point x="511.74687500000005" y="192.6125"/>
-            <y:Point x="507.67033691406255" y="201.7267578125"/>
-            <y:Point x="499.49645996093756" y="216.3095703125"/>
-            <y:Point x="493.43725280761726" y="224.056689453125"/>
-            <y:Point x="489.4742584228516" y="227.702392578125"/>
-            <y:Point x="485.5989349365235" y="230.132861328125"/>
-            <y:Point x="481.83398742675786" y="231.348095703125"/>
-            <y:Point x="480.00000000000006" y="231.5"/>
+          <y:Path sx="-42.0" sy="-32.0" tx="71.0" ty="0.0">
+            <y:Point x="720.75" y="168.0"/>
+            <y:Point x="719.2830810546875" y="167.75"/>
+            <y:Point x="716.0181884765625" y="165.75"/>
+            <y:Point x="712.3851318359375" y="161.75"/>
+            <y:Point x="708.4718017578125" y="155.75"/>
+            <y:Point x="702.2685546875" y="143.0"/>
+            <y:Point x="693.8369140625" y="119.0"/>
+            <y:Point x="685.6630859375" y="89.0"/>
+            <y:Point x="677.2314453125" y="65.0"/>
+            <y:Point x="671.0281982421875" y="52.25"/>
+            <y:Point x="667.1148681640625" y="46.24999999999999"/>
+            <y:Point x="663.4818115234375" y="42.24999999999999"/>
+            <y:Point x="660.2169189453125" y="40.24999999999999"/>
+            <y:Point x="658.75" y="40.0"/>
           </y:Path>
           <y:LineStyle color="#808080" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="scentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-17.3701171875" xml:space="preserve" y="-9.3505859375">2<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="tcentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-85.2451171875" xml:space="preserve" y="-137.3505859375">1<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e8" source="n7" target="n6">
-      <data key="d8"/>
+    <edge id="e8" source="n7" target="n4">
+      <data key="d8" xml:space="preserve"><![CDATA[outgoing
+--------
+duds.gui.forms.Main
+
+
+incoming
+--------
+duds.analyzer.Facade
+duds.analyzer.FileScanner
+duds.analyzer.model
+duds.analyzer.ModulesAnalyzer
+duds.analyzer.UnitsAnalyzer
+]]></data>
       <data key="d9">
         <y:PolyLineEdge>
-          <y:Path sx="-42.0" sy="0.0" tx="47.5" ty="-15.5">
-            <y:Point x="554.325" y="115.4"/>
-            <y:Point x="551.0954101562501" y="115.74453125"/>
-            <y:Point x="542.96865234375" y="118.50078124999999"/>
-            <y:Point x="533.22392578125" y="124.01328125"/>
-            <y:Point x="522.58779296875" y="132.28203125"/>
-            <y:Point x="514.3757934570312" y="140.1201171875"/>
-            <y:Point x="508.3916381835938" y="144.94355468749998"/>
-            <y:Point x="498.70166015625" y="150.88671875"/>
-            <y:Point x="485.32607421875" y="156.39921875"/>
-            <y:Point x="472.65439453125003" y="159.15546875"/>
-            <y:Point x="467.00000000000006" y="159.5"/>
+          <y:Path sx="-42.0" sy="0.0" tx="53.0" ty="-30.0">
+            <y:Point x="571.6875" y="200.0"/>
+            <y:Point x="560.8260498046875" y="200.12451171875"/>
+            <y:Point x="541.0125732421875" y="201.12060546875"/>
+            <y:Point x="523.7449951171875" y="203.11279296875"/>
+            <y:Point x="509.0233154296875" y="206.10107421875"/>
+            <y:Point x="496.8475341796875" y="210.08544921875"/>
+            <y:Point x="487.2176513671875" y="215.06591796875"/>
+            <y:Point x="480.1336669921875" y="221.04248046875"/>
+            <y:Point x="475.5955810546875" y="228.01513671875"/>
+            <y:Point x="474.28125" y="231.875"/>
+            <y:Point x="471.625" y="242.5"/>
+            <y:Point x="468.7978515625" y="252.4609375"/>
+            <y:Point x="462.3818359375" y="268.3984375"/>
+            <y:Point x="457.2493896484375" y="276.865234375"/>
+            <y:Point x="453.8399658203125" y="280.849609375"/>
+            <y:Point x="450.5428466796875" y="283.505859375"/>
+            <y:Point x="447.4459228515625" y="284.833984375"/>
+            <y:Point x="446.0" y="285.0"/>
           </y:Path>
           <y:LineStyle color="#808080" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="scentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-20.7587890625" xml:space="preserve" y="-9.3505859375">1<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="tcentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-297.984375" xml:space="preserve" y="75.6494140625">5<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e9" source="n10" target="n8">
-      <data key="d8"/>
+    <edge id="e9" source="n7" target="n5">
+      <data key="d8" xml:space="preserve"><![CDATA[outgoing
+--------
+duds.gui.forms.Main
+
+
+incoming
+--------
+duds.refactoring.AddUnitToUses
+duds.refactoring.FormatUses
+duds.refactoring.PascalAnalyzerUsesReportProcessor
+duds.refactoring.RemoveUnusedUnits
+duds.refactoring.RenameUnit
+]]></data>
       <data key="d9">
         <y:PolyLineEdge>
-          <y:Path sx="-42.0" sy="24.80000000000001" tx="62.5" ty="0.0">
-            <y:Point x="554.325" y="403.40000000000003"/>
-            <y:Point x="552.7930541992188" y="403.51640625000005"/>
-            <y:Point x="549.2902954101563" y="404.44765625"/>
-            <y:Point x="543.10927734375" y="407.59062500000005"/>
-            <y:Point x="533.61455078125" y="415.0406250000001"/>
-            <y:Point x="523.35341796875" y="426.21562500000005"/>
-            <y:Point x="512.9715820312501" y="440.18437500000005"/>
-            <y:Point x="502.71044921875006" y="451.35937499999994"/>
-            <y:Point x="493.2157226562501" y="458.80937499999993"/>
-            <y:Point x="487.0347045898438" y="461.95234374999995"/>
-            <y:Point x="483.5319458007813" y="462.88359375"/>
-            <y:Point x="482.00000000000006" y="463.0"/>
+          <y:Path sx="-42.0" sy="16.0" tx="60.5" ty="-20.0">
+            <y:Point x="720.75" y="216.0"/>
+            <y:Point x="717.6201171875" y="216.265625"/>
+            <y:Point x="709.7197265625" y="218.390625"/>
+            <y:Point x="700.2177734375" y="222.640625"/>
+            <y:Point x="689.8173828125" y="229.015625"/>
+            <y:Point x="679.1826171875" y="236.98437499999997"/>
+            <y:Point x="668.7822265625" y="243.359375"/>
+            <y:Point x="659.2802734375" y="247.609375"/>
+            <y:Point x="651.3798828125" y="249.734375"/>
+            <y:Point x="648.25" y="250.0"/>
           </y:Path>
           <y:LineStyle color="#808080" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="scentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-17.3701171875" xml:space="preserve" y="-9.3505859375">1<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="tcentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-95.7451171875" xml:space="preserve" y="24.6494140625">5<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e10" source="n10" target="n9">
-      <data key="d8"/>
+    <edge id="e10" source="n7" target="n6">
+      <data key="d8" xml:space="preserve"><![CDATA[outgoing
+--------
+duds.gui.forms.Main
+
+
+incoming
+--------
+duds.export.modules.CSV
+duds.export.modules.GraphML
+duds.export.units.Gephi
+duds.export.units.GraphML
+]]></data>
       <data key="d9">
         <y:PolyLineEdge>
-          <y:Path sx="-42.0" sy="12.399999999999999" tx="71.0" ty="0.0"/>
-          <y:LineStyle color="#808080" type="line" width="1.0"/>
-          <y:Arrows source="none" target="standard"/>
-          <y:BendStyle smoothed="false"/>
-        </y:PolyLineEdge>
-      </data>
-    </edge>
-    <edge id="e11" source="n10" target="n4">
-      <data key="d8"/>
-      <data key="d9">
-        <y:PolyLineEdge>
-          <y:Path sx="-42.0" sy="0.0" tx="53.0" ty="15.5">
-            <y:Point x="554.325" y="378.6"/>
-            <y:Point x="551.0954101562501" y="378.25546875000003"/>
-            <y:Point x="542.96865234375" y="375.49921875000007"/>
-            <y:Point x="533.22392578125" y="369.98671875"/>
-            <y:Point x="522.58779296875" y="361.71796875000007"/>
-            <y:Point x="511.56875" y="351.38203124999995"/>
-            <y:Point x="499.716796875" y="343.11328125"/>
-            <y:Point x="487.87734375" y="337.60078124999995"/>
-            <y:Point x="477.12851562500003" y="334.84453125"/>
-            <y:Point x="472.50000000000006" y="334.5"/>
+          <y:Path sx="-42.0" sy="32.0" tx="47.5" ty="-20.0">
+            <y:Point x="720.75" y="232.0"/>
+            <y:Point x="719.2625732421875" y="232.2109375"/>
+            <y:Point x="715.8336181640625" y="233.8984375"/>
+            <y:Point x="711.8724365234375" y="237.2734375"/>
+            <y:Point x="707.4669189453125" y="242.3359375"/>
+            <y:Point x="700.2177734375" y="253.09375"/>
+            <y:Point x="689.8173828125" y="273.34375"/>
+            <y:Point x="681.76611328125" y="292.5390625"/>
+            <y:Point x="675.89404296875" y="304.3515625"/>
+            <y:Point x="669.61962890625" y="314.4765625"/>
+            <y:Point x="663.10693359375" y="322.9140625"/>
+            <y:Point x="656.52001953125" y="329.6640625"/>
+            <y:Point x="650.02294921875" y="334.7265625"/>
+            <y:Point x="643.77978515625" y="338.1015625"/>
+            <y:Point x="637.95458984375" y="339.7890625"/>
+            <y:Point x="635.25" y="340.0"/>
           </y:Path>
           <y:LineStyle color="#808080" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="scentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-17.3701171875" xml:space="preserve" y="-9.3505859375">1<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="tcentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-108.7451171875" xml:space="preserve" y="98.6494140625">4<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e12" source="n10" target="n5">
-      <data key="d8"/>
+    <edge id="e11" source="n10" target="n8">
+      <data key="d8" xml:space="preserve"><![CDATA[outgoing
+--------
+duds.common.ModulesSerializer.test
+duds.common.UsesParser.SimpleLexer.test
+duds.common.UsesParser.test
+duds.refactoring.FormatUses.test
+duds.refactoring.FormatUsesHelper.test
+duds.refactoring.RemoveUnusedUnits.test
+
+
+incoming
+--------
+DUnitX.Assert
+DUnitX.TestFramework
+]]></data>
       <data key="d9">
         <y:PolyLineEdge>
-          <y:Path sx="-42.0" sy="-12.399999999999977" tx="60.5" ty="15.5">
-            <y:Point x="554.325" y="366.20000000000005"/>
-            <y:Point x="552.4910125732422" y="366.04809570312506"/>
-            <y:Point x="548.7260650634767" y="364.8328613281251"/>
-            <y:Point x="544.8507415771485" y="362.40239257812505"/>
-            <y:Point x="540.8877471923829" y="358.756689453125"/>
-            <y:Point x="534.8285400390625" y="351.00957031249993"/>
-            <y:Point x="526.6546630859375" y="336.4267578125"/>
-            <y:Point x="522.578125" y="327.3125"/>
-            <y:Point x="517.1625" y="314.35"/>
-            <y:Point x="511.73720703125" y="302.19765625"/>
-            <y:Point x="501.10107421875" y="282.75390625"/>
-            <y:Point x="493.6692260742188" y="272.4244140625"/>
-            <y:Point x="489.1445922851563" y="267.56347656249994"/>
-            <y:Point x="485.0698608398438" y="264.3228515624999"/>
-            <y:Point x="481.5358520507813" y="262.70253906249997"/>
-            <y:Point x="480.00000000000006" y="262.5"/>
+          <y:Path sx="-42.0" sy="16.0" tx="62.5" ty="0.0">
+            <y:Point x="720.75" y="446.0"/>
+            <y:Point x="717.7021484375" y="446.421875"/>
+            <y:Point x="710.4580078125" y="449.796875"/>
+            <y:Point x="702.2685546875" y="456.546875"/>
+            <y:Point x="693.8369140625" y="466.671875"/>
+            <y:Point x="687.6776733398438" y="476.26953125"/>
+            <y:Point x="683.1506958007812" y="482.17578125"/>
+            <y:Point x="678.2286987304688" y="487.23828125"/>
+            <y:Point x="673.0493774414062" y="491.45703125"/>
+            <y:Point x="665.09912109375" y="496.203125"/>
+            <y:Point x="657.3444213867188" y="499.05078125"/>
+            <y:Point x="652.5127563476562" y="499.89453125"/>
+            <y:Point x="650.25" y="500.0"/>
           </y:Path>
           <y:LineStyle color="#808080" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="scentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-17.3701171875" xml:space="preserve" y="-9.3505859375">6<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="tcentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-93.7451171875" xml:space="preserve" y="44.6494140625">2<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>
     </edge>
-    <edge id="e13" source="n10" target="n6">
-      <data key="d8"/>
+    <edge id="e12" source="n10" target="n9">
       <data key="d9">
         <y:PolyLineEdge>
-          <y:Path sx="-42.0" sy="-24.80000000000001" tx="47.5" ty="15.5">
-            <y:Point x="554.325" y="353.8"/>
-            <y:Point x="552.7891479492188" y="353.48105468750003"/>
-            <y:Point x="549.2551391601563" y="350.9294921875"/>
-            <y:Point x="545.1804077148438" y="345.8263671875"/>
-            <y:Point x="540.6557739257813" y="338.17167968750005"/>
-            <y:Point x="535.7720581054688" y="327.9654296875"/>
-            <y:Point x="530.6200805664063" y="315.2076171875"/>
-            <y:Point x="522.58779296875" y="291.28671875"/>
-            <y:Point x="514.3757934570312" y="262.2626953125"/>
-            <y:Point x="508.3916381835938" y="244.40175781250002"/>
-            <y:Point x="501.9989868164063" y="229.09238281249998"/>
-            <y:Point x="495.3648315429688" y="216.33457031249998"/>
-            <y:Point x="488.6561645507813" y="206.12832031250002"/>
-            <y:Point x="482.0399780273438" y="198.4736328125"/>
-            <y:Point x="475.6832641601563" y="193.37050781250002"/>
-            <y:Point x="469.7530151367188" y="190.8189453125"/>
-            <y:Point x="467.00000000000006" y="190.5"/>
+          <y:Path sx="-42.0" sy="32.0" tx="71.0" ty="0.0">
+            <y:Point x="720.75" y="462.0"/>
+            <y:Point x="719.2830810546875" y="462.25000000000006"/>
+            <y:Point x="716.0181884765625" y="464.25000000000006"/>
+            <y:Point x="712.3851318359375" y="468.25000000000006"/>
+            <y:Point x="708.4718017578125" y="474.25000000000006"/>
+            <y:Point x="702.2685546875" y="487.00000000000006"/>
+            <y:Point x="693.8369140625" y="511.0"/>
+            <y:Point x="685.6630859375" y="541.0"/>
+            <y:Point x="677.2314453125" y="565.0"/>
+            <y:Point x="671.0281982421875" y="577.75"/>
+            <y:Point x="667.1148681640625" y="583.75"/>
+            <y:Point x="663.4818115234375" y="587.75"/>
+            <y:Point x="660.2169189453125" y="589.75"/>
+            <y:Point x="658.75" y="590.0"/>
           </y:Path>
           <y:LineStyle color="#808080" type="line" width="1.0"/>
           <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="scentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-17.3701171875" xml:space="preserve" y="-9.3505859375">0<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="tcentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-85.2451171875" xml:space="preserve" y="118.6494140625">0<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e13" source="n10" target="n4">
+      <data key="d8" xml:space="preserve"><![CDATA[outgoing
+--------
+duds.refactoring.FormatUses.test
+
+
+incoming
+--------
+duds.analyzer.model
+duds.analyzer.ModulesAnalyzer
+]]></data>
+      <data key="d9">
+        <y:PolyLineEdge>
+          <y:Path sx="-42.0" sy="0.0" tx="53.0" ty="30.0">
+            <y:Point x="608.0" y="430.0"/>
+            <y:Point x="594.27978515625" y="429.833984375"/>
+            <y:Point x="569.08056640625" y="428.505859375"/>
+            <y:Point x="546.86962890625" y="425.849609375"/>
+            <y:Point x="527.64697265625" y="421.865234375"/>
+            <y:Point x="511.41259765625" y="416.552734375"/>
+            <y:Point x="498.16650390625" y="409.912109375"/>
+            <y:Point x="490.1929931640625" y="404.06005859375"/>
+            <y:Point x="485.8111572265625" y="399.74365234375"/>
+            <y:Point x="482.1763916015625" y="395.09521484375"/>
+            <y:Point x="479.2886962890625" y="390.11474609375"/>
+            <y:Point x="473.7744140625" y="377.5390625"/>
+            <y:Point x="464.9208984375" y="361.6015625"/>
+            <y:Point x="458.4935302734375" y="353.134765625"/>
+            <y:Point x="454.4747314453125" y="349.150390625"/>
+            <y:Point x="450.7713623046875" y="346.494140625"/>
+            <y:Point x="447.4713134765625" y="345.166015625"/>
+            <y:Point x="446.0" y="345.0"/>
+          </y:Path>
+          <y:LineStyle color="#808080" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="scentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-20.76763916015625" xml:space="preserve" y="-9.3505859375">1<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="tcentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-297.99322509765625" xml:space="preserve" y="-94.3505859375">2<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e14" source="n10" target="n5">
+      <data key="d8" xml:space="preserve"><![CDATA[outgoing
+--------
+duds.refactoring.FormatUses.test
+duds.refactoring.FormatUsesHelper.test
+duds.refactoring.RemoveUnusedUnits.test
+
+
+incoming
+--------
+duds.refactoring.FormatUses
+duds.refactoring.FormatUsesHelper
+duds.refactoring.RemoveUnusedUnits
+]]></data>
+      <data key="d9">
+        <y:PolyLineEdge>
+          <y:Path sx="-42.0" sy="-32.0" tx="60.5" ty="20.0">
+            <y:Point x="720.75" y="398.0"/>
+            <y:Point x="719.2625732421875" y="397.7890625"/>
+            <y:Point x="715.8336181640625" y="396.1015625"/>
+            <y:Point x="711.8724365234375" y="392.7265625"/>
+            <y:Point x="707.4669189453125" y="387.6640625"/>
+            <y:Point x="700.2177734375" y="376.90625"/>
+            <y:Point x="689.8173828125" y="356.65625"/>
+            <y:Point x="679.1826171875" y="331.34375"/>
+            <y:Point x="668.7822265625" y="311.09375"/>
+            <y:Point x="661.5330810546875" y="300.3359375"/>
+            <y:Point x="657.1275634765625" y="295.2734375"/>
+            <y:Point x="653.1663818359375" y="291.8984375"/>
+            <y:Point x="649.7374267578125" y="290.2109375"/>
+            <y:Point x="648.25" y="290.0"/>
+          </y:Path>
+          <y:LineStyle color="#808080" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="scentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-17.3701171875" xml:space="preserve" y="-9.3505859375">3<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="tcentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-95.7451171875" xml:space="preserve" y="-117.3505859375">3<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:BendStyle smoothed="false"/>
+        </y:PolyLineEdge>
+      </data>
+    </edge>
+    <edge id="e15" source="n10" target="n6">
+      <data key="d9">
+        <y:PolyLineEdge>
+          <y:Path sx="-42.0" sy="-16.0" tx="47.5" ty="20.0">
+            <y:Point x="720.75" y="414.0"/>
+            <y:Point x="717.6201171875" y="413.734375"/>
+            <y:Point x="709.7197265625" y="411.609375"/>
+            <y:Point x="700.2177734375" y="407.359375"/>
+            <y:Point x="689.8173828125" y="400.984375"/>
+            <y:Point x="678.890625" y="393.015625"/>
+            <y:Point x="666.3828125" y="386.640625"/>
+            <y:Point x="653.25" y="382.390625"/>
+            <y:Point x="640.8046875" y="380.265625"/>
+            <y:Point x="635.25" y="380.0"/>
+          </y:Path>
+          <y:LineStyle color="#808080" type="line" width="1.0"/>
+          <y:Arrows source="none" target="standard"/>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="scentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-17.3701171875" xml:space="preserve" y="-9.3505859375">0<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
+          <y:EdgeLabel alignment="center" backgroundColor="#FFFFFF" distance="2.0" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasLineColor="false" height="18.701171875" horizontalTextPosition="center" iconTextGap="4" modelName="three_center" modelPosition="tcentr" preferredPlacement="anywhere" ratio="0.5" textColor="#000000" verticalTextPosition="bottom" visible="true" width="10.673828125" x="-108.7451171875" xml:space="preserve" y="-43.3505859375">0<y:PreferredPlacementDescriptor angle="0.0" angleOffsetOnRightSide="0" angleReference="absolute" angleRotationOnRightSide="co" distance="-1.0" frozen="true" placement="anywhere" side="anywhere" sideReference="relative_to_edge_flow"/></y:EdgeLabel>
           <y:BendStyle smoothed="false"/>
         </y:PolyLineEdge>
       </data>

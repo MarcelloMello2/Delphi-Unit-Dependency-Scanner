@@ -5,11 +5,19 @@ The Delphi Unit Dependency Scanner (or DUDS as it has become known) parses a Del
 
 ## Analysis Features
 
-**docs for v.3? "module support" features missing here!**
+### Uses dependencies
 
-The uses hierarchy can be displayed in several different ways, searched and sorted.
+The uses hierarchy can be displayed in several different ways, searched and sorted. Cycles are marked in the tree-view.
 
-The unit relationships can be exported in several formats - XML, Gephi CSV and GraphML.
+Unit relationships can be exported in several formats - XML, Gephi CSV and GraphML.
+
+### Module dependencies
+
+You can define modules (list of units or directory-paths) and allowed module dependencies. Actual module dependencies will be analyzed and dependency violations will be reported to the log.
+
+By exporting modules to ".graphml" you can use a graphML-enabled tool like [yEd](https://www.yworks.com/products/yed) to get an overview of your modules architecture.
+
+![modules export in yEd](/Docs/media/duds-project.modules.png?raw=true)
 
 ## Refactoring Features
 
