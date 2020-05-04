@@ -37,6 +37,8 @@ type
     moOwn
   );
 
+  TModuleOrigins = set of TModuleOrigin;
+
   TModuleUsage = (
     muUndefined,
     muProduction,

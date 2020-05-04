@@ -17,6 +17,7 @@ uses
 type
   TModulesAnalyzer = class(TCustomAnalyzer)
   private
+    procedure MapUnitsToModules;
     procedure AnalyzeAllowedDependencies;
     procedure AnalyzeActualDependencies;
 
@@ -24,7 +25,6 @@ type
     function GetLogAreaName: string; override;
 
   public
-    procedure MapUnitsToModules;
     procedure Execute;
 
   end;
@@ -45,9 +45,7 @@ var
   aModule: TModule;
   UnitsTotal, UnitsMappedToModules: Integer;
 begin
-  fModel.Modules.ClearModulesAnalysisData;
   fModel.Modules.ReBuildFastSearchList;
-  fModel.Modules.CreateUnknownModule;
 
   UnitsTotal := 0;
   UnitsMappedToModules := 0;
@@ -89,9 +87,9 @@ var
     ImplicitlyDefinedDependency: TModule;
   begin
     for ImplicitlyDefinedDependency in Dependency.DefinedDependencies do
-      if not CurrentModule.AllowedDependencies.Contains(ImplicitlyDefinedDependency) then
+      if not CurrentModule.AnalysisData.AllowedDependencies.Contains(ImplicitlyDefinedDependency) then
       begin
-        CurrentModule.AllowedDependencies.Add(ImplicitlyDefinedDependency);
+        CurrentModule.AnalysisData.AllowedDependencies.Add(ImplicitlyDefinedDependency);
         RecursivelyAddImplicitDependencies(ImplicitlyDefinedDependency);
       end;
   end;
@@ -114,12 +112,12 @@ begin
 
     // add explicit dependencies (do this after implicit to be able to warn for redundant definitions)
     for DefinedDependency in CurrentModule.DefinedDependencies do
-      if CurrentModule.AllowedDependencies.Contains(DefinedDependency) then
+      if CurrentModule.AnalysisData.AllowedDependencies.Contains(DefinedDependency) then
         Log('Module "%s" defines a dependency to "%s". ' +
             'You can remove this from the module definition since this dependency is anyway implicitly allowed.',
             [CurrentModule.Name, DefinedDependency.Name], LogWarning)
       else
-        CurrentModule.AllowedDependencies.Add(DefinedDependency);
+        CurrentModule.AnalysisData.AllowedDependencies.Add(DefinedDependency);
   end;
 
 end;
@@ -158,10 +156,13 @@ begin
           // TODO ~ End ~
 
 
-          if CurrentModule <> UsedModule then
+          // TODO: There should be user settings for "what to report"
+
+          if CurrentModule <> UsedModule then // don't handle any "inner-module-dependencies"
+          begin
             if not CurrentModule.IsUnknownModule then // don't report "unknown module" => "known module"
             begin
-              IsDelphiToDelphi     := (CurrentModule.Origin = moDelphi) and (UsedModule.Origin = moDelphi);
+              IsDelphiToDelphi     := (CurrentModule.Origin = moDelphi)   and (UsedModule.Origin = moDelphi);
               Is3rdPartyToDelphi   := (CurrentModule.Origin = mo3rdParty) and (UsedModule.Origin = moDelphi);
               Is3rdPartyTo3rdParty := (CurrentModule.Origin = mo3rdParty) and (UsedModule.Origin = mo3rdParty);
 
@@ -170,16 +171,31 @@ begin
               else
                 LogLevel := LogError;
 
-              if LogLevel = LogError then
+              // if LogLevel = LogError then
                 if not IsDelphiToDelphi and not Is3rdPartyToDelphi and not Is3rdPartyTo3rdParty then
-                  if not CurrentModule.AllowedDependencies.Contains(UsedModule) then
+                  if not CurrentModule.AnalysisData.AllowedDependencies.Contains(UsedModule) then
                     Log('Dependency violation: Module "%s" ==> "%s"; Unit "%s" ==> "%s"',
                          [CurrentModule.Name, UsedModule.Name, CurrentDelphiFile.UnitInfo.DelphiUnitName, UsedDelphiFile.UnitInfo.DelphiUnitName], LogLevel);
+
             end;
 
-          // TODO
-  //        CurrentModule.AddActualDependency(CurrentDelphiFile, UsedModule, UsedDelphiFile);
+            // Save all actual dependencies between modules - What do we want to know?
+            //   - Is there a dependency between A and B?
+            //   - Which units cause the dependency?
+            //   - How strong is the dependency between A and B? (e.g. how many units does A use from B)
+            //   - Is this dependency a violation?
 
+            // -> to get fast answers for these questions, we need to save details and sums
+
+            // Details:
+            //    (Module A, Unit x) uses (Module B, Unit y) => save these details in Module A
+
+            // Summary
+            //    (Module A) (allowed/non-allowed) uses (Module B) because of (5) units from (Module B) beeing used by (Module A)
+
+
+  //        CurrentModule.AddActualDependency(CurrentDelphiFile, UsedModule, UsedDelphiFile);
+          end;
 
         end;
       end;
@@ -190,14 +206,22 @@ end;
 
 procedure TModulesAnalyzer.Execute;
 begin
-  // step 1: Identify "allowed dependencies" for all modules
+
+  // step 0: Clear old analysis data
+  fModel.Modules.ClearModulesAnalysisData;
+  fModel.Modules.CreateUnknownModule;
+
+  // step 1: Try to map each unit to a defined module (or "unknown module)
+  MapUnitsToModules;
+
+  // step 2: Identify "allowed dependencies" for all modules
   AnalyzeAllowedDependencies;
 
-  // step 2: Identify "actual dependencies" between modules (may contain illegal dependencies)
+  // step 3: Identify "actual dependencies" between modules (may contain illegal dependencies)
   // Idea: Calc "strength" = number of units using
   AnalyzeActualDependencies;
 
-  // step 3: Reporting
+  // step 4: Reporting
   //  - "illegal dependencies"
   //  - "defined but not used dependencies"
   // TODO

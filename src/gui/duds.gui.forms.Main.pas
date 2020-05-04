@@ -1307,7 +1307,7 @@ begin
     if not Sender.Selected[Node] then
     begin
       aDelphiFile := FModel.DelphiFileList[GetID(Node)];
-      if aDelphiFile.UnitInfo.Module = FModel.Modules.UnknownModule then
+      if Assigned(aDelphiFile.UnitInfo.Module) and aDelphiFile.UnitInfo.Module.IsUnknownModule then
       begin
         TargetCanvas.Brush.Color := cUnknownModuleBackgroundColor;
         TargetCanvas.Font.Color  := cUnknownModuleForegroundColor;
@@ -1392,7 +1392,7 @@ begin
     if not Sender.Selected[Node] then
     begin
       aDelphiFile := FTreeNodeObjects[GetID(Node)].DelphiFile;
-      if aDelphiFile.UnitInfo.Module = FModel.Modules.UnknownModule then
+      if Assigned(aDelphiFile.UnitInfo.Module) and aDelphiFile.UnitInfo.Module.IsUnknownModule then
       begin
         TargetCanvas.Brush.Color := cUnknownModuleBackgroundColor;
         TargetCanvas.Font.Color  := cUnknownModuleForegroundColor;
@@ -2130,8 +2130,8 @@ procedure TfrmMain.FillGUIFromModel;
       if UnitWasAddedForTheFirstTime then
          DelphiFile.BaseTreeNode := TreeNode;
 
-      // update the "" information for all parents
-      if DelphiFile.UnitInfo.Module = FModel.Modules.UnknownModule then
+      // update the "UnknownModuleInChildren" information for all parents
+      if Assigned(DelphiFile.UnitInfo.Module) and DelphiFile.UnitInfo.Module.IsUnknownModule then
         MarkAllParentsContainingUnknownModule(TreeNode);
 
       // Calc Circular Ref by walking up the tree
@@ -2436,6 +2436,7 @@ begin
       aExportModulesToGraphML.OnLog           := Self.Log;;
       aExportModulesToGraphML.ProjectSettings := FProjectSettings;
       aExportModulesToGraphML.FileName        := saveDialog_Modules_GraphML.FileName;
+      aExportModulesToGraphML.OriginsToExport := [moUndefined, mo3rdParty, moOwn]; // TODO: This should be a user setting
 
       aExportModulesToGraphML.ExportModules;
     finally
@@ -2619,7 +2620,7 @@ begin
     aVisible := true;
     if actShowOnlyUnknownModules.Checked then
     begin
-      aIsUnknownModule := (DelphiFile.UnitInfo.Module = fModel.Modules.UnknownModule) or FTreeNodeObjects[GetID(Node)].UnknownModuleInChildren;
+      aIsUnknownModule := (Assigned(DelphiFile.UnitInfo.Module) and DelphiFile.UnitInfo.Module.IsUnknownModule) or FTreeNodeObjects[GetID(Node)].UnknownModuleInChildren;
       aVisible         := aIsUnknownModule;
     end
     else
@@ -2844,7 +2845,7 @@ begin
   if Column = 0 then // Column = 'name'
     if not Sender.Selected[Node] then
     begin
-      if aModule = FModel.Modules.UnknownModule then
+      if aModule.IsUnknownModule then
       begin
         TargetCanvas.Brush.Color := cUnknownModuleBackgroundColor;
         TargetCanvas.Font.Color  := cUnknownModuleForegroundColor;

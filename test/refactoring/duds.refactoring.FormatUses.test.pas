@@ -177,7 +177,7 @@ begin
   aModulesAnalyzer := TModulesAnalyzer.Create;
   try
     aModulesAnalyzer.Model := fModel;
-    aModulesAnalyzer.MapUnitsToModules;
+    aModulesAnalyzer.Execute;
   finally
     aModulesAnalyzer.Free;
   end;

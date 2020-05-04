@@ -135,6 +135,9 @@ begin
       if aDelphiFile = nil then
          raise Exception.CreateFmt('could not find a parsed delphi file for uses list element "%s"', [aUsesElement.TextValue]);
 
+      if not Assigned(aDelphiFile.UnitInfo.Module) then
+         raise Exception.CreateFmt('delphi file for %s has not module assigned. It should be a "known" or the "unknown" module.', [aDelphiFile.UnitInfo.DelphiUnitName]);
+
       aUsesElement.Module := aDelphiFile.UnitInfo.Module;
     end;
 
@@ -142,7 +145,7 @@ begin
   UnitsWithUnknownModules := '';
   for aUsesElement in aUsesList do
     if aUsesElement.ElementType = etUnit then
-      if aUsesElement.Module = FModel.Modules.UnknownModule then
+      if aUsesElement.Module.IsUnknownModule then
         AddToken(UnitsWithUnknownModules, aUsesElement.TextValue);
   if not UnitsWithUnknownModules.IsEmpty then
     if fAllowModuleGroupingWithUnknownModules then
@@ -180,7 +183,7 @@ begin
     aUsesList.Clear;
     for Module in FModel.Modules.OrderedModules  do
     begin
-      if Module <> FModel.Modules.UnknownModule then
+      if not Module.IsUnknownModule then
       begin
         i := 0;
         while i < aUsesListBuf.Count do

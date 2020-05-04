@@ -98,7 +98,6 @@ begin
     aModulesAnalyzer := CreateAnalyzer<TModulesAnalyzer>;
     try
       aModulesAnalyzer.InitByCustomAnalyzer(Self);
-      aModulesAnalyzer.MapUnitsToModules;
       aModulesAnalyzer.Execute;
     finally
       ReleaseAnalyzer(aModulesAnalyzer);

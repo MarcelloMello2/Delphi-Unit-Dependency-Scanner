@@ -67,22 +67,29 @@ type
 
   end;
 
-  TModuleAnalysisData = class // simple pojo
+  TModule = class;
+  TModuleAnalysisData = class // pojo
   private
-    FLinesOfCode: Integer;
-    FNumberOfFiles: Integer;
-    FNumberOfFilesNotInPath: Integer;
+    fAllowedDependencies: TObjectList<TModule>;
+    fLinesOfCode: Integer;
+    fNumberOfFiles: Integer;
+    fNumberOfFilesNotInPath: Integer;
 
   public
+    constructor Create;
+    destructor Destroy; override;
+
     procedure Clear;
 
-    property LinesOfCode: Integer read FLinesOfCode write FLinesOfCode;
-    property NumberOfFiles: Integer read FNumberOfFiles write FNumberOfFiles;
-    property NumberOfFilesNotInPath: Integer read FNumberOfFilesNotInPath write FNumberOfFilesNotInPath;
+    { AllowedDependencies = (directly) defined dependencies + all indirectly defined dependencies }
+    property AllowedDependencies: TObjectList<TModule>   read fAllowedDependencies write fAllowedDependencies;
+    property LinesOfCode: Integer            read fLinesOfCode            write fLinesOfCode;
+    property NumberOfFiles: Integer          read fNumberOfFiles          write fNumberOfFiles;
+    property NumberOfFilesNotInPath: Integer read fNumberOfFilesNotInPath write fNumberOfFilesNotInPath;
 
   end;
 
-  TModule = class // simple pojo
+  TModule = class // pojo
   private
     fID: Integer;
     fName: string;
@@ -92,7 +99,6 @@ type
     fOrigin: TModuleOrigin;
     fUsage: TModuleUsage;
     fDefinedDependencies: TObjectList<TModule>;
-    fAllowedDependencies: TObjectList<TModule>;
     fAnalysisData: TModuleAnalysisData;
 
   protected
@@ -116,9 +122,6 @@ type
 
     { dependencies - as defined in modules definition file }
     property DefinedDependencies: TObjectList<TModule> read fDefinedDependencies write fDefinedDependencies;
-
-    { AllowedDependencies = (directly) defined dependencies + all indirectly defined dependencies }
-    property AllowedDependencies: TObjectList<TModule> read fAllowedDependencies write fAllowedDependencies;
     property Paths: TStringList read GetPaths write SetPaths;
     property Units: TStringList read GetUnits write SetUnits;
 
@@ -162,17 +165,15 @@ constructor TModule.Create(IsUnknownModule: Boolean = false);
 begin
   fIsUnknownModule     := IsUnknownModule;
   fDefinedDependencies := TObjectList<TModule>.Create(false);
-  fAllowedDependencies := TObjectList<TModule>.Create(false);
-  fUnits := TStringList.Create(TDuplicates.dupError, true, false);
-  fPaths := TStringList.Create(TDuplicates.dupError, true, false);
-  fAnalysisData := TModuleAnalysisData.Create;
+  fUnits               := TStringList.Create(TDuplicates.dupError, true, false);
+  fPaths               := TStringList.Create(TDuplicates.dupError, true, false);
+  fAnalysisData        := TModuleAnalysisData.Create;
 end;
 
 destructor TModule.Destroy;
 begin
   FreeAndNil(fUnits);
   FreeAndNil(fPaths);
-  FreeAndNil(fAllowedDependencies);
   FreeAndNil(fDefinedDependencies);
   FreeAndNil(fAnalysisData);
   inherited;
@@ -210,11 +211,23 @@ end;
 
 { TModuleAnalysisData }
 
+constructor TModuleAnalysisData.Create;
+begin
+  fAllowedDependencies := TObjectList<TModule>.Create(false);
+end;
+
+destructor TModuleAnalysisData.Destroy;
+begin
+  FreeAndNil(fAllowedDependencies);
+  inherited;
+end;
+
 procedure TModuleAnalysisData.Clear;
 begin
-  FLinesOfCode   := 0;
-  FNumberOfFiles := 0;
-  FNumberOfFilesNotInPath := 0;
+  fLinesOfCode            := 0;
+  fNumberOfFiles          := 0;
+  fNumberOfFilesNotInPath := 0;
+  fAllowedDependencies.Clear;
 end;
 
 end.

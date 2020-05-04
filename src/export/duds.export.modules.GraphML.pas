@@ -24,23 +24,40 @@ type
     fProjectSettings: TProjectSettings;
     FOnLog: TLogProcedure;
     fFileName: string;
+    fOriginsToExport: TModuleOrigins;
 
     procedure AppendModuleNodes(xmlGraph: IXMLNode);
     procedure AppendDependencies(xmlGraph: IXMLNode);
 
+    function ModuleIsPartOfExport(Module: TModule): Boolean;
+
   public
+    constructor Create;
+
     procedure ExportModules;
 
-    property Model: TDudsModel    read FModel    write FModel;
-    property OnLog: TLogProcedure read FOnLog    write FOnLog;
+    property Model: TDudsModel                 read FModel           write FModel;
+    property OnLog: TLogProcedure              read FOnLog           write FOnLog;
     property ProjectSettings: TProjectSettings read fProjectSettings write fProjectSettings;
-    property FileName: string read fFileName write fFileName;
+    property FileName: string                  read fFileName        write fFileName;
+
+    property OriginsToExport: TModuleOrigins   read fOriginsToExport write fOriginsToExport;
   end;
 
 
 implementation
 
 { TExportModulesToGraphML }
+
+constructor TExportModulesToGraphML.Create;
+begin
+  fOriginsToExport := [moUndefined, moDelphi, mo3rdParty, moOwn];
+end;
+
+function TExportModulesToGraphML.ModuleIsPartOfExport(Module: TModule): Boolean;
+begin
+  Result := Module.Origin in fOriginsToExport;
+end;
 
 const
   cNodeKey = 'd0';
@@ -127,32 +144,33 @@ var
   GeometryNode: IXMLNode;
 begin
   for CurrentModule in FModel.Modules.OrderedModules do
-  begin
-    ModuleNode := xmlGraph.AddChild('node');
-    ModuleNode.Attributes['id'] := 'n' + IntToStr(CurrentModule.ID);
+    if ModuleIsPartOfExport(CurrentModule) then
+    begin
+      ModuleNode := xmlGraph.AddChild('node');
+      ModuleNode.Attributes['id'] := 'n' + IntToStr(CurrentModule.ID);
 
-    ModuleData := ModuleNode.AddChild('data');
-    ModuleData.Attributes['key'] := cNodeKey;
+      ModuleData := ModuleNode.AddChild('data');
+      ModuleData.Attributes['key'] := cNodeKey;
 
-    ShapeNode := ModuleData.AddChild('y:ShapeNode');
+      ShapeNode := ModuleData.AddChild('y:ShapeNode');
 
-    ShapeNode.AddChild('y:NodeLabel').Text := BuildNodeHtmlText(CurrentModule);
+      ShapeNode.AddChild('y:NodeLabel').Text := BuildNodeHtmlText(CurrentModule);
 
-    if CurrentModule.Usage = muTest then
-      ShapeNode.AddChild('y:Fill').Attributes['color']        := cModuleOriginLightColors[CurrentModule.Origin]
-    else
-      ShapeNode.AddChild('y:Fill').Attributes['color']        := cModuleOriginMediumColors[CurrentModule.Origin];
+      if CurrentModule.Usage = muTest then
+        ShapeNode.AddChild('y:Fill').Attributes['color']        := cModuleOriginLightColors[CurrentModule.Origin]
+      else
+        ShapeNode.AddChild('y:Fill').Attributes['color']        := cModuleOriginMediumColors[CurrentModule.Origin];
 
-    BorderStyleNode := ShapeNode.AddChild('y:BorderStyle');
-    BorderStyleNode.Attributes['color'] := cModuleOriginDarkColors[CurrentModule.Origin];
-    // border style shows production vs. test code
-    if CurrentModule.Usage = muTest then
-       BorderStyleNode.Attributes['type'] := 'dashed';
+      BorderStyleNode := ShapeNode.AddChild('y:BorderStyle');
+      BorderStyleNode.Attributes['color'] := cModuleOriginDarkColors[CurrentModule.Origin];
+      // border style shows production vs. test code
+      if CurrentModule.Usage = muTest then
+         BorderStyleNode.Attributes['type'] := 'dashed';
 
-    GeometryNode := ShapeNode.AddChild('y:Geometry');
-    GeometryNode.Attributes['width'] := '150';
+      GeometryNode := ShapeNode.AddChild('y:Geometry');
+      GeometryNode.Attributes['width'] := '150';
 
-  end;
+    end;
 end;
 
 procedure TExportModulesToGraphML.AppendDependencies(xmlGraph: IXMLNode);
@@ -162,30 +180,28 @@ var
   edgeData: IXMLNode;
   polyLineEdge: IXMLNode;
   CurrentModule: TModule;
-  dependendModule: TModule;
+  DependendModule: TModule;
 begin
   edgeID := 0;
 
   for CurrentModule in FModel.Modules.OrderedModules do
-  begin
-    for dependendModule in CurrentModule.DefinedDependencies do
-    begin
-      edgeNode := xmlGraph.AddChild('edge');
-      edgeNode.Attributes['id']     := 'e' + IntToStr(edgeID);
-      edgeNode.Attributes['source'] := 'n' + IntToStr(CurrentModule.ID);
-      edgeNode.Attributes['target'] := 'n' + IntToStr(dependendModule.ID);
+    for DependendModule in CurrentModule.DefinedDependencies do
+      if ModuleIsPartOfExport(CurrentModule) and ModuleIsPartOfExport(DependendModule)  then
+      begin
+        edgeNode := xmlGraph.AddChild('edge');
+        edgeNode.Attributes['id']     := 'e' + IntToStr(edgeID);
+        edgeNode.Attributes['source'] := 'n' + IntToStr(CurrentModule.ID);
+        edgeNode.Attributes['target'] := 'n' + IntToStr(DependendModule.ID);
 
-      edgeData := edgeNode.AddChild('data');
-      edgeData.Attributes['key'] := 'd1';
-      polyLineEdge := edgeData.AddChild('y:PolyLineEdge');
+        edgeData := edgeNode.AddChild('data');
+        edgeData.Attributes['key'] := 'd1';
+        polyLineEdge := edgeData.AddChild('y:PolyLineEdge');
 
-      polyLineEdge.AddChild('y:LineStyle').Attributes['color'] := '#808080';
-      polyLineEdge.AddChild('y:Arrows').Attributes['target']   := 'standard';
+        polyLineEdge.AddChild('y:LineStyle').Attributes['color'] := '#808080';
+        polyLineEdge.AddChild('y:Arrows').Attributes['target']   := 'standard';
 
-      Inc(edgeID);
-    end;
-  end;
-
+        Inc(edgeID);
+      end;
 end;
 
 end.
