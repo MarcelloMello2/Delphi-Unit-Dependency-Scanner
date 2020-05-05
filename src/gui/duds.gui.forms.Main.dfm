@@ -940,19 +940,24 @@ object frmMain: TfrmMain
             Items = <
               item
                 Action = actSaveToXML
-                Caption = '&Save to XML'
+                Caption = '&Save Units to XML'
               end
               item
                 Action = actSaveToGephiCSV
-                Caption = 'S&ave to Gephi CSV'
+                Caption = 'S&ave Units to Gephi CSV'
               end
               item
-                Action = actSaveToGraphML
-                Caption = 'Sa&ve to GraphML'
+                Action = actExportUnitsToGraphML
+                Caption = 'Sa&ve Units to GraphML'
+                ImageIndex = 12
+              end
+              item
+                Action = actExportUnitsToGraphMLCurrentModule
+                ImageIndex = 12
               end
               item
                 Action = actSaveCircularRefs
-                Caption = 'Sav&e circular reference'
+                Caption = 'Sav&e Units circular reference'
               end
               item
                 Caption = '-'
@@ -964,6 +969,7 @@ object frmMain: TfrmMain
               item
                 Action = actExportModulesToGraphML
                 Caption = 'Save &Modules to GraphML'
+                ImageIndex = 12
               end>
             Action = actExportDropDown
             Caption = 'E&xport'
@@ -971,6 +977,7 @@ object frmMain: TfrmMain
           end
           item
             Action = actExportModulesToGraphML
+            Caption = 'S&ave Modules to GraphML'
             ImageIndex = 12
           end
           item
@@ -1108,23 +1115,29 @@ object frmMain: TfrmMain
     end
     object actSaveToXML: TAction
       Category = 'Export'
-      Caption = 'Save to XML'
+      Caption = 'Save Units to XML'
       OnExecute = actSaveToXMLExecute
     end
     object actSaveToGephiCSV: TAction
       Category = 'Export'
-      Caption = 'Save to Gephi CSV'
+      Caption = 'Save Units to Gephi CSV'
       OnExecute = actSaveToGephiCSVExecute
     end
-    object actSaveToGraphML: TAction
+    object actExportUnitsToGraphML: TAction
       Category = 'Export'
-      Caption = 'Save to GraphML'
+      Caption = 'Save Units to GraphML'
       ImageIndex = 12
-      OnExecute = actSaveToGraphMLExecute
+      OnExecute = actExportUnitsToGraphMLExecute
+    end
+    object actExportUnitsToGraphMLCurrentModule: TAction
+      Category = 'Export'
+      Caption = 'Save Units to GraphML (selected Module only)'
+      ImageIndex = 12
+      OnExecute = actExportUnitsToGraphMLCurrentModuleExecute
     end
     object actSaveCircularRefs: TAction
       Category = 'Export'
-      Caption = 'Save circular reference'
+      Caption = 'Save Units circular reference'
       OnExecute = actSaveCircularRefsExecute
     end
     object actFormatUsesOfFile: TAction

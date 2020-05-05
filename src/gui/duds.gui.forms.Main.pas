@@ -179,7 +179,8 @@ type
     SavetoXML1: TMenuItem;
     SavetoGephiCSV1: TMenuItem;
     saveDialog_Units_GephiCSV: TSaveDialog;
-    actSaveToGraphML: TAction;
+    actExportUnitsToGraphML: TAction;
+    actExportUnitsToGraphMLCurrentModule: TAction;
     saveDialog_Units_GraphML: TSaveDialog;
     edtSearchTree: TEdit;
     edtSearchList: TEdit;
@@ -327,7 +328,8 @@ type
 
     procedure actSaveToXMLExecute(Sender: TObject);
     procedure actSaveToGephiCSVExecute(Sender: TObject);
-    procedure actSaveToGraphMLExecute(Sender: TObject);
+    procedure actExportUnitsToGraphMLExecute(Sender: TObject);
+    procedure actExportUnitsToGraphMLCurrentModuleExecute(Sender: TObject);
     procedure actSaveCircularRefsExecute(Sender: TObject);
     procedure actExportModulesToCSVExecute(Sender: TObject);
     procedure actExportModulesToGraphMLExecute(Sender: TObject);
@@ -403,6 +405,7 @@ type
     function CompareTwoModulesTreeNodes(aDelphiFile1,
       aDelphiFile2: TDelphiFile): Integer;
     procedure SetupUnitsListsColumns(tree: TVirtualStringTree);
+    function GetModuleFromModuleNode(Node: PVirtualNode): TModule;
 
     property Modified: Boolean read FModified write SetModified;
   end;
@@ -1530,7 +1533,8 @@ begin
   actShowFile.Enabled               := DelphiFile <> nil;
   actSaveToXML.Enabled              := not FBusy;
   actSaveToGephiCSV.Enabled         := not FBusy;
-  actSaveToGraphML.Enabled          := not FBusy;
+  actExportUnitsToGraphML.Enabled              := not FBusy;
+  actExportUnitsToGraphMLCurrentModule.Enabled := not FBusy and (vtModules.FocusedNode <> nil);
   actSaveCircularRefs.Enabled       := not FBusy;
 end;
 
@@ -2379,12 +2383,41 @@ begin
     ExportToGephi(FModel, actShowUnitsNotInPath.Checked, saveDialog_Units_GephiCSV.Filename);
 end;
 
-procedure TfrmMain.actSaveToGraphMLExecute(Sender: TObject);
+procedure TfrmMain.actExportUnitsToGraphMLExecute(Sender: TObject);
 begin
   saveDialog_Units_GraphML.FileName := ChangeFileExt(fProjectFilename, '.units.graphml');
 
   if saveDialog_Units_GraphML.Execute then
-    ExportToGraphML(FModel, actShowUnitsNotInPath.Checked, saveDialog_Units_GraphML.Filename);
+    ExportUnitsToGraphML(FModel, actShowUnitsNotInPath.Checked, saveDialog_Units_GraphML.Filename);
+end;
+
+procedure TfrmMain.actExportUnitsToGraphMLCurrentModuleExecute(Sender: TObject);
+
+  function CharOnly(aChars, aValue: string): string;
+  var
+    i: LongInt;
+  begin
+    Result := '';
+    for i  := 1 to Length(aValue) do
+      if Pos(aValue[i], aChars) > 0 then
+        Result := Result + aValue[i];
+  end;
+
+var
+  aModule: TModule;
+  aModuleNameForFileName: string;
+begin
+  if vtModules.FocusedNode <> nil then
+  begin
+    aModule := GetModuleFromModuleNode(vtModules.FocusedNode);
+
+    aModuleNameForFileName := CharOnly('abcdefghijklmnopqrstuvwxyz_.1234567890', aModule.Name.ToLower);
+
+    saveDialog_Units_GraphML.FileName := ChangeFileExt(fProjectFilename, aModuleNameForFileName + '.units.graphml');
+
+    if saveDialog_Units_GraphML.Execute then
+      ExportUnitsToGraphML(FModel, actShowUnitsNotInPath.Checked, saveDialog_Units_GraphML.Filename, aModule);
+  end;
 end;
 
 procedure TfrmMain.actSaveToXMLExecute(Sender: TObject);
@@ -2801,7 +2834,7 @@ procedure TfrmMain.vtModulesGetText(Sender: TBaseVirtualTree; Node:
 var
   aModule: TModule;
 begin
-  aModule := fModel.Modules.OrderedModules[GetID(Node) - 1]; // ID beginnt mit 1, ObjectList mit 0
+  aModule := GetModuleFromModuleNode(Node);
 
   CellText := '';
 
@@ -2833,13 +2866,18 @@ begin
   end;
 end;
 
+function TfrmMain.GetModuleFromModuleNode(Node: PVirtualNode): TModule;
+begin
+  Result := fModel.Modules.OrderedModules[GetID(Node) - 1]; // ID beginnt mit 1, ObjectList mit 0
+end;
+
 procedure TfrmMain.vtModulesDrawText(Sender: TBaseVirtualTree; TargetCanvas:
     TCanvas; Node: PVirtualNode; Column: TColumnIndex; const Text: string;
     const CellRect: TRect; var DefaultDraw: Boolean);
 var
   aModule: TModule;
 begin
-  aModule := fModel.Modules.OrderedModules[GetID(Node) - 1]; // ID beginnt mit 1, ObjectList mit 0
+  aModule := GetModuleFromModuleNode(Node);
 
   // highlight "unknown modules"
   if Column = 0 then // Column = 'name'

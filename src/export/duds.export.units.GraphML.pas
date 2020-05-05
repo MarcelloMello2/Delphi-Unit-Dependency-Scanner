@@ -13,11 +13,17 @@ uses
   duds.common.Classes,
   duds.analyzer.model;
 
-procedure ExportToGraphML(Model: TDudsModel; ExportUnitsNotInPath: Boolean; const Filename: String);
+procedure ExportUnitsToGraphML(Model: TDudsModel; ExportUnitsNotInPath: Boolean; const Filename: String; OnlyModule: TModule = nil);
 
 implementation
 
-procedure ExportToGraphML(Model: TDudsModel; ExportUnitsNotInPath: Boolean; const Filename: String);
+procedure ExportUnitsToGraphML(Model: TDudsModel; ExportUnitsNotInPath: Boolean; const Filename: String; OnlyModule: TModule = nil);
+
+  function UnitIsPartOfExport(UnitInfo: IUnitInfo): Boolean;
+  begin
+    Result := (OnlyModule = nil) or (UnitInfo.Module = OnlyModule);
+  end;
+
 type
   TUseSection = (usInterface, usImplementation);
 
@@ -25,13 +31,14 @@ const
   COL: array [TUseSection] of Cardinal = ($000000, $808080);
 
 var
-  n: Integer;
   Xml: IXMLDocument;
   EdgeID, NodeID: Integer;
   EdgeNode1, EdgeNode2: String;
   graphml, Key, graph, Node, edge, line, data: IXMLNode;
   UnitName, TrimmedUnitName, ColourString: String;
   NodeDictionary: TDictionary<String, String>;
+  UnitInfo: IUnitInfo;
+  UsedUnit: IUsedUnitInfo;
 begin
   // Internally GraphML is an XML document
   Xml := TXMLDocument.Create(nil);
@@ -63,62 +70,71 @@ begin
 
   NodeDictionary := TDictionary<String, String>.Create;
   try
-    // Build Dictionary
+    // build Dictionary & export nodes
     for UnitName in Model.ParsedDelphiFiles.Keys do
     begin
       if (Model.ParsedDelphiFiles[UnitName].InSearchPath) or ExportUnitsNotInPath then
       begin
-        TrimmedUnitName := Trim(Model.ParsedDelphiFiles[UnitName].UnitInfo.DelphiUnitName);
+        UnitInfo := Model.ParsedDelphiFiles[UnitName].UnitInfo;
 
-        Node := graph.AddChild('node');
-        Node.Attributes['id'] := 'n' + IntToStr(NodeID);
+        if UnitIsPartOfExport(UnitInfo) then
+        begin
+          TrimmedUnitName := Trim(UnitInfo.DelphiUnitName);
 
-        data := Node.AddChild('data');
-        data.Attributes['key'] := 'd0';
-        data.AddChild('y:ShapeNode').AddChild('y:NodeLabel').Text := TrimmedUnitName;
+          Node := graph.AddChild('node');
+          Node.Attributes['id'] := 'n' + IntToStr(NodeID);
 
-        NodeDictionary.AddOrSetValue(UpperCase(TrimmedUnitName), 'n' + NodeID.ToString);
+          data := Node.AddChild('data');
+          data.Attributes['key'] := 'd0';
+          data.AddChild('y:ShapeNode').AddChild('y:NodeLabel').Text := TrimmedUnitName;
 
-        Inc(NodeID);
+          NodeDictionary.AddOrSetValue(UpperCase(TrimmedUnitName), 'n' + NodeID.ToString);
+
+          Inc(NodeID);
+        end;
       end;
     end;
 
-    // Build XML
+    // export edges
     for UnitName in Model.ParsedDelphiFiles.Keys do
     begin
       if (Model.ParsedDelphiFiles[UnitName].InSearchPath) or ExportUnitsNotInPath then
       begin
-        TrimmedUnitName := Trim(Model.ParsedDelphiFiles[UnitName].UnitInfo.DelphiUnitName);
-
-        for n := 0 to pred(Model.ParsedDelphiFiles[UnitName].UnitInfo.UsedUnits.Count) do
+        UnitInfo := Model.ParsedDelphiFiles[UnitName].UnitInfo;
+        if UnitIsPartOfExport(UnitInfo) then
         begin
-          if (Model.ParsedDelphiFiles.ContainsKey(UpperCase(Model.ParsedDelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName))) and
-            (ExportUnitsNotInPath or
-            (Model.ParsedDelphiFiles[UpperCase(Model.ParsedDelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName)].InSearchPath)) and
-            (NodeDictionary.TryGetValue(UpperCase(TrimmedUnitName), EdgeNode1)) and
-            (NodeDictionary.TryGetValue(UpperCase(Trim(Model.ParsedDelphiFiles[UnitName].UnitInfo.UsedUnits[n].DelphiUnitName)),
-            EdgeNode2)) then
+          TrimmedUnitName := Trim(UnitInfo.DelphiUnitName);
+
+          for UsedUnit in UnitInfo.UsedUnits do
           begin
-            edge := graph.AddChild('edge');
-            edge.Attributes['id'] := 'e' + IntToStr(EdgeID);
-            edge.Attributes['source'] := EdgeNode1;
-            edge.Attributes['target'] := EdgeNode2;
+            if (Model.ParsedDelphiFiles.ContainsKey(UpperCase(UsedUnit.DelphiUnitName))) and
+              (ExportUnitsNotInPath or
+              (Model.ParsedDelphiFiles[UpperCase(UsedUnit.DelphiUnitName)].InSearchPath)) and
+              (NodeDictionary.TryGetValue(UpperCase(TrimmedUnitName), EdgeNode1)) and
+              (NodeDictionary.TryGetValue(UpperCase(Trim(UsedUnit.DelphiUnitName)),
+              EdgeNode2)) then
+            begin
+              edge := graph.AddChild('edge');
+              edge.Attributes['id'] := 'e' + IntToStr(EdgeID);
+              edge.Attributes['source'] := EdgeNode1;
+              edge.Attributes['target'] := EdgeNode2;
 
-            data := edge.AddChild('data');
-            data.Attributes['key'] := 'd1';
-            line := data.AddChild('y:PolyLineEdge');
+              data := edge.AddChild('data');
+              data.Attributes['key'] := 'd1';
+              line := data.AddChild('y:PolyLineEdge');
 
-            case Model.ParsedDelphiFiles[UnitName].UnitInfo.UsedUnits[n].UsesType of
-              utImplementation:
-                ColourString := '000000'
-            else
-              ColourString := '808080';
+              case UsedUnit.UsesType of
+                utImplementation:
+                  ColourString := '000000'
+              else
+                ColourString := '808080';
+              end;
+
+              line.AddChild('y:LineStyle').Attributes['color'] := '#' + ColourString;
+              line.AddChild('y:Arrows').Attributes['target']   := 'standard';
+
+              Inc(EdgeID);
             end;
-
-            line.AddChild('y:LineStyle').Attributes['color'] := '#' + ColourString;
-            line.AddChild('y:Arrows').Attributes['target'] := 'standard';
-
-            Inc(EdgeID);
           end;
         end;
       end;
