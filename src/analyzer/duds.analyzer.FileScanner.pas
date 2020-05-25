@@ -156,7 +156,7 @@ var
 begin
   DefinedPaths := 0;
 
-  aExpandedPaths       := TStringList.Create; // no sorting to keep order as defined in projet settings
+  aExpandedPaths       := TStringList.Create; // no sorting to keep order as defined in project settings
   aExpandedPathsLookup := TStringList.Create(TDuplicates.dupError, true, false);
   try
     for DefinedPath in fProjectSettings.SearchPaths do
@@ -190,6 +190,9 @@ begin
     end;
 
     Log(StrScanningDSearchSearchPaths, [aExpandedPaths.Count, DefinedPaths], LogInfo);
+
+    // Save the search paths (e.g. for the include file handler)
+    fModel.ExpandedSearchPaths.Assign(aExpandedPaths);
 
     ScanFoldersAndAddAllDelphiFiles(aExpandedPaths);
   finally

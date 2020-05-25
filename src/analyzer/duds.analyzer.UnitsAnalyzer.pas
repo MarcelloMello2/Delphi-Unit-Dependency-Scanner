@@ -30,6 +30,7 @@ type
   private
     fAlreadyLoggedMissingIncludes: TStringList;
     FScanDepth: Integer;
+    fIncludeCache: TIncludeCache;
     procedure AnalyzeUnitOrProjectFile(Unitname: string; IsRootFile: Boolean);
     procedure AddParsedDelphiFile(UnitInfo: IUnitInfo; IsRootFile: Boolean; InPath: Boolean);
 
@@ -50,13 +51,15 @@ implementation
 
 constructor TUnitsAnalyzer.Create;
 begin
-  FScanDepth         := 0;
+  FScanDepth                    := 0;
   fAlreadyLoggedMissingIncludes := TStringList.Create(TDuplicates.dupError, true, false);
+  fIncludeCache                 := TIncludeCache.Create;
 end;
 
 destructor TUnitsAnalyzer.Destroy;
 begin
   fAlreadyLoggedMissingIncludes.Free;
+  fIncludeCache.Free;
   inherited;
 end;
 
@@ -121,7 +124,7 @@ begin
           aUsesParser := TUsesParser.Create;
           try
             aUsesParser.OnLog          := fOnLog;
-            aUsesParser.IncludeHandler := TAnalyzerIncludeHandler.Create(Filename, fOnLog, fAlreadyLoggedMissingIncludes);
+            aUsesParser.IncludeHandler := TAnalyzerIncludeHandler.Create(Filename, fModel, fOnLog, fIncludeCache, fAlreadyLoggedMissingIncludes);
             Parsed := aUsesParser.GetUsedUnitsFromFile(Filename, UnitInfo);
           finally
             FreeAndNil(aUsesParser);

@@ -17,6 +17,7 @@ type
     FParsedDelphiRootFiles: TObjectList<TDelphiFile>;
     FParsedDelphiFiles: TObjectDictionary<String, TDelphiFile>;
     FDelphiFileList: TObjectList<TDelphiFile>;
+    fExpandedSearchPaths: TStringList;
     fStats: TAnalyzerStats;
 
   public
@@ -35,6 +36,7 @@ type
 
     property Modules: TModulesDefinition read fModules;
     property RootFiles: TStringList read fRootFiles;
+    property ExpandedSearchPaths: TStringList read fExpandedSearchPaths write fExpandedSearchPaths;
     property Files: TDictionary<String, String> read FFiles;
     property ParsedDelphiRootFiles: TObjectList<TDelphiFile> read FParsedDelphiRootFiles;
     property ParsedDelphiFiles: TObjectDictionary<String, TDelphiFile> read FParsedDelphiFiles;
@@ -54,6 +56,7 @@ begin
   FDelphiFileList.Clear;
   fModules.Clear;
   fRootFiles.Clear;
+  fExpandedSearchPaths.Clear;
   fStats.Clear;
 end;
 
@@ -62,6 +65,7 @@ begin
   inherited Create;
   fModules               := TModulesDefinition.Create;
   fRootFiles             := TStringList.Create(TDuplicates.dupError, false, false); // not sorted, to keep project settings order
+  fExpandedSearchPaths   := TStringList.Create(TDuplicates.dupError, false, false); // not sorted, to keep project order defined in project settings
   FFiles                 := TDictionary<String, String>.Create;
   FParsedDelphiRootFiles := TObjectList<TDelphiFile>.Create(FALSE);
   FParsedDelphiFiles     := TObjectDictionary<String, TDelphiFile>.Create([doOwnsValues]);
@@ -73,6 +77,7 @@ destructor TDudsModel.Destroy;
 begin
   fModules.Free;
   fRootFiles.Free;
+  fExpandedSearchPaths.Free;
   FFiles.Free;
   FParsedDelphiRootFiles.Free;
   FParsedDelphiFiles.Free;
