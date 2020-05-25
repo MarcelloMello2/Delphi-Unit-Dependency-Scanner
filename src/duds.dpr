@@ -25,6 +25,7 @@ uses
   duds.analyzer.Stats                                in '..\src\analyzer\duds.analyzer.Stats.pas',
   duds.analyzer.model                                in '..\src\analyzer\duds.analyzer.model.pas',
   duds.analyzer.FileScanner                          in '..\src\analyzer\duds.analyzer.FileScanner.pas',
+  duds.analyzer.IncludeHandler                       in '..\src\analyzer\duds.analyzer.IncludeHandler.pas',
   duds.analyzer.UnitsAnalyzer                        in '..\src\analyzer\duds.analyzer.UnitsAnalyzer.pas',
   duds.analyzer.ModulesAnalyzer                      in '..\src\analyzer\duds.analyzer.ModulesAnalyzer.pas',
   duds.analyzer.Facade                               in '..\src\analyzer\duds.analyzer.Facade.pas',

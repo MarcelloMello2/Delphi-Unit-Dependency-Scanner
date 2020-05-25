@@ -153,6 +153,7 @@
         <DCCReference Include="analyzer\duds.analyzer.Stats.pas"/>
         <DCCReference Include="analyzer\duds.analyzer.model.pas"/>
         <DCCReference Include="analyzer\duds.analyzer.FileScanner.pas"/>
+        <DCCReference Include="analyzer\duds.analyzer.IncludeHandler.pas"/>
         <DCCReference Include="analyzer\duds.analyzer.UnitsAnalyzer.pas"/>
         <DCCReference Include="analyzer\duds.analyzer.ModulesAnalyzer.pas"/>
         <DCCReference Include="analyzer\duds.analyzer.Facade.pas"/>

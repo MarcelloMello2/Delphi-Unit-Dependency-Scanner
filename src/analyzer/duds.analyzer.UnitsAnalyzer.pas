@@ -7,6 +7,8 @@ uses
 
   Vcl.Forms, // for "Application.ProcessMessages"
 
+  SimpleParser.Lexer.Types,
+
   duds.common.Utils,
   duds.common.Files,
   duds.common.Types,
@@ -18,7 +20,10 @@ uses
 
   duds.common.UnitInfo,
   duds.common.UsedUnitInfo,
-  duds.common.UsesParser, duds.analyzer.CustomAnalyzer;
+  duds.common.UsesParser,
+
+  duds.analyzer.CustomAnalyzer,
+  duds.analyzer.IncludeHandler;
 
 type
   TUnitsAnalyzer = class(TCustomAnalyzer)
@@ -115,8 +120,8 @@ begin
           // -> this returns `FALSE` e.g. when it is an unknown file type
           aUsesParser := TUsesParser.Create;
           try
-            aUsesParser.OnLog := fOnLog;
-            aUsesParser.AlreadyLoggedMissingIncludes := fAlreadyLoggedMissingIncludes;
+            aUsesParser.OnLog          := fOnLog;
+            aUsesParser.IncludeHandler := TAnalyzerIncludeHandler.Create(Filename, fOnLog, fAlreadyLoggedMissingIncludes);
             Parsed := aUsesParser.GetUsedUnitsFromFile(Filename, UnitInfo);
           finally
             FreeAndNil(aUsesParser);

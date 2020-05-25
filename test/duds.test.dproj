@@ -108,9 +108,11 @@
         <DCCReference Include="..\src\common\duds.common.Delphi.pas"/>
         <DCCReference Include="..\src\common\duds.common.modules.pas"/>
         <DCCReference Include="..\src\common\duds.common.modulesSerializer.pas"/>
+        <DCCReference Include="..\src\analyzer\duds.analyzer.CustomAnalyzer.pas"/>
         <DCCReference Include="..\src\analyzer\duds.analyzer.Stats.pas"/>
         <DCCReference Include="..\src\analyzer\duds.analyzer.model.pas"/>
         <DCCReference Include="..\src\analyzer\duds.analyzer.FileScanner.pas"/>
+        <DCCReference Include="..\src\analyzer\duds.analyzer.IncludeHandler.pas"/>
         <DCCReference Include="..\src\analyzer\duds.analyzer.UnitsAnalyzer.pas"/>
         <DCCReference Include="..\src\analyzer\duds.analyzer.ModulesAnalyzer.pas"/>
         <DCCReference Include="..\src\analyzer\duds.analyzer.Facade.pas"/>

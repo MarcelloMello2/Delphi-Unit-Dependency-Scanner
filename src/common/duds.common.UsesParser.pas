@@ -43,29 +43,11 @@ type
     property LinesOfCode: integer read GetLinesOfCode; // this is only defined after a complete lexing until the end of the file (ptNull)
   end;
 
-  TUsesParserIncludeHandler = class(TInterfacedObject, IIncludeHandler)
-  private
-    fFileName: string;
-    FOnLog: TLogProcedure;
-    fAlreadyLoggedMissingIncludes: TStringlist;
-
-    procedure Log(const Msg: String; const Severity: Integer = LogInfo); overload;
-    procedure Log(const Msg: String; const Args: array of const; const Severity: Integer); overload;
-  public
-    constructor Create(const FileName: string; OnLog: TLogProcedure;
-        AlreadyLoggedMissingIncludes: TStringList);
-    function GetIncludeFileContent(const ParentFileName, IncludeName: string; out Content: string;
-      out FileName: string): Boolean;
-
-    property OnLog: TLogProcedure read FOnLog    write FOnLog;
-    property AlreadyLoggedMissingIncludes: TStringlist read fAlreadyLoggedMissingIncludes write fAlreadyLoggedMissingIncludes;
-  end;
-
   TUsesParser = class
   private
+    fIncludeHandler: IIncludeHandler;
     fUsesLexer: TUsesLexer;
     FOnLog: TLogProcedure;
-    fAlreadyLoggedMissingIncludes: TStringlist;
 
     procedure Log(const Msg: String; const Severity: Integer = LogInfo); overload;
     procedure Log(const Msg: String; const Args: array of const; const Severity: Integer); overload;
@@ -74,16 +56,17 @@ type
 
     function ConsumeDottyIdentifier(aLexer: TUsesLexer): string;
     procedure ReadUses(UnitInfo: IUnitInfo; UsesType: TUsedUnitType);
+
     function GetLinesOfCode: integer;
   public
     constructor Create;
     destructor Destroy; override;
 
-    function GetUsedUnitsFromSource(const UnitFileName: String; const Source: String; var UnitInfo: IUnitInfo): Boolean;
+    function GetUsedUnitsFromSource(const UnitFileName, Source: String; var UnitInfo: IUnitInfo): Boolean;
     function GetUsedUnitsFromFile(const UnitFileName: String; var UnitInfo: IUnitInfo): Boolean;
 
     property OnLog: TLogProcedure read FOnLog    write FOnLog;
-    property AlreadyLoggedMissingIncludes: TStringlist read fAlreadyLoggedMissingIncludes write fAlreadyLoggedMissingIncludes;
+    property IncludeHandler: IIncludeHandler read fIncludeHandler write fIncludeHandler;
     property LinesOfCode: integer read GetLinesOfCode;
 
   end;
@@ -168,57 +151,6 @@ begin
     end;
   end;
   Result := GenID = ptUses;
-end;
-
-{ TUsesParserIncludeHandler }
-
-constructor TUsesParserIncludeHandler.Create(const FileName: string; OnLog: TLogProcedure; AlreadyLoggedMissingIncludes: TStringList);
-begin
-  inherited Create;
-  fFileName                     := FileName;
-  FOnLog                        := OnLog;
-  fAlreadyLoggedMissingIncludes := AlreadyLoggedMissingIncludes;
-end;
-
-procedure TUsesParserIncludeHandler.Log(const Msg: String; const Severity: Integer);
-begin
-  if Assigned(FOnLog) then
-    FOnLog('Uses Parser: ' + Msg, Severity);
-end;
-
-procedure TUsesParserIncludeHandler.Log(const Msg: String; const Args: array of const; const Severity: Integer);
-begin
-  Log(Format(Msg, Args), Severity);
-end;
-
-function TUsesParserIncludeHandler.GetIncludeFileContent(const ParentFileName,
-  IncludeName: string; out Content, FileName: string): Boolean;
-var
-  IncludeFileName: string;
-  FileContent: TStringList;
-begin
-  FileContent := TStringList.Create;
-  try
-    IncludeFileName := TPath.Combine(ExtractFilePath(fFileName), IncludeName.TrimStart(['''']).TrimEnd(['''']));
-    if not FileExists(IncludeFileName) then
-    begin
-      Result := False;
-      if fAlreadyLoggedMissingIncludes.IndexOf(IncludeFileName.ToLower) = -1 then
-      begin
-        Log('Could not resolve include in file "%s" - "%s" not found (searching only in same path)', [fFileName, IncludeName], LogWarning);
-        fAlreadyLoggedMissingIncludes.Add(IncludeFileName.ToLower);
-      end;
-      Exit;
-    end;
-
-    FileContent.LoadFromFile(IncludeFileName);
-    Content := FileContent.Text;
-    FileName := IncludeFileName;
-
-    Result := True;
-  finally
-    FileContent.Free;
-  end;
 end;
 
 { TUsesParser }
@@ -310,6 +242,50 @@ begin
   end;
 end;
 
+constructor TUsesParser.Create;
+begin
+  fUsesLexer      := TUsesLexer.Create;
+  fIncludeHandler := nil;
+end;
+
+destructor TUsesParser.Destroy;
+begin
+  fUsesLexer.Free;
+  inherited;
+end;
+
+procedure TUsesParser.Log(const Msg: String; const Severity: Integer);
+begin
+  if Assigned(FOnLog) then
+    FOnLog('Uses Parser: ' + Msg, Severity);
+end;
+
+procedure TUsesParser.Log(const Msg: String; const Args: array of const; const Severity: Integer);
+begin
+  Log(Format(Msg, Args), Severity);
+end;
+
+function TUsesParser.GetDataString(StringStream: TStringStream): string;
+var
+  Encoding: TEncoding;
+begin
+  // try to read a bom from the buffer to create the correct encoding
+  // but only if the encoding is still the default encoding
+  if StringStream.Encoding = TEncoding.Default then
+  begin
+    Encoding := nil;
+    TEncoding.GetBufferEncoding(StringStream.Bytes, Encoding);
+    Result := Encoding.GetString(StringStream.Bytes, Length(Encoding.GetPreamble), StringStream.Size);
+  end
+  else
+    Result := StringStream.Encoding.GetString(StringStream.Bytes, 0, StringStream.Size);
+end;
+
+function TUsesParser.GetLinesOfCode: integer;
+begin
+  Result := fUsesLexer.LinesOfCode;
+end;
+
 function TUsesParser.GetUsedUnitsFromSource(const UnitFileName, Source: String; var UnitInfo: IUnitInfo): Boolean;
 begin
   Result := True;
@@ -319,8 +295,8 @@ begin
 
   fUsesLexer.Origin := Source;
 
-  // create an include handler
-  fUsesLexer.IncludeHandler       := TUsesParserIncludeHandler.Create(UnitFileName, FOnLog, fAlreadyLoggedMissingIncludes);
+  // assign the include handler
+  fUsesLexer.IncludeHandler := IncludeHandler;
 
   // step 1: determine file type by file content -> "uses", "program", "package", ...
   fUsesLexer.ProceedToFileType;
@@ -369,49 +345,6 @@ begin
 
   // "lines of code" gets calculated while parsing, so we can only receive it down here
   UnitInfo.LinesOfCode := fUsesLexer.LinesOfCode;
-end;
-
-constructor TUsesParser.Create;
-begin
-  fUsesLexer := TUsesLexer.Create;
-end;
-
-destructor TUsesParser.Destroy;
-begin
-  fUsesLexer.Free;
-  inherited;
-end;
-
-procedure TUsesParser.Log(const Msg: String; const Severity: Integer);
-begin
-  if Assigned(FOnLog) then
-    FOnLog('Uses Parser: ' + Msg, Severity);
-end;
-
-procedure TUsesParser.Log(const Msg: String; const Args: array of const; const Severity: Integer);
-begin
-  Log(Format(Msg, Args), Severity);
-end;
-
-function TUsesParser.GetDataString(StringStream: TStringStream): string;
-var
-  Encoding: TEncoding;
-begin
-  // try to read a bom from the buffer to create the correct encoding
-  // but only if the encoding is still the default encoding
-  if StringStream.Encoding = TEncoding.Default then
-  begin
-    Encoding := nil;
-    TEncoding.GetBufferEncoding(StringStream.Bytes, Encoding);
-    Result := Encoding.GetString(StringStream.Bytes, Length(Encoding.GetPreamble), StringStream.Size);
-  end
-  else
-    Result := StringStream.Encoding.GetString(StringStream.Bytes, 0, StringStream.Size);
-end;
-
-function TUsesParser.GetLinesOfCode: integer;
-begin
-  Result := fUsesLexer.LinesOfCode;
 end;
 
 function TUsesParser.GetUsedUnitsFromFile(const UnitFileName: String; var UnitInfo: IUnitInfo): Boolean;
