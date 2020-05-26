@@ -93,6 +93,13 @@ type
     Label1: TLabel;
     tabModules: TTabSheet;
     edt_ModulesDefinitionFile: TLabeledEdit;
+    tab_Defines: TTabSheet;
+    memDefines: TRichEdit;
+    Panel6: TPanel;
+    chk_UseDefines: TCheckBox;
+    Panel7: TPanel;
+    Panel8: TPanel;
+    lbl_DefinesHint: TLabel;
     procedure btnAddFileClick(Sender: TObject);
     procedure btnAddPathClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -274,6 +281,8 @@ begin
   chkLinkUnits.Checked := FProjectSettings.LinkUnits;
   memRootFiles.Lines.Assign(FProjectSettings.RootFiles);
   memSearchPaths.Lines.Assign(FProjectSettings.SearchPaths);
+  memDefines.Lines.Assign(FProjectSettings.Defines);
+  chk_UseDefines.Checked := FProjectSettings.UseDefines;
   memUnitScopeNames.Lines.Assign(FProjectSettings.UnitScopeNames);
   edt_ModulesDefinitionFile.Text := FProjectSettings.ModulesDefinitionFile;
 end;
@@ -289,6 +298,8 @@ begin
   FProjectSettings.LinkUnits := chkLinkUnits.Checked;
   FProjectSettings.RootFiles.Assign(memRootFiles.Lines);
   FProjectSettings.SearchPaths.Assign(memSearchPaths.Lines);
+  FProjectSettings.Defines.Assign(memDefines.Lines);
+  FProjectSettings.UseDefines := chk_UseDefines.Checked;
   FProjectSettings.UnitScopeNames.Assign(memUnitScopeNames.Lines);
   FProjectSettings.ModulesDefinitionFile := edt_ModulesDefinitionFile.Text;
 end;

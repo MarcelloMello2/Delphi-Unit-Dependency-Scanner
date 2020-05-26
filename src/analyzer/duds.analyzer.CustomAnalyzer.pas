@@ -15,6 +15,7 @@ type
     fProjectFilename: string;
     fCancelled: Boolean;
 
+    function SettingsLineIsRelevant(element: string): Boolean;
     function GetLogAreaName: string; virtual;
     procedure SetCancelled(const Value: Boolean); virtual;
 
@@ -46,6 +47,11 @@ end;
 function TCustomAnalyzer.GetLogAreaName: string;
 begin
   Result := '';
+end;
+
+function TCustomAnalyzer.SettingsLineIsRelevant(element: string): Boolean;
+begin
+  Result := not element.IsEmpty and not element.TrimLeft.StartsWith('//');
 end;
 
 procedure TCustomAnalyzer.Log(const Msg: String; const Severity: Integer);

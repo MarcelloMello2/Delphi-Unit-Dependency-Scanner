@@ -3,8 +3,8 @@ object frmSettings: TfrmSettings
   Top = 0
   BorderIcons = [biSystemMenu]
   Caption = 'Settings'
-  ClientHeight = 551
-  ClientWidth = 953
+  ClientHeight = 603
+  ClientWidth = 1179
   Color = clBtnFace
   Constraints.MinHeight = 300
   Constraints.MinWidth = 400
@@ -22,21 +22,24 @@ object frmSettings: TfrmSettings
     AlignWithMargins = True
     Left = 3
     Top = 3
-    Width = 947
-    Height = 517
-    ActivePage = tabRootFiles
+    Width = 1173
+    Height = 569
+    ActivePage = tab_Defines
     Align = alClient
     TabOrder = 0
+    ExplicitWidth = 1110
     object tabRootFiles: TTabSheet
       Caption = 'Root Files'
+      ExplicitWidth = 1102
       object Panel4: TPanel
-        Left = 826
+        Left = 1052
         Top = 0
         Width = 113
-        Height = 365
+        Height = 417
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 0
+        ExplicitLeft = 989
         object btnAddFile: TButton
           AlignWithMargins = True
           Left = 3
@@ -76,19 +79,20 @@ object frmSettings: TfrmSettings
       object pnlFTSInfo: TPanel
         AlignWithMargins = True
         Left = 3
-        Top = 368
-        Width = 933
+        Top = 420
+        Width = 1159
         Height = 118
         Align = alBottom
         BevelOuter = bvNone
         Color = clGray
         ParentBackground = False
         TabOrder = 2
+        ExplicitWidth = 1096
         object Panel14: TPanel
           AlignWithMargins = True
           Left = 1
           Top = 1
-          Width = 931
+          Width = 1157
           Height = 116
           Margins.Left = 1
           Margins.Top = 1
@@ -99,11 +103,12 @@ object frmSettings: TfrmSettings
           Color = 12910591
           ParentBackground = False
           TabOrder = 0
+          ExplicitWidth = 1094
           object lnkFTSInfo: TLabel
             AlignWithMargins = True
             Left = 1
             Top = 1
-            Width = 929
+            Width = 1155
             Height = 114
             Margins.Left = 1
             Margins.Top = 1
@@ -136,8 +141,8 @@ object frmSettings: TfrmSettings
         AlignWithMargins = True
         Left = 3
         Top = 3
-        Width = 820
-        Height = 359
+        Width = 1046
+        Height = 411
         Align = alClient
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
@@ -151,21 +156,22 @@ object frmSettings: TfrmSettings
         WordWrap = False
         Zoom = 100
         OnChange = OnSettingChange
+        ExplicitWidth = 983
       end
     end
     object tabSearchPaths: TTabSheet
       Caption = 'Search Paths'
       ImageIndex = 1
+      ExplicitWidth = 1102
       object Panel2: TPanel
-        Left = 779
+        Left = 1005
         Top = 0
         Width = 160
-        Height = 436
+        Height = 429
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitLeft = 600
-        ExplicitHeight = 334
+        ExplicitLeft = 942
         object btnAddPath: TButton
           AlignWithMargins = True
           Left = 3
@@ -199,8 +205,8 @@ object frmSettings: TfrmSettings
         AlignWithMargins = True
         Left = 3
         Top = 3
-        Width = 773
-        Height = 430
+        Width = 999
+        Height = 423
         Align = alClient
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
@@ -214,26 +220,26 @@ object frmSettings: TfrmSettings
         WordWrap = False
         Zoom = 100
         OnChange = OnSettingChange
+        ExplicitWidth = 936
       end
       object Panel3: TPanel
         AlignWithMargins = True
         Left = 3
-        Top = 439
-        Width = 933
-        Height = 47
+        Top = 432
+        Width = 1159
+        Height = 106
         Align = alBottom
         BevelOuter = bvNone
         Color = clGray
         ParentBackground = False
         TabOrder = 2
-        ExplicitTop = 337
-        ExplicitWidth = 754
+        ExplicitWidth = 1096
         object Panel5: TPanel
           AlignWithMargins = True
           Left = 1
           Top = 1
-          Width = 931
-          Height = 45
+          Width = 1157
+          Height = 104
           Margins.Left = 1
           Margins.Top = 1
           Margins.Right = 1
@@ -243,13 +249,13 @@ object frmSettings: TfrmSettings
           Color = 12910591
           ParentBackground = False
           TabOrder = 0
-          ExplicitWidth = 752
+          ExplicitWidth = 1094
           object Label1: TLabel
             AlignWithMargins = True
             Left = 1
             Top = 1
-            Width = 402
-            Height = 39
+            Width = 1155
+            Height = 102
             Margins.Left = 1
             Margins.Top = 1
             Margins.Right = 1
@@ -257,8 +263,12 @@ object frmSettings: TfrmSettings
             Align = alClient
             Caption = 
               'Each of the directories will be searched for matching files (*.p' +
-              'as, *.dpr, *.dpk). '#13#10'Add <+> behind a search path to perform a r' +
-              'ecusive search in subdirectories. '#13#10'E.g. C:\MyProject\source<+>'
+              'as, *.dpr, *.dpk). Directories of root files are searched automa' +
+              'tically.'#13#10'Add <+> behind a search path to perform a recusive sea' +
+              'rch in subdirectories. '#13#10'E.g. C:\MyProject\source<+>'#13#10#13#10'Search p' +
+              'aths will also be used to resolve includes ({$I ...}, {$INCLUDE ' +
+              '...}).'#13#10#13#10'Empty lines will be ignored. "//" Comments will be ign' +
+              'ored.'
             Color = 14548991
             Font.Charset = ANSI_CHARSET
             Font.Color = clWindowText
@@ -269,6 +279,130 @@ object frmSettings: TfrmSettings
             ParentFont = False
             Transparent = True
             WordWrap = True
+            ExplicitWidth = 661
+            ExplicitHeight = 91
+          end
+        end
+      end
+    end
+    object tab_Defines: TTabSheet
+      Caption = 'Compiler Switches'
+      ImageIndex = 6
+      ExplicitWidth = 1102
+      object memDefines: TRichEdit
+        AlignWithMargins = True
+        Left = 196
+        Top = 3
+        Width = 966
+        Height = 407
+        Align = alClient
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Courier New'
+        Font.Style = []
+        ParentFont = False
+        PlainText = True
+        ScrollBars = ssBoth
+        TabOrder = 0
+        WordWrap = False
+        Zoom = 100
+        OnChange = OnSettingChange
+        ExplicitWidth = 903
+      end
+      object Panel6: TPanel
+        Left = 0
+        Top = 0
+        Width = 193
+        Height = 413
+        Align = alLeft
+        BevelOuter = bvNone
+        TabOrder = 1
+        object chk_UseDefines: TCheckBox
+          AlignWithMargins = True
+          Left = 15
+          Top = 15
+          Width = 175
+          Height = 15
+          Hint = 
+            'This will add also subfolders when you pick a path with "Add Sea' +
+            'rch Paths".'#13#10#13#10'If you want to perform recursion at scan-time, ad' +
+            'd <+> behind the path.'
+          Margins.Left = 15
+          Margins.Top = 15
+          Align = alTop
+          Caption = 'Use Defines'
+          ParentShowHint = False
+          ShowHint = True
+          TabOrder = 0
+          WordWrap = True
+          OnClick = OnSettingChange
+        end
+      end
+      object Panel7: TPanel
+        AlignWithMargins = True
+        Left = 3
+        Top = 416
+        Width = 1159
+        Height = 122
+        Align = alBottom
+        BevelOuter = bvNone
+        Color = clGray
+        ParentBackground = False
+        TabOrder = 2
+        ExplicitWidth = 1096
+        object Panel8: TPanel
+          AlignWithMargins = True
+          Left = 1
+          Top = 1
+          Width = 1157
+          Height = 120
+          Margins.Left = 1
+          Margins.Top = 1
+          Margins.Right = 1
+          Margins.Bottom = 1
+          Align = alClient
+          BevelOuter = bvNone
+          Color = 12910591
+          ParentBackground = False
+          TabOrder = 0
+          ExplicitWidth = 1094
+          object lbl_DefinesHint: TLabel
+            AlignWithMargins = True
+            Left = 1
+            Top = 1
+            Width = 1155
+            Height = 118
+            Margins.Left = 1
+            Margins.Top = 1
+            Margins.Right = 1
+            Margins.Bottom = 1
+            Align = alClient
+            Caption = 
+              'HINT: There are NO built-in defines, so you have to set e.g. the' +
+              ' compiler version define also - e.g. VER330 for Delphi 10.3 Rio.' +
+              ' See http://docwiki.embarcadero.com/RADStudio/Rio/en/Conditional' +
+              '_compilation_(Delphi)'#13#10#13#10'Activating "Use Directives" will produc' +
+              'e a parsing result like a compiler behaves - switches must eithe' +
+              'r be Active or no Active. Code inside an inactive switch will be' +
+              ' ignored.'#13#10#13#10'Not activating "Use Directives" will try to ignore ' +
+              'all "Directives" and parse all the code - in order to see uses d' +
+              'ependencies that are "hidden"  in compiler switches. '#13#10'CAUTION: ' +
+              'This only works, when the code is still valid - so it depends on' +
+              ' the "coding style" of using switches.'#13#10#13#10'Empty lines will be ig' +
+              'nored. "//" Comments will be ignored.'
+            Color = 14548991
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentColor = False
+            ParentFont = False
+            Transparent = True
+            WordWrap = True
+            ExplicitWidth = 878
+            ExplicitHeight = 117
           end
         end
       end
@@ -276,12 +410,9 @@ object frmSettings: TfrmSettings
     object tabModules: TTabSheet
       Caption = 'Modules'
       ImageIndex = 5
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 760
-      ExplicitHeight = 387
+      ExplicitWidth = 1102
       object edt_ModulesDefinitionFile: TLabeledEdit
-        Left = 136
+        Left = 144
         Top = 17
         Width = 585
         Height = 21
@@ -289,7 +420,7 @@ object frmSettings: TfrmSettings
         EditLabel.Height = 13
         EditLabel.Caption = 'Modules Definition File'
         LabelPosition = lpLeft
-        LabelSpacing = 5
+        LabelSpacing = 7
         TabOrder = 0
         OnChange = edt_ModulesDefinitionFileChange
       end
@@ -297,12 +428,13 @@ object frmSettings: TfrmSettings
     object tabUnitScopes: TTabSheet
       Caption = 'Unit Scope Names'
       ImageIndex = 4
+      ExplicitWidth = 1102
       object memUnitScopeNames: TRichEdit
         AlignWithMargins = True
         Left = 3
         Top = 3
-        Width = 933
-        Height = 483
+        Width = 1159
+        Height = 535
         Align = alClient
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
@@ -336,15 +468,13 @@ object frmSettings: TfrmSettings
         WordWrap = False
         Zoom = 100
         OnChange = OnSettingChange
+        ExplicitWidth = 1096
       end
     end
     object tabScan: TTabSheet
       Caption = 'Scan'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 760
-      ExplicitHeight = 387
+      ExplicitWidth = 1102
       object chkLinkUnits: TCheckBox
         Left = 16
         Top = 16
@@ -370,10 +500,7 @@ object frmSettings: TfrmSettings
     object tabEnvironment: TTabSheet
       Caption = 'Environment'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 760
-      ExplicitHeight = 387
+      ExplicitWidth = 1102
       object chkLoadLastProject: TCheckBox
         Left = 16
         Top = 16
@@ -388,17 +515,18 @@ object frmSettings: TfrmSettings
   end
   object Panel1: TPanel
     Left = 0
-    Top = 523
-    Width = 953
+    Top = 575
+    Width = 1179
     Height = 28
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitWidth = 1116
     object lblStatus: TLabel
       AlignWithMargins = True
       Left = 3
       Top = 5
-      Width = 788
+      Width = 1014
       Height = 20
       Margins.Top = 5
       Align = alClient
@@ -411,7 +539,7 @@ object frmSettings: TfrmSettings
     end
     object btnOK: TButton
       AlignWithMargins = True
-      Left = 797
+      Left = 1023
       Top = 0
       Width = 75
       Height = 25
@@ -424,10 +552,11 @@ object frmSettings: TfrmSettings
       ParentDoubleBuffered = False
       TabOrder = 0
       OnClick = btnOKClick
+      ExplicitLeft = 960
     end
     object btnCancel: TButton
       AlignWithMargins = True
-      Left = 875
+      Left = 1101
       Top = 0
       Width = 75
       Height = 25
@@ -437,6 +566,7 @@ object frmSettings: TfrmSettings
       Caption = '&Cancel'
       TabOrder = 1
       OnClick = btnCancelClick
+      ExplicitLeft = 1038
     end
   end
   object OpenDialog1: TOpenDialog

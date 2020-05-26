@@ -93,6 +93,8 @@ type
     procedure DoSaveToIniFile(const IniFile: TIniFile); virtual; abstract;
     procedure DoLoadFromIniFile(const IniFile: TIniFile); virtual; abstract;
   public
+    procedure Clear; virtual;
+
     procedure SaveToFile(const Filename: String);
     function LoadFromFile(const Filename: String): Boolean;
   end;
@@ -101,6 +103,8 @@ type
   strict private
     FRootFiles: TStringList;
     FSearchPaths: TStringList;
+    fDefines: TStringList;
+    fUseDefines: Boolean;
     FUnitScopeNames: TStringList;
     FLinkUnits: Boolean;
     fModulesDefinitionFile: string;
@@ -115,13 +119,16 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    procedure Clear;
+    procedure Clear; override;
 
     property RootFiles: TStringList read FRootFiles write SetRootFiles;
     property SearchPaths: TStringList read FSearchPaths write SetSearchPaths;
+    property UseDefines: Boolean read fUseDefines write fUseDefines;
+    property Defines: TStringList read fDefines write fDefines;
     property UnitScopeNames: TStringList read FUnitScopeNames write SetUnitScopeNames;
     property LinkUnits: Boolean read FLinkUnits write FLinkUnits;
     property ModulesDefinitionFile: string read fModulesDefinitionFile write fModulesDefinitionFile;
+
   end;
 
   TEnvironmentSettings = class(TBaseSettings)
@@ -181,6 +188,11 @@ end;
 
 { TBaseSettings }
 
+procedure TBaseSettings.Clear;
+begin
+
+end;
+
 function TBaseSettings.LoadFromFile(const Filename: String): Boolean;
 var
   IniFile: TIniFile;
@@ -189,6 +201,7 @@ begin
 
   if Result then
   begin
+    Clear;
     IniFile := TIniFile.Create(Filename);
     try
       DoLoadFromIniFile(IniFile);
@@ -220,6 +233,8 @@ procedure TProjectSettings.Clear;
 begin
   fRootFiles.Clear;
   fSearchPaths.Clear;
+  fUseDefines := false;
+  fDefines.Clear;
   fUnitScopeNames.Clear;
   fLinkUnits             := True;
   fModulesDefinitionFile := '';
@@ -229,6 +244,7 @@ constructor TProjectSettings.Create;
 begin
   FRootFiles := TStringList.Create;
   FSearchPaths := TStringList.Create;
+  fDefines := TStringList.Create;
   FUnitScopeNames := TStringList.Create;
   FLinkUnits := True;
 
@@ -241,6 +257,7 @@ begin
   FreeAndNil(FRootFiles);
   FreeAndNil(FUnitScopeNames);
   FreeAndNil(FSearchPaths);
+  FreeAndNil(fDefines);
 
   inherited;
 end;
@@ -253,8 +270,9 @@ begin
 
   IniFile.ReadStrings('RootFiles', FRootFiles);
   IniFile.ReadStrings('SearchPaths', FSearchPaths);
+  fUseDefines := IniFile.ReadBool('Settings', 'UseDefines', fUseDefines);
+  IniFile.ReadStrings('Defines', fDefines);
   IniFile.ReadStrings('UnitScopeNames', FUnitScopeNames);
-
   FLinkUnits := IniFile.ReadBool('Settings', 'LinkUnits', FLinkUnits);
   fModulesDefinitionFile := IniFile.ReadString('Settings', 'ModulesDefinitionFile', fModulesDefinitionFile);
 end;
@@ -263,8 +281,9 @@ procedure TProjectSettings.DoSaveToIniFile(const IniFile: TIniFile);
 begin
   IniFile.WriteStrings('RootFiles', FRootFiles);
   IniFile.WriteStrings('SearchPaths', FSearchPaths);
+  IniFile.WriteBool('Settings', 'UseDefines', fUseDefines);
+  IniFile.WriteStrings('Defines', fDefines);
   IniFile.WriteStrings('UnitScopeNames', FUnitScopeNames);
-
   IniFile.WriteBool('Settings', 'LinkUnits', FLinkUnits);
   IniFile.WriteString('Settings', 'ModulesDefinitionFile', fModulesDefinitionFile);
 end;

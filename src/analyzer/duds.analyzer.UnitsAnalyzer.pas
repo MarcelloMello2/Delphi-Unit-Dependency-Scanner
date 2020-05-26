@@ -125,6 +125,13 @@ begin
           try
             aUsesParser.OnLog          := fOnLog;
             aUsesParser.IncludeHandler := TAnalyzerIncludeHandler.Create(Filename, fModel, fOnLog, fIncludeCache, fAlreadyLoggedMissingIncludes);
+
+            aUsesParser.UsesLexer.UseDefines := fProjectSettings.UseDefines;
+            if fProjectSettings.UseDefines then
+              for var Define in fProjectSettings.Defines do
+                if SettingsLineIsRelevant(Define.Trim) then
+                  aUsesParser.UsesLexer.AddDefine(Define.Trim);
+
             Parsed := aUsesParser.GetUsedUnitsFromFile(Filename, UnitInfo);
           finally
             FreeAndNil(aUsesParser);

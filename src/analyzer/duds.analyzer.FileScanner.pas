@@ -16,7 +16,6 @@ type
   TDudsFileScanner = class(TCustomAnalyzer)
   private
     procedure ScanFoldersAndAddAllDelphiFiles(Dirs: TStrings);
-    function IsCommentedOut(path: string): Boolean;
 
   protected
     function GetLogAreaName: string; override;
@@ -78,11 +77,6 @@ begin
   end;
 end;
 
-function TDudsFileScanner.IsCommentedOut(path: string): Boolean;
-begin
-  Result := path.TrimLeft.StartsWith('//');
-end;
-
 procedure TDudsFileScanner.ScanRootFileFolders;
 var
   RootFile,
@@ -94,7 +88,7 @@ begin
   for RootFile in FProjectSettings.RootFiles do
     // allow empty definition lines (e.g. for visual structuring)
     // allow "commenting" out of a line
-    if not RootFile.IsEmpty and not IsCommentedOut(RootFile) then
+    if SettingsLineIsRelevant(RootFile) then
     begin
       RootFileAbsolutePath := GetAbsolutePath(RootFile, fProjectFilename);
       if not FileExists(RootFileAbsolutePath) then
@@ -163,7 +157,7 @@ begin
     begin
       // allow empty definition lines (e.g. for visual structuring)
       // allow "commenting" out of a line
-      if not DefinedPath.IsEmpty and not IsCommentedOut(DefinedPath) then
+      if SettingsLineIsRelevant(DefinedPath) then
       begin
         Inc(DefinedPaths);
 

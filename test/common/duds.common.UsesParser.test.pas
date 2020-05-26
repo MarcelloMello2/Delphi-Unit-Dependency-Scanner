@@ -21,11 +21,13 @@ type
   [TestFixture]
   TUsesParserTest = class(TObject)
   private
-    procedure GetUnits(code: string; var UnitInfo: IUnitInfo; UnitFileName: string = ''; UseDefines: Boolean = false);
-    procedure CheckUsedUnits(UnitInfo: IUnitInfo; aExpectedUsesNames: array of
-        string; aExpectedDefinedFilePaths: array of string;
-        aExpectedAbsoluteFilePaths: array of string; aExpectedUsesTypes: array of
-        TUsedUnitType);
+    procedure GetUnits(code: string; var UnitInfo: IUnitInfo; UnitFileName: string = ''; UseDefines: Boolean = false; Define: string = '');
+    procedure CheckUsedUnits(UnitInfo: IUnitInfo;
+      aExpectedUsesNames: array of string;
+      aExpectedDefinedFilePaths: array of string;
+      aExpectedAbsoluteFilePaths: array of string;
+      aExpectedUsesTypes: array of TUsedUnitType);
+
   public
 
     [Test]
@@ -56,10 +58,16 @@ type
     procedure SimpleUnitWithDottyNamesUsingKeywords;
 
     [Test]
-    procedure DottyNamesAndSwitches;
+    procedure UnitWithSwitches;
 
     [Test]
-    procedure UnitWithSwitches;
+    procedure UnitWithUsesClauseInSwitch;
+
+    [Test]
+    procedure UnitWithUsesInSwitchButKeyWordOutside;
+
+    [Test]
+    procedure DottyNamesAndSwitches;
 
     [Test]
     procedure UnitWithDoubledBodyBySwitches;
@@ -69,13 +77,15 @@ type
 
 { TUsesParserTest }
 
-procedure TUsesParserTest.GetUnits(code: string; var UnitInfo: IUnitInfo; UnitFileName: string = ''; UseDefines: Boolean = false);
+procedure TUsesParserTest.GetUnits(code: string; var UnitInfo: IUnitInfo; UnitFileName: string = ''; UseDefines: Boolean = false; Define: string = '');
 var
   aUsesParser : TUsesParser;
 begin
   aUsesParser := TUsesParser.Create;
   try
-    aUsesParser.UsesLexer.UseDefines := UseDefines; 
+    aUsesParser.UsesLexer.UseDefines := UseDefines;
+    if not Define.IsEmpty then
+      aUsesParser.UsesLexer.AddDefine(Define);
     aUsesParser.GetUsedUnitsFromSource(UnitFileName, code, UnitInfo);
   finally
     aUsesParser.Free;
@@ -351,8 +361,61 @@ const
 var
   UnitInfo: IUnitInfo;
 begin
-  GetUnits(code, UnitInfo);
-  CheckUsedUnits(UnitInfo, ['Classes', 'SuperClasses', 'Windows'], [], [], [utInterface, utInterface, utImplementation]);
+  GetUnits(code, UnitInfo, '', false); // UseDefines = false
+  CheckUsedUnits(UnitInfo, ['Classes',   'SuperClasses', 'Windows'], [], [], [utInterface,   utInterface, utImplementation]);
+
+  GetUnits(code, UnitInfo, '', true); // UseDefines = true
+  CheckUsedUnits(UnitInfo, [{'Classes', }'SuperClasses', 'Windows'], [], [], [{utInterface, }utInterface, utImplementation]);
+end;
+
+procedure TUsesParserTest.UnitWithUsesClauseInSwitch;
+const
+  code = 'unit myUnit; ' +
+         'interface ' +
+         '  {$IFDEF SWITCH_1} ' +
+         '  uses ' +
+         '    Classes; ' +
+         '  {$ENDIF} ' +
+
+         '  {$IFDEF SWITCH_1} ' +
+         '  uses ' +
+         '    SuperClasses; ' +
+         '  {$ENDIF} '  +
+
+         'end.';
+var
+  UnitInfo: IUnitInfo;
+begin
+  GetUnits(code, UnitInfo, '', true); // UseDefines = true => 0 uses
+  CheckUsedUnits(UnitInfo, [], [], [], []);
+end;
+
+procedure TUsesParserTest.UnitWithUsesInSwitchButKeyWordOutside;
+const
+  code = 'unit myUnit; ' +
+         'interface ' +
+         '  uses ' +
+
+         '  {$IFDEF SWITCH_1} ' +
+         '    Classes; ' +
+         '  {$ENDIF} ' +
+
+         '  {$IFDEF SWITCH_2} ' +
+         '    SuperClasses; ' +
+         '  {$ENDIF} '  +
+
+         'implementation' +
+
+         ' type ' +
+         '   TMyClass = class ' +
+         '   end; ' +
+
+         'end.';
+var
+  UnitInfo: IUnitInfo;
+begin
+  GetUnits(code, UnitInfo, '', true, 'SWITCH_2'); // UseDefines = true => 0 uses
+  CheckUsedUnits(UnitInfo, ['SuperClasses'], [], [], [utInterface]);
 end;
 
 procedure TUsesParserTest.DottyNamesAndSwitches;

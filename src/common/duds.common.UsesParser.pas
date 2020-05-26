@@ -38,6 +38,7 @@ type
     function ProceedToNextUses: Boolean;
 
     procedure Next;
+    procedure NextNoJunk;
 
     property CurrentUsesType: TUsedUnitType read fCurrentUsesType;
     property LinesOfCode: integer read GetLinesOfCode; // this is only defined after a complete lexing until the end of the file (ptNull)
@@ -119,24 +120,33 @@ begin
   end;
 end;
 
+procedure TUsesLexer.NextNoJunk;
+begin
+  // Go to the next non-junk token - we don't use fUsesLexer.NextNoJunk, because that would skip our "Lines of Code" counting mechanism
+  // Hint: Code inside inactive compiler switches is considered  as "Junk" also
+  repeat
+    Next;
+  until not IsJunk;
+end;
+
 procedure TUsesLexer.ProceedToFileType;
 begin
   // get the next token until we arrive at the start of a file
   // -> this skips any comments etc. before the start of the file
   while not (GenID in [ptProgram, ptPackage, ptLibrary, ptUnit, ptNull]) do
-    Next;
+    NextNoJunk;
 end;
 
 procedure TUsesLexer.ProceedToNextIdentifier;
 begin
-  while not (GenID in [ptIdentifier, ptNull]) do
-    Next;
+  while not (GenID in [ptIdentifier, ptNull]) or IsJunk do
+    NextNoJunk;
 end;
 
 function TUsesLexer.ProceedToNextContains: Boolean;
 begin
   while not (GenID in [ptContains, ptNull]) do
-    Next;
+    NextNoJunk;
   Result := GenID = ptContains;
 end;
 
@@ -144,7 +154,7 @@ function TUsesLexer.ProceedToNextUses: Boolean;
 begin
   while not (GenID in [ptUses, ptNull]) do
   begin
-    Next;
+    NextNoJunk;
     case GenID of
       ptInterface:      fCurrentUsesType := utInterface;
       ptImplementation: fCurrentUsesType := utImplementation;
@@ -161,16 +171,11 @@ begin
 
   // look ahead, maybe the identifiert is dotty
   // -> consume all 'ptPoint' and 'ptIdentifier' tokens
-
-  aLexer.InitAhead; // this proceeds to the next non-junk token automatically
-  if aLexer.AheadTokenID = ptPoint then
+  aLexer.NextNoJunk;
+  while (aLexer.TokenID in [ptIdentifier, ptPoint]) do
   begin
-    aLexer.Next;
-    while (aLexer.TokenID in [ptIdentifier, ptPoint]) do
-    begin
-      Result := Result + aLexer.Token;
-      aLexer.Next;
-    end;
+    Result := Result + aLexer.Token;
+    aLexer.NextNoJunk;
   end;
 end;
 
@@ -181,7 +186,7 @@ var
   PathToken: string;
   UnitNameWithExtension: string;
 begin
-  fUsesLexer.Next;
+  fUsesLexer.NextNoJunk;
 
   while not (fUsesLexer.GenID in [ptSemiColon, ptNull]) do
   begin
@@ -202,21 +207,15 @@ begin
           // look ahead, maybe there is a path definition for the unit
           //    e.g. "myUnit in '..\someFolder\myUnit.pas'"
           //                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-          // we use the "ahead" lexer here to not move the cursor of the main lexer
-          fUsesLexer.InitAhead;
-          while not (fUsesLexer.AheadGenID in [ptIn, ptComma, ptSemiColon, ptNull]) do
-            fUsesLexer.AheadNext;
-          // Did we find the 'in' token?
-          if fUsesLexer.AheadGenID = ptIn then
+          if fUsesLexer.GenID = ptIn then
           begin
             // ... then move to the following '<path>' token
-            while not (fUsesLexer.AheadGenID in [ptStringConst, ptComma, ptSemiColon, ptNull]) do
-              fUsesLexer.AheadNext;
+            while not (fUsesLexer.GenID in [ptStringConst, ptComma, ptSemiColon, ptNull]) do
+              fUsesLexer.NextNoJunk;
             // did we find the string const token?
-            if fUsesLexer.AheadGenID = ptStringConst then
+            if fUsesLexer.GenID = ptStringConst then
             begin
-              PathToken                    := fUsesLexer.AheadToken;
+              PathToken                    := fUsesLexer.Token;
               UsedUnitInfo.DefinedFilePath := PathToken.TrimStart(['''']).TrimEnd(['''']);
               UsedUnitInfo.FileName        := ExpandFileNameRelBaseDir(UsedUnitInfo.DefinedFilePath, ExtractFilePath(UnitInfo.Filename)); // absolute path
 
@@ -225,7 +224,7 @@ begin
               if PathToken.EndsWith(UnitNameWithExtension, true) then
               begin
                 PosOfUnitNameInPath          := Length(PathToken) - Length(UnitNameWithExtension);
-                UsedUnitInfo.InFilePosition  := fUsesLexer.AheadLex.TokenPos + PosOfUnitNameInPath;  // start position of the unit name in the path string const
+                UsedUnitInfo.InFilePosition  := fUsesLexer.TokenPos + PosOfUnitNameInPath;  // start position of the unit name in the path string const
               end
               else
               begin
@@ -238,11 +237,7 @@ begin
         end;
     end;
 
-    // Go to the next non-junk token - we don't use fUsesLexer.NextNoJunk, because that would skip our "Lines of Code" counting mechanism
-    // Hint: Code inside inactive compiler switches is considered  as "Junk" also
-    repeat
-      fUsesLexer.Next;
-    until not fUsesLexer.IsJunk;
+    fUsesLexer.NextNoJunk;
   end;
 end;
 
@@ -303,10 +298,10 @@ begin
   UnitInfo          := TUnitInfo.Create;
   UnitInfo.Filename := UnitFileName;
 
-  fUsesLexer.Origin := Source;
-
-  // assign the include handler
+  // assign the include handler (must be assigned before assiging Source, otherwise an include in the first line will be ignored!)
   fUsesLexer.IncludeHandler := IncludeHandler;
+
+  fUsesLexer.Origin := Source;
 
   // step 1: determine file type by file content -> "uses", "program", "package", ...
   fUsesLexer.ProceedToFileType;
