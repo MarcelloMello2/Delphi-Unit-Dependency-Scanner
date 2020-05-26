@@ -21,14 +21,11 @@ type
   [TestFixture]
   TUsesParserTest = class(TObject)
   private
-    procedure GetUnits(code: string; var UnitInfo: IUnitInfo; UnitFileName: string
-        = '');
+    procedure GetUnits(code: string; var UnitInfo: IUnitInfo; UnitFileName: string = ''; UseDefines: Boolean = false);
     procedure CheckUsedUnits(UnitInfo: IUnitInfo; aExpectedUsesNames: array of
         string; aExpectedDefinedFilePaths: array of string;
         aExpectedAbsoluteFilePaths: array of string; aExpectedUsesTypes: array of
         TUsedUnitType);
-
-
   public
 
     [Test]
@@ -42,6 +39,9 @@ type
 
     [Test]
     procedure ProgramWithPaths;
+
+    [Test]
+    procedure ProgramWithPathsAndSwitches;
 
     [Test]
     procedure ProgramWithPaths_CheckPosition;
@@ -69,12 +69,13 @@ type
 
 { TUsesParserTest }
 
-procedure TUsesParserTest.GetUnits(code: string; var UnitInfo: IUnitInfo; UnitFileName: string = '');
+procedure TUsesParserTest.GetUnits(code: string; var UnitInfo: IUnitInfo; UnitFileName: string = ''; UseDefines: Boolean = false);
 var
   aUsesParser : TUsesParser;
 begin
   aUsesParser := TUsesParser.Create;
   try
+    aUsesParser.UsesLexer.UseDefines := UseDefines; 
     aUsesParser.GetUsedUnitsFromSource(UnitFileName, code, UnitInfo);
   finally
     aUsesParser.Free;
@@ -104,13 +105,14 @@ end;
 
 procedure TUsesParserTest.CountLinesWhileParsingForUses;
 
-  function ParseUnitsAndGetLinesOfCode(code: string): integer;
+  function ParseUnitsAndGetLinesOfCode(code: string; UseDefines: Boolean): integer;
   var
     aUsesParser : TUsesParser;
     UnitInfo: IUnitInfo;
   begin
     aUsesParser := TUsesParser.Create;
     try
+      aUsesParser.UsesLexer.UseDefines := UseDefines;     
       aUsesParser.GetUsedUnitsFromSource('', code, UnitInfo);
       Result := aUsesParser.LinesOfCode;
     finally
@@ -122,7 +124,7 @@ var
   code: string;
 begin
   code := '';
-  Assert.AreEqual(0, ParseUnitsAndGetLinesOfCode(code), 'lines of code');
+  Assert.AreEqual(0, ParseUnitsAndGetLinesOfCode(code, false), 'lines of code');
 
   // no line breaks
   code := 'program myProgram; '                    +
@@ -131,7 +133,8 @@ begin
           '  unit2 in ''..\unit2.pas''        ,  ' +
           '  unit3 in ''C:\temp\unit3.pas''   ;  ' +
           'end.';
-  Assert.AreEqual(1, ParseUnitsAndGetLinesOfCode(code), 'lines of code');
+  Assert.AreEqual(1, ParseUnitsAndGetLinesOfCode(code, false), 'lines of code - without defines-handling');
+  Assert.AreEqual(1, ParseUnitsAndGetLinesOfCode(code, true),  'lines of code - with    defines-handling');
 
   // normal line breaks, no comments, every line should count
   code := 'program myProgram; '                    + sLineBreak +
@@ -140,7 +143,7 @@ begin
           '  unit2 in ''..\unit2.pas''        ,  ' + sLineBreak +
           '  unit3 in ''C:\temp\unit3.pas''   ;  ' + sLineBreak +
           'end.';
-  Assert.AreEqual(6, ParseUnitsAndGetLinesOfCode(code), 'lines of code');
+  Assert.AreEqual(6, ParseUnitsAndGetLinesOfCode(code, false), 'lines of code');
 
   // normal line breaks, comments & empty lines
   code := { 1} 'program myProgram; '            + sLineBreak +
@@ -160,7 +163,8 @@ begin
           { 9} '    comment } end; '            + sLineBreak + // <- comment & code, do NOT count
           {10} 'end.'                           + sLineBreak +
           {  } '';                                             // <- empty line after end of unit, do NOT count
-  Assert.AreEqual(10, ParseUnitsAndGetLinesOfCode(code), 'lines of code');
+  Assert.AreEqual(10, ParseUnitsAndGetLinesOfCode(code, false), 'lines of code -  - without defines-handling');
+  Assert.AreEqual(9,  ParseUnitsAndGetLinesOfCode(code, true),  'lines of code -  - with    defines-handling');
 end;
 
 procedure TUsesParserTest.CheckUsedUnits(UnitInfo: IUnitInfo; aExpectedUsesNames: array of string;
@@ -227,6 +231,41 @@ begin
     ['unit1.pas',              '..\unit2.pas',               'C:\temp\unit3.pas'],
     [folder_src + 'unit1.pas', folder_base + 'unit2.pas',    'C:\temp\unit3.pas'],
     [utImplementation,         utImplementation,             utImplementation]);
+end;
+
+procedure TUsesParserTest.ProgramWithPathsAndSwitches;
+const
+  code = 'program myProgram; ' +
+         'uses ' +
+         '  unit1 in ''unit1.pas''           ,  ' +
+         '{$IFDEF MY_SWITCH}'                     + sLineBreak +
+         '  unit2 in ''..\unit2.pas''        ,  ' +                             // This unit is in a switch, so it should not appear when using defines
+         '{$ENDIF}'                               + sLineBreak +
+         '  unit3 in ''C:\temp\unit3.pas''   ;  ' +
+         'end.';
+
+  folder_base     = 'C:\folder_src\program\';
+  folder_src      = folder_base + 'src\';
+  programFileName = folder_src + 'myProgram.dpr';
+var
+  UnitInfo: IUnitInfo;
+begin
+
+  GetUnits(code, UnitInfo, programFileName, false);   // With UseDefines = false
+  CheckUsedUnits(UnitInfo,
+    ['unit1',                  'unit2',                      'unit3'],
+    ['unit1.pas',              '..\unit2.pas',               'C:\temp\unit3.pas'],
+    [folder_src + 'unit1.pas', folder_base + 'unit2.pas',    'C:\temp\unit3.pas'],
+    [utImplementation,         utImplementation,             utImplementation]);
+
+
+  GetUnits(code, UnitInfo, programFileName, true);   // With UseDefines = true
+  CheckUsedUnits(UnitInfo,
+    ['unit1',                  {'unit2',                  }    'unit3'],
+    ['unit1.pas',              {'..\unit2.pas',           }    'C:\temp\unit3.pas'],
+    [folder_src + 'unit1.pas', {folder_base + 'unit2.pas', }   'C:\temp\unit3.pas'],
+    [utImplementation,         {utImplementation,          }   utImplementation]);
+
 end;
 
 procedure TUsesParserTest.ProgramWithPaths_CheckPosition;

@@ -58,7 +58,7 @@ constructor TAnalyzerIncludeHandler.Create(const FileName: string; Model: TDudsM
 begin
   inherited Create;
   fUnitFileFolder               := IncludeTrailingPathDelimiter(ExtractFilePath(FileName));
-  fUnitFile                     := ChangeFileExt(ExtractFileName(FileName), '');
+  fUnitFile                     := ExtractFileName(FileName);
   fModel                        := Model;
   FOnLog                        := OnLog;
   fIncludeCache                 := IncludeCache;
@@ -167,15 +167,20 @@ var
   fComputedName: string;
   IncludeCacheItem: TIncludeCacheItem;
   CacheKey: string;
+  aRelativeToFolder: string;
 begin
+  aRelativeToFolder := fUnitFileFolder;
+  if not ParentFileName.IsEmpty then // include inside include? -> use parent file to resolve relative paths
+    aRelativeToFolder := IncludeTrailingPathDelimiter(ExtractFilePath(ParentFileName));
+
   if FileName.StartsWith('*.') then
-    fComputedName := fUnitFile + FileName.Remove(0 { 0-based } , 1)
+    fComputedName := ChangeFileExt(fUnitFile, '') + FileName.Remove(0 { 0-based } , 1)
   else if FileName.Contains('*') then
     fComputedName := FileName.Replace('*', '', [rfReplaceAll])
   else
     fComputedName := FileName;
 
-  CacheKey := fComputedName + #13 + fUnitFileFolder;
+  CacheKey := fComputedName + #13 + aRelativeToFolder;
   if fIncludeCache.TryGetValue(CacheKey, IncludeCacheItem) then
   begin
     Content  := IncludeCacheItem.Content;
@@ -183,9 +188,9 @@ begin
     Exit(True);
   end;
 
-  if not FindFile(fComputedName, fUnitFileFolder, FilePath) then
+  if not FindFile(fComputedName, aRelativeToFolder, FilePath) then
   begin
-    Log('Cannot find include file "%s", Source folder "%s"', [fComputedName, fUnitFileFolder], LogError);
+    Log('Cannot find include file "%s", defined in file "%s", source folder "%s"', [fComputedName, fUnitFile, aRelativeToFolder], LogError);
     IncludeCacheItem.FileName := '';
     IncludeCacheItem.Content  := '';
     FIncludeCache.Add(CacheKey, IncludeCacheItem);

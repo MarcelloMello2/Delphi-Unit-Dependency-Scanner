@@ -44,6 +44,8 @@ type
     property Stats: TAnalyzerStats read fStats write fStats;
   end;
 
+  EModelException = class(Exception);
+
 implementation
 
 { TDudsModel }
@@ -159,11 +161,11 @@ begin
   Result := TDelphiFile.Create;
 
   if DelphiUnitName.IsEmpty then
-    raise Exception.Create('empty unit name not allowed - parser error?');
+    raise EModelException.Create('empty unit name not allowed - parser error?');
 
   aUnitNameLookupKey := UpperCase(DelphiUnitName);
   if FParsedDelphiFiles.TryGetValue(aUnitNameLookupKey, aDelphiFileAlreadyExisting) then
-    raise Exception.CreateFmt('file "%s" is already parsed, you cannot add it mulitple time - code error?', [DelphiUnitName]);
+    raise EModelException.CreateFmt('file "%s" is already parsed, you cannot add it mulitple time - code error?', [DelphiUnitName]);
     
   FParsedDelphiFiles.Add(aUnitNameLookupKey, Result);
   FDelphiFileList.Add(Result);

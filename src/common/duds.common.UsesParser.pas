@@ -65,6 +65,7 @@ type
     function GetUsedUnitsFromSource(const UnitFileName, Source: String; var UnitInfo: IUnitInfo): Boolean;
     function GetUsedUnitsFromFile(const UnitFileName: String; var UnitInfo: IUnitInfo): Boolean;
 
+    property UsesLexer: TUsesLexer read fUsesLexer;
     property OnLog: TLogProcedure read FOnLog    write FOnLog;
     property IncludeHandler: IIncludeHandler read fIncludeHandler write fIncludeHandler;
     property LinesOfCode: integer read GetLinesOfCode;
@@ -79,10 +80,9 @@ constructor TUsesLexer.Create;
 begin
   inherited Create;
   fCurrentUsesType   := utUnknown;
-  UseDefines         := false; // we want to see all tokens, so do not activate compiler switch logic
-  fLoC_Count       := 0;
+  fLoC_Count         := 0;
   fLoC_HasCodeInLine := false;
-  fLoC_ReachedTheEnd     := false;
+  fLoC_ReachedTheEnd := false;
 end;
 
 // next with counting "lines of code"
@@ -238,14 +238,24 @@ begin
         end;
     end;
 
-    fUsesLexer.Next;
+    // Go to the next non-junk token - we don't use fUsesLexer.NextNoJunk, because that would skip our "Lines of Code" counting mechanism
+    // Hint: Code inside inactive compiler switches is considered  as "Junk" also
+    repeat
+      fUsesLexer.Next;
+    until not fUsesLexer.IsJunk;
   end;
 end;
 
 constructor TUsesParser.Create;
 begin
-  fUsesLexer      := TUsesLexer.Create;
-  fIncludeHandler := nil;
+  fUsesLexer            := TUsesLexer.Create;
+
+  // For parsing dependencies we typically want to respect switches -
+  // For parsing a unit e.g. to reformat uses - we want to see all tokens, so do not activate compiler switch logic
+  // .UseDefines should be set by the "user" of the TUsesParser
+  fUsesLexer.UseDefines := false;
+
+  fIncludeHandler       := nil;
 end;
 
 destructor TUsesParser.Destroy;
