@@ -11,12 +11,10 @@ object frmMain: TfrmMain
   Font.Name = 'Segoe UI'
   Font.Style = []
   Menu = MainMenu1
-  OldCreateOrder = False
   WindowState = wsMaximized
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  PixelsPerInch = 96
   TextHeight = 13
   object ActionToolBar1: TActionToolBar
     Left = 0
@@ -26,7 +24,7 @@ object frmMain: TfrmMain
     ActionManager = ActionManager1
     Caption = 'ActionToolBar1'
     Color = clMenuBar
-    ColorMap.DisabledFontColor = 7171437
+    ColorMap.DisabledFontColor = 10461087
     ColorMap.HighlightColor = clWhite
     ColorMap.BtnSelectedFont = clBlack
     ColorMap.UnusedColor = clWhite
@@ -40,6 +38,7 @@ object frmMain: TfrmMain
     ParentShowHint = False
     ShowHint = True
     Spacing = 0
+    ExplicitWidth = 1181
   end
   object pnlBackground: TPanel
     Left = 0
@@ -50,6 +49,8 @@ object frmMain: TfrmMain
     BevelOuter = bvNone
     Caption = 'Click Scan to begin the Unit Dependecy Seach'
     TabOrder = 1
+    ExplicitWidth = 1181
+    ExplicitHeight = 616
     object Splitter4: TSplitter
       Left = 0
       Top = 589
@@ -79,6 +80,8 @@ object frmMain: TfrmMain
       ParentFont = False
       TabOrder = 0
       Visible = False
+      ExplicitWidth = 1178
+      ExplicitHeight = 585
       object Splitter1: TSplitter
         Left = 0
         Top = 433
@@ -98,6 +101,8 @@ object frmMain: TfrmMain
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 0
+        ExplicitWidth = 1178
+        ExplicitHeight = 432
         object pcView: TPageControl
           Left = 0
           Top = 0
@@ -112,6 +117,8 @@ object frmMain: TfrmMain
           Font.Style = []
           ParentFont = False
           TabOrder = 0
+          ExplicitWidth = 1178
+          ExplicitHeight = 432
           object tabTree: TTabSheet
             Caption = 'Units Tree'
             object Splitter2: TSplitter
@@ -129,6 +136,7 @@ object frmMain: TfrmMain
               Align = alLeft
               BevelOuter = bvNone
               TabOrder = 0
+              ExplicitHeight = 402
               object edtSearchTree: TEdit
                 AlignWithMargins = True
                 Left = 3
@@ -165,7 +173,23 @@ object frmMain: TfrmMain
                 Height = 371
                 Margins.Right = 0
                 Align = alClient
+                Colors.BorderColor = 15987699
+                Colors.DisabledColor = clGray
+                Colors.DropMarkColor = 15385233
+                Colors.DropTargetColor = 15385233
+                Colors.DropTargetBorderColor = 15385233
+                Colors.FocusedSelectionColor = 15385233
+                Colors.FocusedSelectionBorderColor = 15385233
+                Colors.GridLineColor = 15987699
+                Colors.HeaderHotColor = clBlack
+                Colors.HotColor = clBlack
+                Colors.SelectionRectangleBlendColor = 15385233
+                Colors.SelectionRectangleBorderColor = 15385233
+                Colors.SelectionTextColor = clBlack
+                Colors.TreeLineColor = 9471874
                 Colors.UnfocusedColor = clMedGray
+                Colors.UnfocusedSelectionColor = clWhite
+                Colors.UnfocusedSelectionBorderColor = clWhite
                 Header.AutoSizeIndex = 0
                 Header.Options = [hoColumnResize, hoDblClickResize, hoDrag, hoShowSortGlyphs, hoVisible, hoFullRepaintOnResize, hoHeightResize]
                 Images = ImageList1
@@ -185,6 +209,8 @@ object frmMain: TfrmMain
                 OnGetImageIndex = vtUnitsTreeGetImageIndex
                 OnGetNodeDataSize = vtUnitsTreeGetNodeDataSize
                 OnHeaderClick = vtCommonHeaderClick
+                Touch.InteractiveGestures = [igPan, igPressAndTap]
+                Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
                 Columns = <
                   item
                     Position = 0
@@ -256,6 +282,8 @@ object frmMain: TfrmMain
               Align = alClient
               Caption = 'Select a file to display its contents here.'
               TabOrder = 1
+              ExplicitWidth = 670
+              ExplicitHeight = 402
               object pcSource: TPageControl
                 AlignWithMargins = True
                 Left = 1
@@ -263,10 +291,12 @@ object frmMain: TfrmMain
                 Width = 669
                 Height = 395
                 Margins.Left = 0
-                ActivePage = tabParentFile
+                ActivePage = tabSelectedFile
                 Align = alClient
                 TabOrder = 0
                 Visible = False
+                ExplicitWidth = 665
+                ExplicitHeight = 394
                 object tabParentFile: TTabSheet
                   Caption = 'Parent File'
                   object memParentFile: TSynEdit
@@ -282,24 +312,41 @@ object frmMain: TfrmMain
                     Font.Height = -13
                     Font.Name = 'Courier New'
                     Font.Style = []
+                    Font.Quality = fqClearTypeNatural
                     TabOrder = 0
-                    CodeFolding.CollapsedLineColor = clGrayText
-                    CodeFolding.FolderBarLinesColor = clGrayText
                     CodeFolding.ShowCollapsedLine = True
-                    CodeFolding.IndentGuidesColor = clGray
-                    CodeFolding.IndentGuides = True
                     UseCodeFolding = False
-                    Gutter.AutoSize = True
                     Gutter.Font.Charset = DEFAULT_CHARSET
                     Gutter.Font.Color = clWindowText
                     Gutter.Font.Height = -11
                     Gutter.Font.Name = 'Courier New'
                     Gutter.Font.Style = []
+                    Gutter.Font.Quality = fqClearTypeNatural
                     Gutter.ShowLineNumbers = True
+                    Gutter.Bands = <
+                      item
+                        Kind = gbkMarks
+                        Width = 13
+                      end
+                      item
+                        Kind = gbkLineNumbers
+                      end
+                      item
+                        Kind = gbkFold
+                      end
+                      item
+                        Kind = gbkTrackChanges
+                      end
+                      item
+                        Kind = gbkMargin
+                        Width = 3
+                      end>
                     Highlighter = SynPasSyn1
                     ReadOnly = True
+                    SelectedColor.Alpha = 0.400000005960464500
                     OnChange = memParentFileChange
-                    FontSmoothing = fsmNone
+                    ExplicitWidth = 654
+                    ExplicitHeight = 358
                   end
                 end
                 object tabSelectedFile: TTabSheet
@@ -318,24 +365,39 @@ object frmMain: TfrmMain
                     Font.Height = -13
                     Font.Name = 'Courier New'
                     Font.Style = []
+                    Font.Quality = fqClearTypeNatural
                     TabOrder = 0
-                    CodeFolding.CollapsedLineColor = clGrayText
-                    CodeFolding.FolderBarLinesColor = clGrayText
                     CodeFolding.ShowCollapsedLine = True
-                    CodeFolding.IndentGuidesColor = clGray
-                    CodeFolding.IndentGuides = True
                     UseCodeFolding = False
-                    Gutter.AutoSize = True
                     Gutter.Font.Charset = DEFAULT_CHARSET
                     Gutter.Font.Color = clWindowText
                     Gutter.Font.Height = -11
                     Gutter.Font.Name = 'Courier New'
                     Gutter.Font.Style = []
+                    Gutter.Font.Quality = fqClearTypeNatural
                     Gutter.ShowLineNumbers = True
+                    Gutter.Bands = <
+                      item
+                        Kind = gbkMarks
+                        Width = 13
+                      end
+                      item
+                        Kind = gbkLineNumbers
+                      end
+                      item
+                        Kind = gbkFold
+                      end
+                      item
+                        Kind = gbkTrackChanges
+                      end
+                      item
+                        Kind = gbkMargin
+                        Width = 3
+                      end>
                     Highlighter = SynPasSyn1
                     ReadOnly = True
+                    SelectedColor.Alpha = 0.400000005960464500
                     OnChange = memSelectedFileChange
-                    FontSmoothing = fsmNone
                   end
                 end
               end
@@ -393,7 +455,23 @@ object frmMain: TfrmMain
                 Height = 371
                 Margins.Right = 0
                 Align = alClient
+                Colors.BorderColor = 15987699
+                Colors.DisabledColor = clGray
+                Colors.DropMarkColor = 15385233
+                Colors.DropTargetColor = 15385233
+                Colors.DropTargetBorderColor = 15385233
+                Colors.FocusedSelectionColor = 15385233
+                Colors.FocusedSelectionBorderColor = 15385233
+                Colors.GridLineColor = 15987699
+                Colors.HeaderHotColor = clBlack
+                Colors.HotColor = clBlack
+                Colors.SelectionRectangleBlendColor = 15385233
+                Colors.SelectionRectangleBorderColor = 15385233
+                Colors.SelectionTextColor = clBlack
+                Colors.TreeLineColor = 9471874
                 Colors.UnfocusedColor = clMedGray
+                Colors.UnfocusedSelectionColor = clWhite
+                Colors.UnfocusedSelectionBorderColor = clWhite
                 Header.AutoSizeIndex = -1
                 Header.MainColumn = -1
                 Header.Options = [hoColumnResize, hoDblClickResize, hoDrag, hoShowSortGlyphs, hoVisible, hoFullRepaintOnResize, hoHeightResize]
@@ -412,6 +490,8 @@ object frmMain: TfrmMain
                 OnPaintText = vtUnitsListPaintText
                 OnGetImageIndex = vtCommonGetImageIndex
                 OnHeaderClick = vtCommonHeaderClick
+                Touch.InteractiveGestures = [igPan, igPressAndTap]
+                Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
                 Columns = <>
               end
             end
@@ -468,7 +548,23 @@ object frmMain: TfrmMain
                     Height = 347
                     Margins.Right = 0
                     Align = alClient
+                    Colors.BorderColor = 15987699
+                    Colors.DisabledColor = clGray
+                    Colors.DropMarkColor = 15385233
+                    Colors.DropTargetColor = 15385233
+                    Colors.DropTargetBorderColor = 15385233
+                    Colors.FocusedSelectionColor = 15385233
+                    Colors.FocusedSelectionBorderColor = 15385233
+                    Colors.GridLineColor = 15987699
+                    Colors.HeaderHotColor = clBlack
+                    Colors.HotColor = clBlack
+                    Colors.SelectionRectangleBlendColor = 15385233
+                    Colors.SelectionRectangleBorderColor = 15385233
+                    Colors.SelectionTextColor = clBlack
+                    Colors.TreeLineColor = 9471874
                     Colors.UnfocusedColor = clMedGray
+                    Colors.UnfocusedSelectionColor = clWhite
+                    Colors.UnfocusedSelectionBorderColor = clWhite
                     Header.AutoSizeIndex = -1
                     Header.MainColumn = -1
                     Header.Options = [hoColumnResize, hoDblClickResize, hoDrag, hoShowSortGlyphs, hoVisible, hoFullRepaintOnResize, hoHeightResize]
@@ -485,6 +581,8 @@ object frmMain: TfrmMain
                     OnPaintText = vtUnitsListPaintText
                     OnGetImageIndex = vtCommonGetImageIndex
                     OnHeaderClick = vtCommonHeaderClick
+                    Touch.InteractiveGestures = [igPan, igPressAndTap]
+                    Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
                     Columns = <>
                   end
                 end
@@ -525,7 +623,23 @@ object frmMain: TfrmMain
                     Height = 347
                     Margins.Right = 0
                     Align = alClient
+                    Colors.BorderColor = 15987699
+                    Colors.DisabledColor = clGray
+                    Colors.DropMarkColor = 15385233
+                    Colors.DropTargetColor = 15385233
+                    Colors.DropTargetBorderColor = 15385233
+                    Colors.FocusedSelectionColor = 15385233
+                    Colors.FocusedSelectionBorderColor = 15385233
+                    Colors.GridLineColor = 15987699
+                    Colors.HeaderHotColor = clBlack
+                    Colors.HotColor = clBlack
+                    Colors.SelectionRectangleBlendColor = 15385233
+                    Colors.SelectionRectangleBorderColor = 15385233
+                    Colors.SelectionTextColor = clBlack
+                    Colors.TreeLineColor = 9471874
                     Colors.UnfocusedColor = clMedGray
+                    Colors.UnfocusedSelectionColor = clWhite
+                    Colors.UnfocusedSelectionBorderColor = clWhite
                     Header.AutoSizeIndex = -1
                     Header.MainColumn = -1
                     Header.Options = [hoColumnResize, hoDblClickResize, hoDrag, hoShowSortGlyphs, hoVisible, hoFullRepaintOnResize, hoHeightResize]
@@ -542,6 +656,8 @@ object frmMain: TfrmMain
                     OnPaintText = vtUnitsListPaintText
                     OnGetImageIndex = vtCommonGetImageIndex
                     OnHeaderClick = vtCommonHeaderClick
+                    Touch.InteractiveGestures = [igPan, igPressAndTap]
+                    Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
                     Columns = <>
                   end
                 end
@@ -561,24 +677,39 @@ object frmMain: TfrmMain
                     Font.Height = -13
                     Font.Name = 'Courier New'
                     Font.Style = []
+                    Font.Quality = fqClearTypeNatural
                     TabOrder = 0
-                    CodeFolding.CollapsedLineColor = clGrayText
-                    CodeFolding.FolderBarLinesColor = clGrayText
                     CodeFolding.ShowCollapsedLine = True
-                    CodeFolding.IndentGuidesColor = clGray
-                    CodeFolding.IndentGuides = True
                     UseCodeFolding = False
-                    Gutter.AutoSize = True
                     Gutter.Font.Charset = DEFAULT_CHARSET
                     Gutter.Font.Color = clWindowText
                     Gutter.Font.Height = -11
                     Gutter.Font.Name = 'Courier New'
                     Gutter.Font.Style = []
+                    Gutter.Font.Quality = fqClearTypeNatural
                     Gutter.ShowLineNumbers = True
+                    Gutter.Bands = <
+                      item
+                        Kind = gbkMarks
+                        Width = 13
+                      end
+                      item
+                        Kind = gbkLineNumbers
+                      end
+                      item
+                        Kind = gbkFold
+                      end
+                      item
+                        Kind = gbkTrackChanges
+                      end
+                      item
+                        Kind = gbkMargin
+                        Width = 3
+                      end>
                     Highlighter = SynPasSyn1
                     ReadOnly = True
+                    SelectedColor.Alpha = 0.400000005960464500
                     OnChange = memListFileChange
-                    FontSmoothing = fsmNone
                   end
                 end
               end
@@ -595,7 +726,23 @@ object frmMain: TfrmMain
               Height = 397
               Margins.Right = 0
               Align = alClient
+              Colors.BorderColor = 15987699
+              Colors.DisabledColor = clGray
+              Colors.DropMarkColor = 15385233
+              Colors.DropTargetColor = 15385233
+              Colors.DropTargetBorderColor = 15385233
+              Colors.FocusedSelectionColor = 15385233
+              Colors.FocusedSelectionBorderColor = 15385233
+              Colors.GridLineColor = 15987699
+              Colors.HeaderHotColor = clBlack
+              Colors.HotColor = clBlack
+              Colors.SelectionRectangleBlendColor = 15385233
+              Colors.SelectionRectangleBorderColor = 15385233
+              Colors.SelectionTextColor = clBlack
+              Colors.TreeLineColor = 9471874
               Colors.UnfocusedColor = clMedGray
+              Colors.UnfocusedSelectionColor = clWhite
+              Colors.UnfocusedSelectionBorderColor = clWhite
               Header.AutoSizeIndex = 0
               Header.Options = [hoColumnResize, hoDblClickResize, hoDrag, hoShowSortGlyphs, hoVisible, hoFullRepaintOnResize, hoHeightResize]
               Images = ImageList1
@@ -605,6 +752,8 @@ object frmMain: TfrmMain
               TreeOptions.StringOptions = [toSaveCaptions, toShowStaticText, toAutoAcceptEditChange]
               OnDrawText = vtModulesDrawText
               OnGetText = vtModulesGetText
+              Touch.InteractiveGestures = [igPan, igPressAndTap]
+              Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
               Columns = <
                 item
                   Position = 0
@@ -651,6 +800,8 @@ object frmMain: TfrmMain
         Align = alBottom
         BevelOuter = bvNone
         TabOrder = 1
+        ExplicitTop = 435
+        ExplicitWidth = 1178
         object Panel9: TPanel
           Left = 858
           Top = 0
@@ -659,6 +810,7 @@ object frmMain: TfrmMain
           Align = alRight
           BevelOuter = bvNone
           TabOrder = 1
+          ExplicitLeft = 854
           object vtStats: TVirtualStringTree
             AlignWithMargins = True
             Left = 2
@@ -667,7 +819,23 @@ object frmMain: TfrmMain
             Height = 144
             Margins.Left = 2
             Align = alClient
+            Colors.BorderColor = 15987699
+            Colors.DisabledColor = clGray
+            Colors.DropMarkColor = 15385233
+            Colors.DropTargetColor = 15385233
+            Colors.DropTargetBorderColor = 15385233
+            Colors.FocusedSelectionColor = 15385233
+            Colors.FocusedSelectionBorderColor = 15385233
+            Colors.GridLineColor = 15987699
+            Colors.HeaderHotColor = clBlack
+            Colors.HotColor = clBlack
+            Colors.SelectionRectangleBlendColor = 15385233
+            Colors.SelectionRectangleBorderColor = 15385233
+            Colors.SelectionTextColor = clBlack
+            Colors.TreeLineColor = 9471874
             Colors.UnfocusedColor = clMedGray
+            Colors.UnfocusedSelectionColor = clWhite
+            Colors.UnfocusedSelectionBorderColor = clWhite
             Header.AutoSizeIndex = 0
             Header.Options = [hoAutoResize, hoColumnResize, hoDblClickResize, hoDrag]
             TabOrder = 0
@@ -675,6 +843,8 @@ object frmMain: TfrmMain
             TreeOptions.SelectionOptions = [toFullRowSelect]
             OnGetText = vtStatsGetText
             OnPaintText = vtStatsPaintText
+            Touch.InteractiveGestures = [igPan, igPressAndTap]
+            Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
             Columns = <
               item
                 Position = 0
@@ -697,7 +867,23 @@ object frmMain: TfrmMain
           Margins.Left = 0
           Margins.Right = 0
           Align = alClient
+          Colors.BorderColor = 15987699
+          Colors.DisabledColor = clGray
+          Colors.DropMarkColor = 15385233
+          Colors.DropTargetColor = 15385233
+          Colors.DropTargetBorderColor = 15385233
+          Colors.FocusedSelectionColor = 15385233
+          Colors.FocusedSelectionBorderColor = 15385233
+          Colors.GridLineColor = 15987699
+          Colors.HeaderHotColor = clBlack
+          Colors.HotColor = clBlack
+          Colors.SelectionRectangleBlendColor = 15385233
+          Colors.SelectionRectangleBorderColor = 15385233
+          Colors.SelectionTextColor = clBlack
+          Colors.TreeLineColor = 9471874
           Colors.UnfocusedColor = clMedGray
+          Colors.UnfocusedSelectionColor = clWhite
+          Colors.UnfocusedSelectionBorderColor = clWhite
           Header.AutoSizeIndex = 0
           Header.MainColumn = -1
           Images = ImageList1
@@ -707,6 +893,8 @@ object frmMain: TfrmMain
           TreeOptions.SelectionOptions = [toFullRowSelect, toRightClickSelect]
           OnGetText = vtLogGetText
           OnGetImageIndex = vtLogGetImageIndex
+          Touch.InteractiveGestures = [igPan, igPressAndTap]
+          Touch.InteractiveGestureOptions = [igoPanSingleFingerHorizontal, igoPanSingleFingerVertical, igoPanInertia, igoPanGutter, igoParentPassthrough]
           Columns = <>
         end
       end
@@ -720,6 +908,8 @@ object frmMain: TfrmMain
       BevelOuter = bvNone
       Caption = 'Panel'
       TabOrder = 1
+      ExplicitTop = 591
+      ExplicitWidth = 1181
       object RichEditUnitPath: TRichEdit
         Left = 0
         Top = 0
@@ -730,14 +920,11 @@ object frmMain: TfrmMain
           'RichEditUnitPath')
         ReadOnly = True
         TabOrder = 0
-        Zoom = 100
+        ExplicitWidth = 1181
       end
     end
   end
   object SynPasSyn1: TSynPasSyn
-    Options.AutoDetectEnabled = False
-    Options.AutoDetectLineLimit = 0
-    Options.Visible = False
     CommentAttri.Foreground = clGreen
     DirectiveAttri.Foreground = clTeal
     KeyAttri.Foreground = clNavy
@@ -953,6 +1140,7 @@ object frmMain: TfrmMain
               end
               item
                 Action = actExportUnitsToGraphMLCurrentModule
+                Caption = 'Save &Units to GraphML (selected Module only)'
                 ImageIndex = 12
               end
               item

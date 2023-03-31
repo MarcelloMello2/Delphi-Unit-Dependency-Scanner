@@ -31,7 +31,7 @@ interface
 
 uses
   VirtualTrees,
-
+  VirtualTrees.Types,
   duds.gui.HourGlass;
 
 type
@@ -39,7 +39,7 @@ type
   private
     procedure InternalExpandCollapse(const Node: PVirtualNode; const Expand: Boolean);
   public
-    procedure AutoFitColumns(Animated: Boolean = FALSE; SmartAutoFitType: TSmartAutoFitType = smaUseColumnOption; RangeStartCol: Integer = NoColumn; RangeEndCol: Integer = NoColumn; IncludeHeader: Boolean = TRUE);
+    procedure AutoFitColumns(Animated: Boolean = FALSE; SmartAutoFitType: TSmartAutoFitType = smaAllColumns; RangeStartCol: Integer = NoColumn; RangeEndCol: Integer = NoColumn; IncludeHeader: Boolean = TRUE);
     procedure SelectNodeEx(const Node: PVirtualNode; const ScrollNodeIntoView: Boolean = True; const Centre: Boolean = False);
     procedure ExpandAll(const Node: PVirtualNode = nil);
     procedure CollapseAll(const Node: PVirtualNode = nil);
@@ -111,8 +111,7 @@ begin
   InternalExpandCollapse(Node, True);
 end;
 
-procedure TVirtualTreeHelper.AutoFitColumns(Animated: Boolean; SmartAutoFitType: TSmartAutoFitType;
-      RangeStartCol: Integer; RangeEndCol: Integer; IncludeHeader: Boolean);
+procedure TVirtualTreeHelper.AutoFitColumns(Animated: Boolean = FALSE; SmartAutoFitType: TSmartAutoFitType = smaAllColumns; RangeStartCol: Integer = NoColumn; RangeEndCol: Integer = NoColumn; IncludeHeader: Boolean = TRUE);
 var
   i, TextW: Integer;
 begin

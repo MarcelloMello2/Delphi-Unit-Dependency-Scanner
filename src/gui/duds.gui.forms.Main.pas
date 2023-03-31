@@ -77,7 +77,7 @@ uses
   duds.refactoring.RemoveUnusedUnits,
   duds.gui.HourGlass,
   duds.gui.Utils,
-  duds.gui.VirtualTreeview;
+  duds.gui.VirtualTreeview, SynEditCodeFolding;
 
 type
   TfrmMain = class(TForm)
@@ -954,7 +954,10 @@ begin
 
       memParentFile.Modified := FALSE;
 
-      pcSource.ActivePageIndex := 0;
+      if tabSelectedFile.TabVisible then
+        pcSource.ActivePageIndex := 1
+      else
+        pcSource.ActivePageIndex := 0;
     end;
   end
   else
@@ -1152,7 +1155,7 @@ begin
       Sender.SortDirection := sdAscending;
     end;
 
-    Sender.Treeview.Sort(nil, Sender.SortColumn, Sender.SortDirection);
+//    Sender.Treeview.Sort(nil, Sender.SortColumn, Sender.SortDirection);
 
     Sender.Treeview.Invalidate;
   finally
@@ -1436,7 +1439,7 @@ begin
   Screen.Cursor := crHourGlass;
   try
     vtUnitsTree.ExpandAll(nil);
-    vtUnitsTree.AutoFitColumns(False, smaUseColumnOption, 2, 10);
+//    vtUnitsTree.AutoFitColumns(False, smaUseColumnOption, 2, 10);
   finally
     Screen.Cursor := OldCursor;
   end;
@@ -1596,7 +1599,7 @@ begin
   vtUsesUnits.Clear;
   vtStats.Clear;
 
-  vtUnitsTree.Header.Columns[1].Options := vtUnitsTree.Header.Columns[1].Options - [coVisible];
+//  vtUnitsTree.Header.Columns[1].Options := vtUnitsTree.Header.Columns[1].Options - [coVisible];
 
   FModel.Clear;
   FStats.Clear;
@@ -1868,7 +1871,7 @@ begin
   end;
 
   if Result then
-    vtUnitsTree.Header.Columns[1].Options := vtUnitsTree.Header.Columns[1].Options + [coVisible];
+//    vtUnitsTree.Header.Columns[1].Options := vtUnitsTree.Header.Columns[1].Options + [coVisible];
 end;
 
 procedure TfrmMain.ApplyMultipleRenames(aCsvFilename: String; DummyRun, RenameHistoryFiles, InsertOldNameComment,
@@ -2249,8 +2252,8 @@ begin
 
     UpdateStats;
   finally
-    vtUnitsTree.AutoFitColumns(False, smaUseColumnOption, 2, 10);
-    vtUnitsList.AutoFitColumns(False, smaUseColumnOption, 1, 6);
+//    vtUnitsTree.AutoFitColumns(False, smaUseColumnOption, 2, 10);
+//    vtUnitsList.AutoFitColumns(False, smaUseColumnOption, 1, 6);
     vtModules.AutoFitColumns;
 
     vtUnitsTree.EndUpdate;
@@ -2683,7 +2686,7 @@ begin
       end;
       if vtUnitsTree.FocusedNode <> nil then
         vtUnitsTree.ScrollIntoView(vtUnitsTree.FocusedNode, TRUE);
-      vtUnitsTree.AutoFitColumns(False, smaUseColumnOption, 2, 10);
+//      vtUnitsTree.AutoFitColumns(False, smaUseColumnOption, 2, 10);
     finally
       vtUnitsTree.EndUpdate;
     end;
@@ -2699,7 +2702,7 @@ begin
       end;
       if vtUnitsList.FocusedNode <> nil then
         vtUnitsList.ScrollIntoView(vtUnitsList.FocusedNode, TRUE);
-      vtUnitsList.AutoFitColumns(False, smaUseColumnOption, 1, 6);
+//      vtUnitsList.AutoFitColumns(False, smaUseColumnOption, 1, 6);
     finally
       vtUnitsList.EndUpdate;
     end;
